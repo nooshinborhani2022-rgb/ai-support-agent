@@ -38,7 +38,21 @@ while True:
     answer, score, topic = find_best_answer(user_message, faq_data)
 
     if score >= 2:
-        print("Topic:", topic)
-        print("Bot:", answer)
+
+        # decision making based on topic
+        if topic == "password_reset":
+            print("Bot:", answer)
+
+        elif topic == "refund":
+            print("Bot:", answer)
+            print("Bot: If you need more help, contact support@example.com")
+
+        elif topic == "payment_issue":
+            print("Bot: This seems like a payment issue.")
+            print("Bot: I will escalate this to a human agent.")
+
+        else:
+            print("Bot:", answer)
+
     else:
         print("Bot: Sorry, I am not confident about your request.")
