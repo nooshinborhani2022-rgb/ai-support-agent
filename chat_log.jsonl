@@ -1,1 +1,4 @@
 {"user": "I forgot my password", "topic": "password_reset", "score": 3, "action": "answered"}
+{"user": "I can't log in, I think I forgot my password", "topic": "password_reset", "score": 4, "action": "answered"}
+{"user": "my card got declined", "topic": "payment_failed", "score": 2, "action": "answered"}
+{"user": "I want my money back", "topic": "refund_request", "score": 3, "action": "answered"}

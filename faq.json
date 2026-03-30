@@ -1,72 +1,32 @@
 [
   {
-    "topic": "refund",
-    "questions": [
-      "How can I get a refund?",
-      "I want my money back.",
-      "Can I request a refund for my order?",
-      "When will I receive my refund?"
-    ],
-    "answer": "Customers can request a refund within 7 days of delivery. Refunds are processed within 3 business days after approval. The item must be unused and in its original packaging."
-  },
-  {
-    "topic": "return",
-    "questions": [
-      "How do I return an item?",
-      "I want to send my order back.",
-      "What is your return policy?",
-      "Can I return a damaged product?"
-    ],
-    "answer": "Customers can return eligible items within 7 days of delivery. Returned items must be unused and in their original packaging. Damaged items can also be reported for return or replacement."
-  },
-  {
-    "topic": "shipping",
-    "questions": [
-      "How long does shipping take?",
-      "When will my order arrive?",
-      "What is the delivery time?",
-      "Do you offer international shipping?"
-    ],
-    "answer": "Standard shipping takes 3 to 5 business days. International shipping may take 7 to 14 business days depending on the destination."
-  },
-  {
-    "topic": "order_tracking",
-    "questions": [
-      "Where is my order?",
-      "How can I track my package?",
-      "I want to check my order status.",
-      "Can I track my shipment?"
-    ],
-    "answer": "Customers can track their orders using the tracking link sent to their email after shipment. If the tracking link is missing, they should contact support."
-  },
-  {
-    "topic": "cancel_order",
-    "questions": [
-      "Can I cancel my order?",
-      "I want to cancel my purchase.",
-      "How do I cancel an order?",
-      "Is it possible to stop my order before shipping?"
-    ],
-    "answer": "Orders can be canceled before they are shipped. Once an order has been shipped, cancellation is no longer possible, but customers may request a return after delivery if eligible."
-  },
-  {
     "topic": "password_reset",
-    "questions": [
-      "I forgot my password.",
-      "How do I reset my password?",
-      "I cannot log into my account.",
-      "Where can I change my password?"
+    "keywords": ["password", "reset", "forgot"],
+    "examples": [
+      "I forgot my password",
+      "reset my password",
+      "can't log in"
     ],
-    "answer": "Customers can reset their password by clicking \"Forgot Password\" on the login page. A password reset link will be sent to their registered email address."
+    "response": "Click on 'Forgot Password' on the login page."
   },
   {
-    "topic": "payment_issue",
-    "questions": [
-      "My payment failed.",
-      "I was charged twice.",
-      "Why was my card declined?",
-      "I have a billing problem."
+    "topic": "payment_failed",
+    "keywords": ["payment", "failed", "card"],
+    "examples": [
+      "my payment failed",
+      "card declined",
+      "payment not working"
     ],
-    "answer": "If a payment fails, customers should first verify their card details and available balance. If they were charged twice or notice an unusual billing issue, the case should be reviewed by the support team."
+    "response": "There was an issue with your payment. Please try again or contact support."
+  },
+  {
+    "topic": "refund_request",
+    "keywords": ["refund", "money back", "return"],
+    "examples": [
+      "I want a refund",
+      "give me my money back",
+      "how do I get a refund"
+    ],
+    "response": "You can request a refund from your account dashboard."
   }
 ]

@@ -12,7 +12,7 @@ def find_best_answer(user_input, faq_data):
     best_topic = None
 
     for item in faq_data:
-        for question in item["questions"]:
+        for question in item["examples"]:
             question_words = set(question.lower().split())
 
             common_words = user_words & question_words
@@ -20,7 +20,7 @@ def find_best_answer(user_input, faq_data):
 
             if score > best_score:
                 best_score = score
-                best_answer = item["answer"]
+                best_answer = item["response"]
                 best_topic = item["topic"]
 
     return best_answer, best_score, best_topic
