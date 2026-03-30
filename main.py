@@ -9,6 +9,7 @@ def find_best_answer(user_input, faq_data):
 
     best_score = 0
     best_answer = None
+    best_topic = None
 
     for item in faq_data:
         for question in item["questions"]:
@@ -20,8 +21,9 @@ def find_best_answer(user_input, faq_data):
             if score > best_score:
                 best_score = score
                 best_answer = item["answer"]
+                best_topic = item["topic"]
 
-    return best_answer, best_score
+    return best_answer, best_score, best_topic
 
 
 print("AI Support Agent Started")
@@ -33,10 +35,10 @@ while True:
         print("Bot: Goodbye!")
         break
 
-    answer, score = find_best_answer(user_message, faq_data)
+    answer, score, topic = find_best_answer(user_message, faq_data)
 
-    # (threshold)
     if score >= 2:
+        print("Topic:", topic)
         print("Bot:", answer)
     else:
         print("Bot: Sorry, I am not confident about your request.")
