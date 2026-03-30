@@ -27,8 +27,15 @@ def find_best_answer(user_input, faq_data):
 
 
 def log_chat(user_message, topic, score, action):
-    with open("chat_log.txt", "a") as log_file:
-        log_file.write(f"User: {user_message} | Topic: {topic} | Score: {score} | Action: {action}\n")
+    log_entry = {
+        "user": user_message,
+        "topic": topic,
+        "score": score,
+        "action": action
+    }
+
+    with open("chat_log.jsonl", "a") as log_file:
+        log_file.write(json.dumps(log_entry) + "\n")
 
 
 print("AI Support Agent Started")
