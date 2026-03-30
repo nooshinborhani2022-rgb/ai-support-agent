@@ -1,7 +1,23 @@
 import json
+from datetime import datetime
 
-with open("faq.json", "r") as file:
-    faq_data = json.load(file)
+
+def load_faq(file_path):
+    with open(file_path, "r") as file:
+        return json.load(file)
+
+
+def log_chat(user_message, topic, score, action_result):
+    log_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "user_message": user_message,
+        "topic": topic,
+        "score": score,
+        "action": action_result
+    }
+
+    with open("chat_log.jsonl", "a") as log_file:
+        log_file.write(json.dumps(log_entry) + "\n")
 
 
 def find_best_answer(user_input, faq_data):
@@ -10,6 +26,7 @@ def find_best_answer(user_input, faq_data):
     best_score = 0
     best_answer = None
     best_topic = None
+    best_action = None
 
     for item in faq_data:
         example_score = 0
@@ -34,23 +51,14 @@ def find_best_answer(user_input, faq_data):
             best_score = total_score
             best_answer = item["response"]
             best_topic = item["topic"]
+            best_action = item["action"]
 
-    return best_answer, best_score, best_topic
-
-
-def log_chat(user_message, topic, score, action):
-    log_entry = {
-        "user": user_message,
-        "topic": topic,
-        "score": score,
-        "action": action
-    }
-
-    with open("chat_log.jsonl", "a") as log_file:
-        log_file.write(json.dumps(log_entry) + "\n")
+    return best_answer, best_score, best_topic, best_action
 
 
-print("AI Support Agent Started")
+faq_data = load_faq("faq.json")
+
+print("Chatbot is ready! Type 'bye' to exit.")
 
 while True:
     user_message = input("You: ")
@@ -59,23 +67,22 @@ while True:
         print("Bot: Goodbye!")
         break
 
-    answer, score, topic = find_best_answer(user_message, faq_data)
+    answer, score, topic, action = find_best_answer(user_message, faq_data)
 
     if score >= 2:
-        if topic == "password_reset":
+        if action == "answer":
             print("Bot:", answer)
             log_chat(user_message, topic, score, "answered")
-        elif topic == "refund_request":
-            print("Bot:", answer)
-            print("Bot: If you need more help, contact support@example.com")
-            log_chat(user_message, topic, score, "answered")
-        elif topic == "payment_failed":
-            print("Bot: This seems like a payment issue.")
+
+        elif action == "escalate":
+            print("Bot: This issue needs human support.")
             print("Bot: I will escalate this to a human agent.")
             log_chat(user_message, topic, score, "escalated")
+
         else:
             print("Bot:", answer)
             log_chat(user_message, topic, score, "answered")
+
     else:
         print("Bot: Sorry, I am not confident about your request.")
         log_chat(user_message, "unknown", score, "not_confident")

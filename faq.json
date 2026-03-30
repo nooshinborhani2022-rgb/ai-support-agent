@@ -1,6 +1,7 @@
 [
   {
     "topic": "password_reset",
+    "action": "answer",
     "keywords": ["password", "reset", "forgot"],
     "examples": [
       "I forgot my password",
@@ -11,6 +12,7 @@
   },
   {
     "topic": "payment_failed",
+    "action": "escalate",
     "keywords": ["payment", "failed", "card"],
     "examples": [
       "my payment failed",
@@ -21,6 +23,7 @@
   },
   {
     "topic": "refund_request",
+    "action": "answer",
     "keywords": ["refund", "money back", "return"],
     "examples": [
       "I want a refund",
