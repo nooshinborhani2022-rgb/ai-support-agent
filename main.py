@@ -26,6 +26,11 @@ def find_best_answer(user_input, faq_data):
     return best_answer, best_score, best_topic
 
 
+def log_chat(user_message, topic, score, action):
+    with open("chat_log.txt", "a") as log_file:
+        log_file.write(f"User: {user_message} | Topic: {topic} | Score: {score} | Action: {action}\n")
+
+
 print("AI Support Agent Started")
 
 while True:
@@ -39,20 +44,24 @@ while True:
 
     if score >= 2:
 
-        # decision making based on topic
         if topic == "password_reset":
             print("Bot:", answer)
+            log_chat(user_message, topic, score, "answered")
 
         elif topic == "refund":
             print("Bot:", answer)
             print("Bot: If you need more help, contact support@example.com")
+            log_chat(user_message, topic, score, "answered")
 
         elif topic == "payment_issue":
             print("Bot: This seems like a payment issue.")
             print("Bot: I will escalate this to a human agent.")
+            log_chat(user_message, topic, score, "escalated")
 
         else:
             print("Bot:", answer)
+            log_chat(user_message, topic, score, "answered")
 
     else:
         print("Bot: Sorry, I am not confident about your request.")
+        log_chat(user_message, "unknown", score, "not_confident")

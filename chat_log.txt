@@ -1,0 +1,2 @@
+User: I forgot my password | Topic: password_reset | Score: 3 | Action: answered
+User: my payment failed | Topic: payment_issue | Score: 2 | Action: escalated
