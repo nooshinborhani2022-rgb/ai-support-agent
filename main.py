@@ -62,7 +62,7 @@ def find_best_answer(user_input, faq_data):
             common_words = user_words & keyword_words
             keyword_score += len(common_words)
 
-        total_score = example_score + keyword_score
+        total_score = (example_score * 2) + keyword_score
 
         if total_score > best_score:
             best_score = total_score
