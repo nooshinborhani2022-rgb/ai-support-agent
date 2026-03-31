@@ -9,7 +9,7 @@ STOPWORDS = {
 
 
 def load_faq(file_path):
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         return json.load(file)
 
 
@@ -22,7 +22,7 @@ def log_chat(user_message, topic, score, action_result):
         "action": action_result
     }
 
-    with open("chat_log.jsonl", "a") as log_file:
+    with open("chat_log.jsonl", "a", encoding="utf-8") as log_file:
         log_file.write(json.dumps(log_entry) + "\n")
 
 
@@ -98,8 +98,7 @@ while True:
             log_chat(user_message, topic, score, "clarify")
 
         elif action == "escalate":
-            print("Bot: This issue needs human support.")
-            print("Bot: I will escalate this to a human agent.")
+            print("Bot:", answer)
             log_chat(user_message, topic, score, "escalated")
 
         else:
