@@ -12,3 +12,5 @@
 {"timestamp": "2026-03-31T11:40:44.524419", "user_message": "Hello", "topic": "unknown", "score": 0, "action": "clarify"}
 {"timestamp": "2026-03-31T11:46:07.191213", "user_message": "refund?", "topic": "refund_request", "score": 2, "action": "answered"}
 {"timestamp": "2026-03-31T11:46:32.174044", "user_message": "I can't log in!", "topic": "login_issue", "score": 7, "action": "clarify"}
+{"timestamp": "2026-03-31T11:54:18.826957", "user_message": "I forgot my password", "topic": "password_reset", "score": 4, "action": "answered"}
+{"timestamp": "2026-03-31T11:54:33.595387", "user_message": "Hello", "topic": "unknown", "score": 0, "action": "clarify"}

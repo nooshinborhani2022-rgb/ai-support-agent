@@ -1,6 +1,11 @@
 import json
 from datetime import datetime
 
+STOPWORDS = {
+    "i", "a", "the", "is", "to", "my", "you", "me",
+    "and", "of", "in", "on", "for", "it", "this"
+}
+
 
 def load_faq(file_path):
     with open(file_path, "r") as file:
@@ -26,7 +31,10 @@ def normalize_text(text):
     for ch in [".", ",", "!", "?", ":", ";", "'", '"']:
         text = text.replace(ch, "")
 
-    return text.split()
+    words = text.split()
+    filtered_words = [word for word in words if word not in STOPWORDS]
+
+    return filtered_words
 
 
 def find_best_answer(user_input, faq_data):
