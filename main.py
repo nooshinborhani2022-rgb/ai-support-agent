@@ -11,6 +11,13 @@ STOPWORDS = {
 }
 
 
+ACTION_PRIORITY = {
+    "escalate": 0,
+    "answer": 1,
+    "clarify": 2
+}
+
+
 def load_faq(file_path="faq.json"):
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -99,9 +106,9 @@ def topic_label(topic):
         "payment_failed": "payment failure",
         "double_charge": "double charge",
         "refund_request": "refund request",
-        "billing_question": "billing",
+        "billing_question": "billing question",
         "subscription_cancel": "subscription cancellation",
-        "fraud_report": "fraud",
+        "fraud_report": "fraud report",
         "order_status": "order status",
         "delivery_issue": "delivery issue",
         "general_help": "general support"
@@ -138,17 +145,24 @@ def get_single_response(intent):
     return "I found your issue, but I don’t have a response ready."
 
 
+def sort_intents_by_priority(intents):
+    return sorted(
+        intents,
+        key=lambda x: (ACTION_PRIORITY.get(x["action"], 99), -x["score"])
+    )
+
+
 def generate_response(selected_intents):
     if not selected_intents:
         return "I'm sorry, I didn’t understand. Could you rephrase?"
 
-    # فقط یک intent
-    if len(selected_intents) == 1:
-        return get_single_response(selected_intents[0])
+    ordered_intents = sort_intents_by_priority(selected_intents)
 
-    # دو intent
-    first_intent = selected_intents[0]
-    second_intent = selected_intents[1]
+    if len(ordered_intents) == 1:
+        return get_single_response(ordered_intents[0])
+
+    first_intent = ordered_intents[0]
+    second_intent = ordered_intents[1]
 
     t1 = topic_label(first_intent["topic"])
     t2 = topic_label(second_intent["topic"])

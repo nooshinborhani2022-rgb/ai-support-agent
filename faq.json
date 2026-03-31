@@ -128,7 +128,7 @@
   {
     "topic": "billing_question",
     "action": "clarify",
-    "keywords": ["billing", "invoice", "charged", "plan cost"],
+    "keywords": ["billing", "invoice", "plan cost"],
     "examples": [
       "I have a billing question",
       "why was I charged",
