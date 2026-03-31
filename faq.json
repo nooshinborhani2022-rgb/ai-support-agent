@@ -6,9 +6,20 @@
     "examples": [
       "I forgot my password",
       "reset my password",
-      "can't log in"
+      "forgot password help"
     ],
     "response": "Click on 'Forgot Password' on the login page."
+  },
+  {
+    "topic": "login_issue",
+    "action": "clarify",
+    "keywords": ["login", "log in", "sign in", "access"],
+    "examples": [
+      "I can't log in",
+      "login not working",
+      "can't access my account"
+    ],
+    "response": "Are you having a password issue, or is your account locked?"
   },
   {
     "topic": "payment_failed",

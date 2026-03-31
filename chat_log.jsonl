@@ -8,3 +8,4 @@
 {"timestamp": "2026-03-30T17:13:27.126785", "user_message": "I forgot my password", "topic": "password_reset", "score": 6, "action": "answered"}
 {"timestamp": "2026-03-30T17:13:48.530107", "user_message": "my payment failed", "topic": "payment_failed", "score": 5, "action": "escalated"}
 {"timestamp": "2026-03-30T17:14:03.484636", "user_message": "I want a refund", "topic": "refund_request", "score": 5, "action": "answered"}
+{"timestamp": "2026-03-31T11:22:26.116282", "user_message": "I can't log in", "topic": "login_issue", "score": 7, "action": "clarify"}
