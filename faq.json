@@ -2,45 +2,235 @@
   {
     "topic": "password_reset",
     "action": "answer",
-    "keywords": ["password", "reset", "forgot"],
+    "keywords": ["password", "reset", "forgot", "change password"],
     "examples": [
       "I forgot my password",
       "reset my password",
-      "forgot password help"
+      "forgot password help",
+      "how do I reset my password",
+      "need a new password"
     ],
-    "response": "Click on 'Forgot Password' on the login page."
+    "response": "Click on 'Forgot Password' on the login page and follow the instructions sent to your email."
   },
   {
     "topic": "login_issue",
     "action": "clarify",
-    "keywords": ["login", "log in", "sign in", "access"],
+    "keywords": ["login", "log in", "sign in", "access account"],
     "examples": [
       "I can't log in",
       "login not working",
-      "can't access my account"
+      "can't access my account",
+      "sign in problem",
+      "it won't let me log in"
     ],
-    "response": "Are you having a password issue, or is your account locked?"
+    "response": "Are you having a password issue, seeing an error message, or is your account locked?"
+  },
+  {
+    "topic": "account_locked",
+    "action": "clarify",
+    "keywords": ["locked", "blocked", "locked out", "access denied"],
+    "examples": [
+      "my account is locked",
+      "I got locked out",
+      "it says my account is blocked",
+      "access denied on my account",
+      "I can't get in because my account is locked"
+    ],
+    "response": "It looks like your account may be locked. Did you receive any error message or security alert?"
+  },
+  {
+    "topic": "email_change",
+    "action": "answer",
+    "keywords": ["change email", "update email", "new email"],
+    "examples": [
+      "how do I change my email",
+      "update my email address",
+      "I want to use a different email",
+      "change account email",
+      "replace old email with new one"
+    ],
+    "response": "You can update your email address from your account settings under profile or security settings."
+  },
+  {
+    "topic": "profile_update",
+    "action": "answer",
+    "keywords": ["profile", "update profile", "edit account", "change details"],
+    "examples": [
+      "how do I update my profile",
+      "change my account details",
+      "edit my profile",
+      "update my personal information",
+      "modify profile settings"
+    ],
+    "response": "You can update your profile information from the account settings page."
   },
   {
     "topic": "payment_failed",
     "action": "escalate",
-    "keywords": ["payment", "failed", "card"],
+    "keywords": ["payment failed", "card declined", "transaction failed", "checkout failed"],
     "examples": [
       "my payment failed",
       "card declined",
-      "payment not working"
+      "payment not working",
+      "transaction failed",
+      "checkout did not go through"
     ],
-    "response": "There was an issue with your payment. Please try again or contact support."
+    "response": "This looks like a payment issue that may require account-specific investigation."
+  },
+  {
+    "topic": "double_charge",
+    "action": "escalate",
+    "keywords": ["charged twice", "double charge", "duplicate payment", "billed twice"],
+    "examples": [
+      "I was charged twice",
+      "you billed me two times",
+      "duplicate charge on my card",
+      "money was taken twice",
+      "why did you charge me again"
+    ],
+    "response": "This looks like a duplicate charge issue and should be reviewed by a support specialist."
   },
   {
     "topic": "refund_request",
     "action": "answer",
-    "keywords": ["refund", "money back", "return"],
+    "keywords": ["refund", "money back", "return payment", "get my money back"],
     "examples": [
       "I want a refund",
       "give me my money back",
-      "how do I get a refund"
+      "how do I get a refund",
+      "refund this please",
+      "can I get my money back"
     ],
-    "response": "You can request a refund from your account dashboard."
+    "response": "You can request a refund from your account dashboard or the support section, depending on your purchase type."
+  },
+  {
+    "topic": "billing_question",
+    "action": "clarify",
+    "keywords": ["billing", "invoice", "charged", "plan cost"],
+    "examples": [
+      "I have a billing question",
+      "why was I charged",
+      "I don't understand this invoice",
+      "question about my bill",
+      "help with billing"
+    ],
+    "response": "Can you clarify whether this is about an invoice, a subscription fee, or an unexpected charge?"
+  },
+  {
+    "topic": "subscription_cancel",
+    "action": "answer",
+    "keywords": ["cancel subscription", "unsubscribe", "stop plan", "cancel plan"],
+    "examples": [
+      "I want to cancel my subscription",
+      "how do I unsubscribe",
+      "stop my plan",
+      "cancel my membership",
+      "end my subscription"
+    ],
+    "response": "You can cancel your subscription from the billing or subscription section in your account settings."
+  },
+  {
+    "topic": "fraud_report",
+    "action": "escalate",
+    "keywords": ["fraud", "stolen card", "scam", "unauthorized use"],
+    "examples": [
+      "someone used my card",
+      "I think this is fraud",
+      "my account was used without permission",
+      "stolen card transaction",
+      "this charge is suspicious"
+    ],
+    "response": "This may involve fraudulent activity and should be escalated immediately to a support specialist."
+  },
+  {
+    "topic": "unauthorized_transaction",
+    "action": "escalate",
+    "keywords": ["unauthorized transaction", "not my charge", "unknown payment", "not me"],
+    "examples": [
+      "this transaction was not mine",
+      "I don't recognize this charge",
+      "unauthorized payment on my account",
+      "I did not make this purchase",
+      "unknown transaction appeared"
+    ],
+    "response": "This looks like an unauthorized transaction and needs urgent review by a support specialist."
+  },
+  {
+    "topic": "suspicious_login",
+    "action": "escalate",
+    "keywords": ["suspicious login", "unknown login", "security alert", "new device login"],
+    "examples": [
+      "I got a suspicious login alert",
+      "someone logged into my account",
+      "unknown device accessed my account",
+      "security alert for login",
+      "I think someone signed into my account"
+    ],
+    "response": "This may be a security-related login issue and should be escalated for review."
+  },
+  {
+    "topic": "order_status",
+    "action": "answer",
+    "keywords": ["order status", "where is my order", "track order", "delivery status"],
+    "examples": [
+      "where is my order",
+      "track my package",
+      "what is my order status",
+      "when will my order arrive",
+      "order tracking help"
+    ],
+    "response": "You can check your order status from the orders section in your account dashboard."
+  },
+  {
+    "topic": "delivery_issue",
+    "action": "clarify",
+    "keywords": ["delivery issue", "late delivery", "shipping problem", "delivery problem"],
+    "examples": [
+      "my delivery is late",
+      "there is a problem with shipping",
+      "package has not arrived",
+      "delivery issue with my order",
+      "why is my shipment delayed"
+    ],
+    "response": "Can you clarify whether your order is delayed, missing, or marked delivered but not received?"
+  },
+  {
+    "topic": "wrong_item",
+    "action": "answer",
+    "keywords": ["wrong item", "incorrect item", "received wrong order"],
+    "examples": [
+      "I received the wrong item",
+      "this is not what I ordered",
+      "wrong product was delivered",
+      "my order is incorrect",
+      "sent me the wrong thing"
+    ],
+    "response": "Please go to your order history and report the issue through the order support options."
+  },
+  {
+    "topic": "missing_item",
+    "action": "answer",
+    "keywords": ["missing item", "item missing", "part of order missing"],
+    "examples": [
+      "an item is missing from my order",
+      "my package is missing one item",
+      "I didn't receive everything",
+      "part of my order is missing",
+      "one item was not included"
+    ],
+    "response": "You can report a missing item from your order details page in the support section."
+  },
+  {
+    "topic": "general_help",
+    "action": "clarify",
+    "keywords": ["help", "issue", "problem", "support"],
+    "examples": [
+      "I need help",
+      "something is wrong",
+      "I have an issue",
+      "can you help me",
+      "support needed"
+    ],
+    "response": "Can you clarify whether your issue is about login, billing, payment, or an order?"
   }
 ]

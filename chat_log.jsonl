@@ -15,3 +15,8 @@
 {"timestamp": "2026-03-31T11:54:18.826957", "user_message": "I forgot my password", "topic": "password_reset", "score": 4, "action": "answered"}
 {"timestamp": "2026-03-31T11:54:33.595387", "user_message": "Hello", "topic": "unknown", "score": 0, "action": "clarify"}
 {"timestamp": "2026-03-31T12:01:03.052328", "user_message": "I want my money back", "topic": "refund_request", "score": 6, "action": "answered"}
+{"timestamp": "2026-03-31T12:23:08.639201", "user_message": "someone used my card", "topic": "fraud_report", "score": 7, "action": "escalated"}
+{"timestamp": "2026-03-31T12:23:49.514340", "user_message": "my account is locked", "topic": "account_locked", "score": 6, "action": "clarify"}
+{"timestamp": "2026-03-31T12:24:12.856323", "user_message": "where is my order", "topic": "order_status", "score": 8, "action": "answered"}
+{"timestamp": "2026-03-31T12:24:34.547538", "user_message": "my order is wrong", "topic": "order_status", "score": 5, "action": "answered"}
+{"timestamp": "2026-03-31T12:24:55.260604", "user_message": "I need help", "topic": "general_help", "score": 5, "action": "clarify"}
