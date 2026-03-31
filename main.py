@@ -142,9 +142,11 @@ def generate_response(selected_intents):
     if not selected_intents:
         return "I'm sorry, I didn’t understand. Could you rephrase?"
 
+    # فقط یک intent
     if len(selected_intents) == 1:
         return get_single_response(selected_intents[0])
 
+    # دو intent
     first_intent = selected_intents[0]
     second_intent = selected_intents[1]
 
@@ -154,7 +156,11 @@ def generate_response(selected_intents):
     response1 = get_single_response(first_intent)
     response2 = get_single_response(second_intent)
 
-    return f"I can help with both {t1} and {t2}. {response1} Also, {response2}"
+    intro = f"I can help with both your {t1} and {t2}."
+    part1 = f"First, {response1}"
+    part2 = f"Also, {response2}"
+
+    return f"{intro}\n\n{part1}\n\n{part2}"
 
 
 def log_interaction(user_message, intents, response, file_path="chat_log.jsonl"):
