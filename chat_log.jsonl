@@ -20,3 +20,7 @@
 {"timestamp": "2026-03-31T12:24:12.856323", "user_message": "where is my order", "topic": "order_status", "score": 8, "action": "answered"}
 {"timestamp": "2026-03-31T12:24:34.547538", "user_message": "my order is wrong", "topic": "order_status", "score": 5, "action": "answered"}
 {"timestamp": "2026-03-31T12:24:55.260604", "user_message": "I need help", "topic": "general_help", "score": 5, "action": "clarify"}
+{"timestamp": "2026-03-31T12:44:50.302413", "user_message": "I want a refund", "topic": "refund_request", "score": 5, "action": "answered"}
+{"timestamp": "2026-03-31T12:45:46.353657", "user_message": "I can not login", "topic": "login_issue", "score": 5, "action": "clarify"}
+{"timestamp": "2026-03-31T12:46:03.549085", "user_message": "I forgot my password", "topic": "password_reset", "score": 7, "action": "answered"}
+{"timestamp": "2026-03-31T12:46:19.192152", "user_message": "I need a password", "topic": "password_reset", "score": 6, "action": "answered"}

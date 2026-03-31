@@ -1,3 +1,4 @@
+import random
 import json
 from datetime import datetime
 
@@ -66,7 +67,7 @@ def find_best_answer(user_input, faq_data):
 
         if total_score > best_score:
             best_score = total_score
-            best_answer = item["response"]
+            best_answer = random.choice(item["responses"])
             best_topic = item["topic"]
             best_action = item["action"]
 
