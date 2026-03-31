@@ -8,12 +8,15 @@
       "reset my password",
       "forgot password help",
       "how do I reset my password",
-      "need a new password"
+      "need a new password",
+      "forgot password",
+      "password help",
+      "cant remember password"
     ],
     "responses": [
       "Of course — you can reset your password by clicking 'Forgot Password' on the login page and following the instructions sent to your email.",
       "Thanks for reaching out. Please use the 'Forgot Password' option on the login page to reset your password.",
-      "I’d be happy to help. You can reset your password from the login page using the 'Forgot Password' link."
+      "I'd be happy to help. You can reset your password from the login page using the 'Forgot Password' link."
     ]
   },
   {
@@ -25,10 +28,15 @@
       "login not working",
       "can't access my account",
       "sign in problem",
-      "it won't let me log in"
+      "it won't let me log in",
+      "cant login",
+      "login issue",
+      "why can't I sign in",
+      "bro I can't log in",
+      "something is wrong with login"
     ],
     "responses": [
-      "I’m sorry you’re having trouble logging in. Are you having a password issue, seeing an error message, or is your account locked?",
+      "I'm sorry you're having trouble logging in. Are you having a password issue, seeing an error message, or is your account locked?",
       "Thanks for letting me know. Could you clarify whether this is a password problem, a lockout issue, or an error on the login page?",
       "I understand the login issue is frustrating. Can you tell me whether you forgot your password, saw an error, or think your account is locked?"
     ]
@@ -42,46 +50,16 @@
       "I got locked out",
       "it says my account is blocked",
       "access denied on my account",
-      "I can't get in because my account is locked"
+      "I can't get in because my account is locked",
+      "locked out",
+      "account blocked",
+      "why is my account locked",
+      "cant access account"
     ],
     "responses": [
-      "I’m sorry about that. It looks like your account may be locked. Did you receive any error message or security alert?",
-      "Thanks for reporting this. If your account is locked, could you let me know whether you saw a warning, verification request, or security notice?",
-      "I understand this is inconvenient. Please tell me whether you received an error message or any security alert when trying to sign in."
-    ]
-  },
-  {
-    "topic": "email_change",
-    "action": "answer",
-    "keywords": ["change email", "update email", "new email"],
-    "examples": [
-      "how do I change my email",
-      "update my email address",
-      "I want to use a different email",
-      "change account email",
-      "replace old email with new one"
-    ],
-    "responses": [
-      "You can update your email address from your account settings under profile or security settings.",
-      "Thanks for asking. To change your email, please go to your account settings and update it from the profile or security section.",
-      "Of course — you can change your email address in your account settings."
-    ]
-  },
-  {
-    "topic": "profile_update",
-    "action": "answer",
-    "keywords": ["profile", "update profile", "edit account", "change details"],
-    "examples": [
-      "how do I update my profile",
-      "change my account details",
-      "edit my profile",
-      "update my personal information",
-      "modify profile settings"
-    ],
-    "responses": [
-      "You can update your profile information from the account settings page.",
-      "Thanks for reaching out. Please go to your account settings to edit your profile details.",
-      "Of course — your profile information can be updated from the settings section of your account."
+      "I'm sorry about that. It looks like your account may be locked. Did you receive any error message or security alert?",
+      "Thanks for reporting this. If your account is locked, could you let me know whether you saw a warning or security notice?",
+      "I understand this is inconvenient. Please tell me whether you received any error message when trying to sign in."
     ]
   },
   {
@@ -93,11 +71,15 @@
       "card declined",
       "payment not working",
       "transaction failed",
-      "checkout did not go through"
+      "checkout did not go through",
+      "payment issue",
+      "card not working",
+      "why is my payment not going through",
+      "checkout failed again"
     ],
     "responses": [
-      "I’m sorry your payment didn’t go through. This may require account-specific investigation, so I’ll escalate it to a support specialist.",
-      "Thanks for letting us know. Since this is a payment issue, I’ll escalate it for further review.",
+      "I'm sorry your payment didn't go through. This may require account-specific investigation, so I'll escalate it to a support specialist.",
+      "Thanks for letting us know. Since this is a payment issue, I'll escalate it for further review.",
       "I understand how frustrating payment problems can be. This issue should be reviewed by a human support specialist."
     ]
   },
@@ -110,12 +92,16 @@
       "you billed me two times",
       "duplicate charge on my card",
       "money was taken twice",
-      "why did you charge me again"
+      "why did you charge me again",
+      "charged twice",
+      "double charged",
+      "you took my money twice",
+      "charged 2 times"
     ],
     "responses": [
-      "I’m sorry about the duplicate charge. This issue needs to be reviewed by a support specialist, so I’ll escalate it right away.",
-      "Thanks for reporting this. A duplicate charge should be investigated, so I’m escalating it to a human agent.",
-      "I understand your concern. Since this may involve duplicate billing, I’ll pass it to a support specialist for review."
+      "I'm sorry about the duplicate charge. This issue needs to be reviewed by a support specialist, so I'll escalate it right away.",
+      "Thanks for reporting this. A duplicate charge should be investigated, so I'm escalating it to a human agent.",
+      "I understand your concern. Since this may involve duplicate billing, I'll pass it to a support specialist for review."
     ]
   },
   {
@@ -127,10 +113,14 @@
       "give me my money back",
       "how do I get a refund",
       "refund this please",
-      "can I get my money back"
+      "can I get my money back",
+      "refund",
+      "refund pls",
+      "money back",
+      "I need a refund asap"
     ],
     "responses": [
-      "I’m sorry for the inconvenience. You can request a refund from your account dashboard or the support section, depending on your purchase type.",
+      "I'm sorry for the inconvenience. You can request a refund from your account dashboard or the support section, depending on your purchase type.",
       "Thanks for reaching out. You can start a refund request from your account dashboard or support page.",
       "I understand you'd like a refund. Please go to your account dashboard and submit a refund request there."
     ]
@@ -144,11 +134,14 @@
       "why was I charged",
       "I don't understand this invoice",
       "question about my bill",
-      "help with billing"
+      "help with billing",
+      "billing issue",
+      "charged me",
+      "what is this charge"
     ],
     "responses": [
-      "I’d be happy to help with billing. Could you clarify whether this is about an invoice, a subscription fee, or an unexpected charge?",
-      "Thanks for your message. Please let me know if your billing question is about an invoice, a plan cost, or a charge you don’t recognize.",
+      "I'd be happy to help with billing. Could you clarify whether this is about an invoice, a subscription fee, or an unexpected charge?",
+      "Thanks for your message. Please let me know if your billing question is about an invoice, a plan cost, or a charge you don't recognize.",
       "I understand billing issues can be confusing. Can you tell me whether this is about an invoice, subscription, or unexpected payment?"
     ]
   },
@@ -161,7 +154,9 @@
       "how do I unsubscribe",
       "stop my plan",
       "cancel my membership",
-      "end my subscription"
+      "end my subscription",
+      "unsubscribe",
+      "cancel plan"
     ],
     "responses": [
       "You can cancel your subscription from the billing or subscription section in your account settings.",
@@ -178,58 +173,27 @@
       "I think this is fraud",
       "my account was used without permission",
       "stolen card transaction",
-      "this charge is suspicious"
+      "this charge is suspicious",
+      "fraud alert",
+      "scam transaction"
     ],
     "responses": [
-      "I’m sorry to hear that. This may involve fraudulent activity, so I’m escalating it immediately to a support specialist.",
+      "I'm sorry to hear that. This may involve fraudulent activity, so I'm escalating it immediately to a support specialist.",
       "Thanks for reporting this right away. Because this may be fraud-related, it needs urgent review by a human agent.",
-      "I understand your concern. This issue appears security-related, so I’ll escalate it immediately."
-    ]
-  },
-  {
-    "topic": "unauthorized_transaction",
-    "action": "escalate",
-    "keywords": ["unauthorized transaction", "not my charge", "unknown payment", "not me"],
-    "examples": [
-      "this transaction was not mine",
-      "I don't recognize this charge",
-      "unauthorized payment on my account",
-      "I did not make this purchase",
-      "unknown transaction appeared"
-    ],
-    "responses": [
-      "I’m sorry about that. An unauthorized transaction should be reviewed urgently, so I’m escalating this to a support specialist.",
-      "Thanks for letting us know. Since this charge may be unauthorized, it requires immediate review by a human agent.",
-      "I understand how serious this is. I’ll escalate this transaction issue for urgent investigation."
-    ]
-  },
-  {
-    "topic": "suspicious_login",
-    "action": "escalate",
-    "keywords": ["suspicious login", "unknown login", "security alert", "new device login"],
-    "examples": [
-      "I got a suspicious login alert",
-      "someone logged into my account",
-      "unknown device accessed my account",
-      "security alert for login",
-      "I think someone signed into my account"
-    ],
-    "responses": [
-      "I’m sorry to hear that. This may be a security-related login issue, so I’m escalating it for urgent review.",
-      "Thanks for reporting this. Since this looks like suspicious account activity, I’m sending it to a support specialist.",
-      "I understand your concern. This appears to be a security issue, so it needs immediate escalation."
+      "I understand your concern. This issue appears security-related, so I'll escalate it immediately."
     ]
   },
   {
     "topic": "order_status",
     "action": "answer",
-    "keywords": ["order status", "where is my order", "track order", "delivery status"],
+    "keywords": ["order status", "where is my order", "track order"],
     "examples": [
       "where is my order",
       "track my package",
       "what is my order status",
       "when will my order arrive",
-      "order tracking help"
+      "order tracking help",
+      "track order"
     ],
     "responses": [
       "You can check your order status from the orders section in your account dashboard.",
@@ -240,52 +204,19 @@
   {
     "topic": "delivery_issue",
     "action": "clarify",
-    "keywords": ["delivery issue", "late delivery", "shipping problem", "delivery problem"],
+    "keywords": ["delivery issue", "late delivery", "shipping problem"],
     "examples": [
       "my delivery is late",
       "there is a problem with shipping",
       "package has not arrived",
       "delivery issue with my order",
-      "why is my shipment delayed"
+      "why is my shipment delayed",
+      "late delivery"
     ],
     "responses": [
-      "I’m sorry about the delivery problem. Could you clarify whether your order is delayed, missing, or marked as delivered but not received?",
+      "I'm sorry about the delivery problem. Could you clarify whether your order is delayed, missing, or marked as delivered but not received?",
       "Thanks for letting me know. Please tell me whether the package is late, missing, or incorrectly marked as delivered.",
       "I understand this is frustrating. Can you clarify if the issue is a delay, a missing package, or a delivery status problem?"
-    ]
-  },
-  {
-    "topic": "wrong_item",
-    "action": "answer",
-    "keywords": ["wrong item", "incorrect item", "received wrong order"],
-    "examples": [
-      "I received the wrong item",
-      "this is not what I ordered",
-      "wrong product was delivered",
-      "my order is incorrect",
-      "sent me the wrong thing"
-    ],
-    "responses": [
-      "I’m sorry you received the wrong item. Please go to your order history and report the issue through the order support options.",
-      "Thanks for reporting this. You can open your order details and use the support option to report the incorrect item.",
-      "I understand the issue. Please check your order history and submit a wrong-item report from there."
-    ]
-  },
-  {
-    "topic": "missing_item",
-    "action": "answer",
-    "keywords": ["missing item", "item missing", "part of order missing"],
-    "examples": [
-      "an item is missing from my order",
-      "my package is missing one item",
-      "I didn't receive everything",
-      "part of my order is missing",
-      "one item was not included"
-    ],
-    "responses": [
-      "I’m sorry an item is missing from your order. You can report it from your order details page in the support section.",
-      "Thanks for letting us know. Please open your order details and report the missing item through support.",
-      "I understand the issue. You can submit a missing-item report from the support section of your order page."
     ]
   },
   {
@@ -297,10 +228,13 @@
       "something is wrong",
       "I have an issue",
       "can you help me",
-      "support needed"
+      "support needed",
+      "help",
+      "problem",
+      "need support"
     ],
     "responses": [
-      "I’d be happy to help. Could you clarify whether your issue is about login, billing, payment, or an order?",
+      "I'd be happy to help. Could you clarify whether your issue is about login, billing, payment, or an order?",
       "Thanks for reaching out. Please tell me if your issue is related to account access, billing, payments, or orders.",
       "Of course — can you share whether this problem is about login, billing, payment, or delivery?"
     ]

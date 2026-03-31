@@ -26,3 +26,5 @@
 {"timestamp": "2026-03-31T12:46:19.192152", "user_message": "I need a password", "topic": "password_reset", "score": 6, "action": "answered"}
 {"timestamp": "2026-03-31T12:51:44.988019", "user_message": "I need a refund", "topic": "refund_request", "score": 3, "action": "answered"}
 {"timestamp": "2026-03-31T12:52:00.481631", "user_message": "I can not login", "topic": "login_issue", "score": 5, "action": "clarify"}
+{"timestamp": "2026-03-31T12:59:09.091304", "user_message": "track order", "topic": "order_status", "score": 8, "action": "answered"}
+{"timestamp": "2026-03-31T12:59:47.370514", "user_message": "help", "topic": "general_help", "score": 3, "action": "clarify"}
