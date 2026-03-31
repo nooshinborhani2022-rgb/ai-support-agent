@@ -93,5 +93,5 @@ while True:
             log_chat(user_message, topic, score, "answered")
 
     else:
-        print("Bot: Sorry, I am not confident about your request.")
-        log_chat(user_message, "unknown", score, "not_confident")
+        print("Bot: Can you please clarify your request?")
+        log_chat(user_message, "unknown", score, "clarify")
