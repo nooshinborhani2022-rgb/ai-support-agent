@@ -2,7 +2,7 @@
   {
     "topic": "password_reset",
     "action": "answer",
-    "keywords": ["password", "reset", "forgot", "change password"],
+    "keywords": ["password", "reset password", "forgot password", "change password", "new password"],
     "examples": [
       "I forgot my password",
       "reset my password",
@@ -11,7 +11,12 @@
       "need a new password",
       "forgot password",
       "password help",
-      "cant remember password"
+      "cant remember password",
+      "i need to reset my password",
+      "how can i change my password",
+      "password reset",
+      "lost my password",
+      "need password reset"
     ],
     "responses": [
       "Of course — you can reset your password by clicking 'Forgot Password' on the login page and following the instructions sent to your email.",
@@ -22,7 +27,7 @@
   {
     "topic": "login_issue",
     "action": "clarify",
-    "keywords": ["login", "log in", "sign in", "access account"],
+    "keywords": ["login", "log in", "sign in", "cannot log in", "cant login", "cant log in", "access account"],
     "examples": [
       "I can't log in",
       "login not working",
@@ -33,7 +38,13 @@
       "login issue",
       "why can't I sign in",
       "bro I can't log in",
-      "something is wrong with login"
+      "something is wrong with login",
+      "i cant access my account",
+      "my login is not working",
+      "cannot sign in",
+      "cant sign in",
+      "trouble logging in",
+      "my account problem"
     ],
     "responses": [
       "I'm sorry you're having trouble logging in. Are you having a password issue, seeing an error message, or is your account locked?",
@@ -44,7 +55,7 @@
   {
     "topic": "account_locked",
     "action": "clarify",
-    "keywords": ["locked", "blocked", "locked out", "access denied"],
+    "keywords": ["account locked", "locked out", "account blocked", "access denied", "blocked account"],
     "examples": [
       "my account is locked",
       "I got locked out",
@@ -54,7 +65,8 @@
       "locked out",
       "account blocked",
       "why is my account locked",
-      "cant access account"
+      "cant access account because it is locked",
+      "my account got blocked"
     ],
     "responses": [
       "I'm sorry about that. It looks like your account may be locked. Did you receive any error message or security alert?",
@@ -65,7 +77,7 @@
   {
     "topic": "payment_failed",
     "action": "escalate",
-    "keywords": ["payment failed", "card declined", "transaction failed", "checkout failed"],
+    "keywords": ["payment failed", "card declined", "transaction failed", "checkout failed", "payment not going through"],
     "examples": [
       "my payment failed",
       "card declined",
@@ -75,7 +87,10 @@
       "payment issue",
       "card not working",
       "why is my payment not going through",
-      "checkout failed again"
+      "checkout failed again",
+      "my card was declined",
+      "payment wont go through",
+      "cant complete payment"
     ],
     "responses": [
       "I'm sorry your payment didn't go through. This may require account-specific investigation, so I'll escalate it to a support specialist.",
@@ -86,7 +101,7 @@
   {
     "topic": "double_charge",
     "action": "escalate",
-    "keywords": ["charged twice", "double charge", "duplicate payment", "billed twice"],
+    "keywords": ["charged twice", "double charge", "duplicate payment", "billed twice", "double charged"],
     "examples": [
       "I was charged twice",
       "you billed me two times",
@@ -96,7 +111,10 @@
       "charged twice",
       "double charged",
       "you took my money twice",
-      "charged 2 times"
+      "charged 2 times",
+      "i got billed twice",
+      "i was charged two times",
+      "paid twice by mistake"
     ],
     "responses": [
       "I'm sorry about the duplicate charge. This issue needs to be reviewed by a support specialist, so I'll escalate it right away.",
@@ -107,7 +125,7 @@
   {
     "topic": "refund_request",
     "action": "answer",
-    "keywords": ["refund", "money back", "return payment", "get my money back"],
+    "keywords": ["refund", "money back", "return payment", "get my money back", "refund request"],
     "examples": [
       "I want a refund",
       "give me my money back",
@@ -117,7 +135,12 @@
       "refund",
       "refund pls",
       "money back",
-      "I need a refund asap"
+      "I need a refund asap",
+      "need refund",
+      "can you refund this",
+      "refund please",
+      "want my money back",
+      "i need my money back"
     ],
     "responses": [
       "I'm sorry for the inconvenience. You can request a refund from your account dashboard or the support section, depending on your purchase type.",
@@ -128,16 +151,20 @@
   {
     "topic": "billing_question",
     "action": "clarify",
-    "keywords": ["billing", "invoice", "plan cost"],
+    "keywords": ["billing", "invoice", "plan cost", "subscription fee", "bill question"],
     "examples": [
       "I have a billing question",
-      "why was I charged",
       "I don't understand this invoice",
       "question about my bill",
       "help with billing",
       "billing issue",
-      "charged me",
-      "what is this charge"
+      "what is this charge",
+      "why did you charge me",
+      "you charged me",
+      "billing help",
+      "invoice problem",
+      "question about invoice",
+      "what am i being charged for"
     ],
     "responses": [
       "I'd be happy to help with billing. Could you clarify whether this is about an invoice, a subscription fee, or an unexpected charge?",
@@ -148,7 +175,7 @@
   {
     "topic": "subscription_cancel",
     "action": "answer",
-    "keywords": ["cancel subscription", "unsubscribe", "stop plan", "cancel plan"],
+    "keywords": ["cancel subscription", "unsubscribe", "stop plan", "cancel plan", "end subscription"],
     "examples": [
       "I want to cancel my subscription",
       "how do I unsubscribe",
@@ -156,7 +183,11 @@
       "cancel my membership",
       "end my subscription",
       "unsubscribe",
-      "cancel plan"
+      "cancel plan",
+      "cancel subscription",
+      "i want to stop my subscription",
+      "please cancel my plan",
+      "how can i cancel my subscription"
     ],
     "responses": [
       "You can cancel your subscription from the billing or subscription section in your account settings.",
@@ -167,7 +198,7 @@
   {
     "topic": "fraud_report",
     "action": "escalate",
-    "keywords": ["fraud", "stolen card", "scam", "unauthorized use"],
+    "keywords": ["fraud", "stolen card", "scam", "unauthorized use", "unauthorized charge", "suspicious charge"],
     "examples": [
       "someone used my card",
       "I think this is fraud",
@@ -175,7 +206,10 @@
       "stolen card transaction",
       "this charge is suspicious",
       "fraud alert",
-      "scam transaction"
+      "scam transaction",
+      "unauthorized charge",
+      "someone made a payment on my account",
+      "this payment was not mine"
     ],
     "responses": [
       "I'm sorry to hear that. This may involve fraudulent activity, so I'm escalating it immediately to a support specialist.",
@@ -186,14 +220,20 @@
   {
     "topic": "order_status",
     "action": "answer",
-    "keywords": ["order status", "where is my order", "track order"],
+    "keywords": ["order status", "where is my order", "track order", "find order", "track package"],
     "examples": [
       "where is my order",
       "track my package",
       "what is my order status",
       "when will my order arrive",
       "order tracking help",
-      "track order"
+      "track order",
+      "how can I find my order",
+      "find my order",
+      "how do I find my order",
+      "where can i see my order",
+      "check my order",
+      "order status please"
     ],
     "responses": [
       "You can check your order status from the orders section in your account dashboard.",
@@ -204,14 +244,18 @@
   {
     "topic": "delivery_issue",
     "action": "clarify",
-    "keywords": ["delivery issue", "late delivery", "shipping problem"],
+    "keywords": ["delivery issue", "late delivery", "shipping problem", "package not arrived", "shipment delayed"],
     "examples": [
       "my delivery is late",
       "there is a problem with shipping",
       "package has not arrived",
       "delivery issue with my order",
       "why is my shipment delayed",
-      "late delivery"
+      "late delivery",
+      "my order is delayed",
+      "shipping problem",
+      "package missing",
+      "my package never arrived"
     ],
     "responses": [
       "I'm sorry about the delivery problem. Could you clarify whether your order is delayed, missing, or marked as delivered but not received?",
@@ -222,16 +266,15 @@
   {
     "topic": "general_help",
     "action": "clarify",
-    "keywords": ["help", "issue", "problem", "support"],
+    "keywords": ["help", "need help", "support"],
     "examples": [
       "I need help",
-      "something is wrong",
-      "I have an issue",
       "can you help me",
       "support needed",
-      "help",
-      "problem",
-      "need support"
+      "help me",
+      "need support",
+      "please help",
+      "can someone help me"
     ],
     "responses": [
       "I'd be happy to help. Could you clarify whether your issue is about login, billing, payment, or an order?",

@@ -95,6 +95,10 @@ def select_top_intents(ranked_intents, min_score=1.0, max_intents=2):
         if intent["score"] >= min_score:
             selected.append(intent)
 
+    if selected:
+        top_score = selected[0]["score"]
+        selected = [intent for intent in selected if intent["score"] >= top_score * 0.6]
+
     return selected[:max_intents]
 
 
