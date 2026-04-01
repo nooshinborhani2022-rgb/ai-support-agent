@@ -21,10 +21,14 @@ def analyze_logs(logs):
     actions = Counter()
     fallback_count = 0
 
+    fallback_queries = []
+    multi_intent_queries = []
+
     for log in logs:
         primary_intent = log.get("primary_intent")
         response = log.get("response", "")
         intents = log.get("intents", [])
+        user_message = log.get("user_message", "")
 
         if primary_intent:
             primary_intents[primary_intent] += 1
@@ -36,6 +40,10 @@ def analyze_logs(logs):
 
         if "I didn’t understand" in response or "Could you rephrase" in response:
             fallback_count += 1
+            fallback_queries.append(user_message)
+
+        if len(intents) > 1:
+            multi_intent_queries.append(user_message)
 
     print("\n=== Log Analysis Report ===")
     print(f"Total messages: {total_messages}")
@@ -48,6 +56,14 @@ def analyze_logs(logs):
     print("\nAction counts:")
     for action, count in actions.most_common():
         print(f"- {action}: {count}")
+
+    print("\nFallback queries:")
+    for q in fallback_queries[:10]:
+        print(f"- {q}")
+
+    print("\nMulti-intent queries:")
+    for q in multi_intent_queries[:10]:
+        print(f"- {q}")
 
 
 def main():

@@ -88,7 +88,7 @@ def detect_intents(user_text, faq_data):
     return results
 
 
-def select_top_intents(ranked_intents, min_score=1.5, max_intents=2):
+def select_top_intents(ranked_intents, min_score=1.0, max_intents=2):
     selected = []
 
     for intent in ranked_intents:
