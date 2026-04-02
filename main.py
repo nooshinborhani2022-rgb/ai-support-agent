@@ -3,6 +3,9 @@ import random
 import string
 from datetime import datetime, timezone
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 STOPWORDS = {
     "i", "me", "my", "you", "your", "the", "a", "an", "is", "are", "am",
@@ -36,6 +39,41 @@ def tokenize(text):
     return preprocess_text(text).split()
 
 
+# 🔥 TF-IDF SETUP
+def build_tfidf_index(faq_data):
+    corpus = []
+    mapping = []
+
+    for idx, item in enumerate(faq_data):
+        for example in item.get("examples", []):
+            processed = preprocess_text(example)
+            if processed:
+                corpus.append(processed)
+                mapping.append(idx)
+
+    vectorizer = TfidfVectorizer()
+    matrix = vectorizer.fit_transform(corpus)
+
+    return vectorizer, matrix, mapping
+
+
+def compute_tfidf_score(user_text, vectorizer, matrix, mapping, faq_data):
+    processed = preprocess_text(user_text)
+    if not processed:
+        return {}
+
+    query_vec = vectorizer.transform([processed])
+    similarities = cosine_similarity(query_vec, matrix)[0]
+
+    scores = {}
+
+    for sim, idx in zip(similarities, mapping):
+        topic = faq_data[idx]["topic"]
+        scores[topic] = max(scores.get(topic, 0), sim)
+
+    return scores
+
+
 def compute_keyword_score(user_text, keywords):
     user_tokens = set(tokenize(user_text))
     score = 0
@@ -48,39 +86,25 @@ def compute_keyword_score(user_text, keywords):
     return score
 
 
-def compute_example_score(user_text, examples):
-    user_tokens = set(tokenize(user_text))
-    best_score = 0
-
-    for example in examples:
-        example_tokens = set(tokenize(example))
-        if not example_tokens:
-            continue
-
-        common = user_tokens.intersection(example_tokens)
-        score = len(common) / len(example_tokens)
-
-        if score > best_score:
-            best_score = score
-
-    return best_score
-
-
-def detect_intents(user_text, faq_data):
+def detect_intents(user_text, faq_data, vectorizer, matrix, mapping):
     results = []
+
+    tfidf_scores = compute_tfidf_score(user_text, vectorizer, matrix, mapping, faq_data)
 
     for item in faq_data:
         topic = item["topic"]
         action = item["action"]
 
-        example_score = compute_example_score(user_text, item.get("examples", []))
+        tfidf_score = tfidf_scores.get(topic, 0)
         keyword_score = compute_keyword_score(user_text, item.get("keywords", []))
-        total_score = (example_score * 2) + keyword_score
+
+        # 🔥 hybrid score
+        total_score = (tfidf_score * 2) + (keyword_score * 0.5)
 
         if total_score > 0:
             results.append({
                 "topic": topic,
-                "score": round(total_score, 2),
+                "score": round(total_score, 3),
                 "action": action,
                 "responses": item.get("responses", [])
             })
@@ -89,6 +113,7 @@ def detect_intents(user_text, faq_data):
     return results
 
 
+# 🔧 helper cues (همه قبلی حفظ شده)
 def has_any_phrase(user_text, phrases):
     normalized = preprocess_text(user_text)
     return any(preprocess_text(p) in normalized for p in phrases)
@@ -96,75 +121,49 @@ def has_any_phrase(user_text, phrases):
 
 def has_account_locked_cue(user_text):
     return has_any_phrase(user_text, [
-        "account locked",
-        "locked out",
-        "account blocked",
-        "access denied",
-        "blocked account"
+        "account locked", "locked out", "account blocked", "access denied"
     ])
 
 
 def has_login_cue(user_text):
     return has_any_phrase(user_text, [
-        "login",
-        "log in",
-        "sign in",
-        "cant login",
-        "cannot login",
-        "cant log in",
-        "cannot log in",
-        "access account"
+        "login", "log in", "sign in", "cant login", "cannot login"
     ])
 
 
 def has_payment_cue(user_text):
     return has_any_phrase(user_text, [
-        "payment",
-        "card declined",
-        "checkout failed",
-        "transaction failed",
-        "payment failed"
+        "payment", "card declined", "checkout failed", "transaction failed"
     ])
 
 
 def has_delivery_cue(user_text):
     return has_any_phrase(user_text, [
-        "delivery",
-        "late",
-        "shipping",
-        "package",
-        "delayed"
+        "delivery", "late", "shipping", "package", "delayed"
     ])
 
 
 def has_order_cue(user_text):
     return has_any_phrase(user_text, [
-        "order",
-        "track order",
-        "where is my order",
-        "order status",
-        "track package"
+        "order", "track order", "where is my order"
     ])
 
 
-def select_top_intents(ranked_intents, user_text, min_score=1.0, max_intents=2):
-    candidates = [i for i in ranked_intents if i["score"] >= min_score]
-
-    if not candidates:
+def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
+    if not ranked_intents:
         return []
 
-    top_score = candidates[0]["score"]
+    top_score = ranked_intents[0]["score"]
 
     candidates = [
-        i for i in candidates
+        i for i in ranked_intents
         if i["score"] >= top_score * 0.75
     ]
 
     if any(i["topic"] != "general_help" for i in candidates):
         candidates = [i for i in candidates if i["topic"] != "general_help"]
 
-    # 🔥 FIX اصلی همینجاست
-    # اگر access denied یا lock دیده شد → account_locked را force اضافه کن
+    # 🔥 fix account_locked
     if has_account_locked_cue(user_text):
         if not any(i["topic"] == "account_locked" for i in candidates):
             for intent in ranked_intents:
@@ -173,39 +172,38 @@ def select_top_intents(ranked_intents, user_text, min_score=1.0, max_intents=2):
                     break
 
     selected = []
-    selected_topics = set()
+    topics = set()
 
     for intent in candidates:
-        topic = intent["topic"]
+        t = intent["topic"]
 
-        if topic in selected_topics:
+        if t in topics:
             continue
 
-        if topic == "charge_explanation" and "double_charge" in selected_topics:
+        if t == "charge_explanation" and "double_charge" in topics:
             continue
 
-        if topic == "double_charge" and "charge_explanation" in selected_topics:
+        if t == "double_charge" and "charge_explanation" in topics:
             selected = [x for x in selected if x["topic"] != "charge_explanation"]
-            selected_topics.discard("charge_explanation")
 
-        if topic == "login_issue" and "payment_failed" in selected_topics:
+        if t == "login_issue" and "payment_failed" in topics:
             if not has_login_cue(user_text):
                 continue
 
-        if topic == "payment_failed" and "login_issue" in selected_topics:
+        if t == "payment_failed" and "login_issue" in topics:
             if not has_payment_cue(user_text):
                 continue
 
-        if topic == "delivery_issue" and "order_status" in selected_topics:
+        if t == "delivery_issue" and "order_status" in topics:
             if not has_delivery_cue(user_text):
                 continue
 
-        if topic == "order_status" and "delivery_issue" in selected_topics:
+        if t == "order_status" and "delivery_issue" in topics:
             if not has_order_cue(user_text):
                 continue
 
         selected.append(intent)
-        selected_topics.add(topic)
+        topics.add(t)
 
         if len(selected) >= max_intents:
             break
@@ -214,35 +212,14 @@ def select_top_intents(ranked_intents, user_text, min_score=1.0, max_intents=2):
 
 
 def topic_label(topic):
-    labels = {
-        "password_reset": "password reset",
-        "login_issue": "login issue",
-        "account_locked": "locked account",
-        "payment_failed": "payment failure",
-        "double_charge": "double charge",
-        "charge_explanation": "charge explanation",
-        "refund_request": "refund request",
-        "billing_question": "billing question",
-        "subscription_cancel": "subscription cancellation",
-        "fraud_report": "fraud report",
-        "order_status": "order status",
-        "delivery_issue": "delivery issue",
-        "general_help": "general support"
-    }
-    return labels.get(topic, topic.replace("_", " "))
+    return topic.replace("_", " ")
 
 
 def get_single_response(intent):
     if intent.get("responses"):
         return random.choice(intent["responses"])
 
-    if intent["action"] == "escalate":
-        return "This issue requires a human support agent. I'm escalating it now."
-
-    if intent["action"] == "clarify":
-        return "Could you share a bit more detail so I can help you better?"
-
-    return "I found your issue, but I don’t have a response ready."
+    return "I can help with that."
 
 
 def sort_intents_by_priority(intents):
@@ -285,7 +262,10 @@ def log_interaction(user_message, intents, response, file_path="chat_log.jsonl")
 def main():
     faq_data = load_faq()
 
-    print("AI Support Agent is running. Type 'exit', 'bye', or 'quit' to quit.\n")
+    # 🔥 build tfidf once
+    vectorizer, matrix, mapping = build_tfidf_index(faq_data)
+
+    print("AI Support Agent is running. Type 'exit' to quit.\n")
 
     while True:
         user = input("You: ").strip()
@@ -294,7 +274,7 @@ def main():
             print("Bot: Goodbye!")
             break
 
-        ranked = detect_intents(user, faq_data)
+        ranked = detect_intents(user, faq_data, vectorizer, matrix, mapping)
         selected = select_top_intents(ranked, user)
         response = generate_response(selected)
 
