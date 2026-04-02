@@ -7,7 +7,8 @@ from datetime import datetime, timezone
 STOPWORDS = {
     "i", "me", "my", "you", "your", "the", "a", "an", "is", "are", "am",
     "to", "for", "of", "and", "or", "in", "on", "at", "it", "this", "that",
-    "be", "can", "cant", "cannot", "do", "did", "was", "were", "with"
+    "be", "can", "cant", "cannot", "do", "did", "was", "were", "with",
+    "working"
 }
 
 
@@ -88,18 +89,128 @@ def detect_intents(user_text, faq_data):
     return results
 
 
-def select_top_intents(ranked_intents, min_score=1.0, max_intents=2):
+def has_any_phrase(user_text, phrases):
+    normalized = preprocess_text(user_text)
+    return any(preprocess_text(p) in normalized for p in phrases)
+
+
+def has_account_locked_cue(user_text):
+    return has_any_phrase(user_text, [
+        "account locked",
+        "locked out",
+        "account blocked",
+        "access denied",
+        "blocked account"
+    ])
+
+
+def has_login_cue(user_text):
+    return has_any_phrase(user_text, [
+        "login",
+        "log in",
+        "sign in",
+        "cant login",
+        "cannot login",
+        "cant log in",
+        "cannot log in",
+        "access account"
+    ])
+
+
+def has_payment_cue(user_text):
+    return has_any_phrase(user_text, [
+        "payment",
+        "card declined",
+        "checkout failed",
+        "transaction failed",
+        "payment failed"
+    ])
+
+
+def has_delivery_cue(user_text):
+    return has_any_phrase(user_text, [
+        "delivery",
+        "late",
+        "shipping",
+        "package",
+        "delayed"
+    ])
+
+
+def has_order_cue(user_text):
+    return has_any_phrase(user_text, [
+        "order",
+        "track order",
+        "where is my order",
+        "order status",
+        "track package"
+    ])
+
+
+def select_top_intents(ranked_intents, user_text, min_score=1.0, max_intents=2):
+    candidates = [i for i in ranked_intents if i["score"] >= min_score]
+
+    if not candidates:
+        return []
+
+    top_score = candidates[0]["score"]
+
+    candidates = [
+        i for i in candidates
+        if i["score"] >= top_score * 0.75
+    ]
+
+    if any(i["topic"] != "general_help" for i in candidates):
+        candidates = [i for i in candidates if i["topic"] != "general_help"]
+
+    # 🔥 FIX اصلی همینجاست
+    # اگر access denied یا lock دیده شد → account_locked را force اضافه کن
+    if has_account_locked_cue(user_text):
+        if not any(i["topic"] == "account_locked" for i in candidates):
+            for intent in ranked_intents:
+                if intent["topic"] == "account_locked":
+                    candidates.append(intent)
+                    break
+
     selected = []
+    selected_topics = set()
 
-    for intent in ranked_intents:
-        if intent["score"] >= min_score:
-            selected.append(intent)
+    for intent in candidates:
+        topic = intent["topic"]
 
-    if selected:
-        top_score = selected[0]["score"]
-        selected = [intent for intent in selected if intent["score"] >= top_score * 0.6]
+        if topic in selected_topics:
+            continue
 
-    return selected[:max_intents]
+        if topic == "charge_explanation" and "double_charge" in selected_topics:
+            continue
+
+        if topic == "double_charge" and "charge_explanation" in selected_topics:
+            selected = [x for x in selected if x["topic"] != "charge_explanation"]
+            selected_topics.discard("charge_explanation")
+
+        if topic == "login_issue" and "payment_failed" in selected_topics:
+            if not has_login_cue(user_text):
+                continue
+
+        if topic == "payment_failed" and "login_issue" in selected_topics:
+            if not has_payment_cue(user_text):
+                continue
+
+        if topic == "delivery_issue" and "order_status" in selected_topics:
+            if not has_delivery_cue(user_text):
+                continue
+
+        if topic == "order_status" and "delivery_issue" in selected_topics:
+            if not has_order_cue(user_text):
+                continue
+
+        selected.append(intent)
+        selected_topics.add(topic)
+
+        if len(selected) >= max_intents:
+            break
+
+    return selected
 
 
 def topic_label(topic):
@@ -109,6 +220,7 @@ def topic_label(topic):
         "account_locked": "locked account",
         "payment_failed": "payment failure",
         "double_charge": "double charge",
+        "charge_explanation": "charge explanation",
         "refund_request": "refund request",
         "billing_question": "billing question",
         "subscription_cancel": "subscription cancellation",
@@ -121,30 +233,14 @@ def topic_label(topic):
 
 
 def get_single_response(intent):
-    topic = intent["topic"]
-    action = intent["action"]
-    responses = intent.get("responses", [])
+    if intent.get("responses"):
+        return random.choice(intent["responses"])
 
-    if action == "escalate":
-        if responses:
-            return random.choice(responses)
+    if intent["action"] == "escalate":
         return "This issue requires a human support agent. I'm escalating it now."
 
-    if action == "clarify":
-        clarify_questions = {
-            "login_issue": "Are you having a password problem, seeing an error message, or is your account locked?",
-            "account_locked": "Did you receive any error message or security alert when trying to sign in?",
-            "billing_question": "Is your question about an invoice, a subscription fee, or an unexpected charge?",
-            "delivery_issue": "Is your package delayed, missing, or marked as delivered but not received?",
-            "general_help": "Is your issue about login, billing, payment, or an order?"
-        }
-        return clarify_questions.get(
-            topic,
-            "Could you give me a bit more detail so I can help you better?"
-        )
-
-    if responses:
-        return random.choice(responses)
+    if intent["action"] == "clarify":
+        return "Could you share a bit more detail so I can help you better?"
 
     return "I found your issue, but I don’t have a response ready."
 
@@ -160,40 +256,25 @@ def generate_response(selected_intents):
     if not selected_intents:
         return "I'm sorry, I didn’t understand. Could you rephrase?"
 
-    ordered_intents = sort_intents_by_priority(selected_intents)
+    ordered = sort_intents_by_priority(selected_intents)
 
-    if len(ordered_intents) == 1:
-        return get_single_response(ordered_intents[0])
+    if len(ordered) == 1:
+        return get_single_response(ordered[0])
 
-    first_intent = ordered_intents[0]
-    second_intent = ordered_intents[1]
+    t1 = topic_label(ordered[0]["topic"])
+    t2 = topic_label(ordered[1]["topic"])
 
-    t1 = topic_label(first_intent["topic"])
-    t2 = topic_label(second_intent["topic"])
+    r1 = get_single_response(ordered[0])
+    r2 = get_single_response(ordered[1])
 
-    response1 = get_single_response(first_intent)
-    response2 = get_single_response(second_intent)
-
-    intro = f"I can help with both your {t1} and {t2}."
-    part1 = f"First, {response1}"
-    part2 = f"Also, {response2}"
-
-    return f"{intro}\n\n{part1}\n\n{part2}"
+    return f"I can help with both your {t1} and {t2}.\n\nFirst, {r1}\n\nAlso, {r2}"
 
 
 def log_interaction(user_message, intents, response, file_path="chat_log.jsonl"):
     log_entry = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "user_message": user_message,
-        "intents": [
-            {
-                "topic": intent["topic"],
-                "score": intent["score"],
-                "action": intent["action"]
-            }
-            for intent in intents
-        ],
-        "primary_intent": intents[0]["topic"] if intents else None,
+        "intents": intents,
         "response": response
     }
 
@@ -214,7 +295,7 @@ def main():
             break
 
         ranked = detect_intents(user, faq_data)
-        selected = select_top_intents(ranked)
+        selected = select_top_intents(ranked, user)
         response = generate_response(selected)
 
         print("Bot:", response)
