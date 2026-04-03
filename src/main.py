@@ -1,3 +1,4 @@
+from src.logger_utils import log_interaction
 from src.preprocessing import preprocess_text
 from src.config import SIMILARITY_THRESHOLD, TOP_K_INTENTS
 import json
@@ -226,18 +227,6 @@ def generate_response(selected_intents):
     r2 = get_single_response(ordered[1])
 
     return f"I can help with both your {t1} and {t2}.\n\nFirst, {r1}\n\nAlso, {r2}"
-
-
-def log_interaction(user_message, intents, response, file_path="chat_log.jsonl"):
-    log_entry = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "user_message": user_message,
-        "intents": intents,
-        "response": response
-    }
-
-    with open(file_path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
 
 def main():
