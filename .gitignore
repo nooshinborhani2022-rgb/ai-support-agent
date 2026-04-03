@@ -1,3 +1,4 @@
 chat_log.jsonl
 chat_log.txt
-git rm -r --cached __pycache__
+__pycache__/
+*.pyc
