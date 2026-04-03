@@ -1,19 +1,11 @@
+from src.preprocessing import preprocess_text
 from src.config import SIMILARITY_THRESHOLD, TOP_K_INTENTS
 import json
 import random
-import string
 from datetime import datetime, timezone
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
-
-STOPWORDS = {
-    "i", "me", "my", "you", "your", "the", "a", "an", "is", "are", "am",
-    "to", "for", "of", "and", "or", "in", "on", "at", "it", "this", "that",
-    "be", "can", "cant", "cannot", "do", "did", "was", "were", "with",
-    "working"
-}
 
 
 ACTION_PRIORITY = {
@@ -28,19 +20,10 @@ def load_faq(file_path="faq.json"):
         return json.load(f)
 
 
-def preprocess_text(text):
-    text = text.lower()
-    text = text.translate(str.maketrans("", "", string.punctuation))
-    words = text.split()
-    words = [w for w in words if w not in STOPWORDS]
-    return " ".join(words)
-
-
 def tokenize(text):
     return preprocess_text(text).split()
 
 
-# 🔥 TF-IDF SETUP
 def build_tfidf_index(faq_data):
     corpus = []
     mapping = []
@@ -99,7 +82,6 @@ def detect_intents(user_text, faq_data, vectorizer, matrix, mapping):
         tfidf_score = tfidf_scores.get(topic, 0)
         keyword_score = compute_keyword_score(user_text, item.get("keywords", []))
 
-        # 🔥 hybrid score
         total_score = (tfidf_score * 2) + (keyword_score * 0.5)
 
         if total_score > 0:
@@ -114,7 +96,6 @@ def detect_intents(user_text, faq_data, vectorizer, matrix, mapping):
     return results
 
 
-# 🔧 helper cues (همه قبلی حفظ شده)
 def has_any_phrase(user_text, phrases):
     normalized = preprocess_text(user_text)
     return any(preprocess_text(p) in normalized for p in phrases)
@@ -164,7 +145,6 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
     if any(i["topic"] != "general_help" for i in candidates):
         candidates = [i for i in candidates if i["topic"] != "general_help"]
 
-    # 🔥 fix account_locked
     if has_account_locked_cue(user_text):
         if not any(i["topic"] == "account_locked" for i in candidates):
             for intent in ranked_intents:
@@ -263,7 +243,6 @@ def log_interaction(user_message, intents, response, file_path="chat_log.jsonl")
 def main():
     faq_data = load_faq()
 
-    # 🔥 build tfidf once
     vectorizer, matrix, mapping = build_tfidf_index(faq_data)
 
     print("AI Support Agent is running. Type 'exit' to quit.\n")
