@@ -1,9 +1,10 @@
+from src.main import build_tfidf_index
 import json
 import subprocess
 import sys
 from pathlib import Path
 
-from main import load_faq, detect_intents, select_top_intents, generate_response
+from src.main import load_faq, detect_intents, select_top_intents, generate_response
 
 
 LOG_FILE = "chat_log.jsonl"
@@ -113,6 +114,7 @@ def normalize_predicted(selected):
 
 def run_tests():
     faq_data = load_faq()
+    vectorizer, matrix, mapping = build_tfidf_index(faq_data)
     clear_log()
 
     passed = 0
@@ -124,7 +126,7 @@ def run_tests():
         user_text = case["input"]
         expected = normalize_expected(case["expected"])
 
-        ranked = detect_intents(user_text, faq_data)
+        ranked = detect_intents(user_text, faq_data, vectorizer, matrix, mapping)
         selected = select_top_intents(ranked, user_text)
         response = generate_response(selected)
 
