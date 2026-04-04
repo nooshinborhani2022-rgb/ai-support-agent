@@ -1,3 +1,18 @@
+# Contraction mapping
+CONTRACTIONS = {
+    "can't": "cannot",
+    "won't": "will not",
+    "don't": "do not",
+    "doesn't": "does not",
+    "didn't": "did not",
+    "i'm": "i am",
+    "it's": "it is",
+    "you're": "you are",
+    "i've": "i have",
+    "we're": "we are",
+    "they're": "they are",
+}
+
 import re
 
 
