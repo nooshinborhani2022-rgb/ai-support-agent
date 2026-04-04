@@ -78,6 +78,11 @@ TEST_CASES = [
     {"input": "I was charged twice and I want a refund", "expected": ["double_charge", "refund_request"]},
     {"input": "access denied and I can't log in", "expected": ["account_locked", "login_issue"]},
     {"input": "my delivery is late and where is my order", "expected": ["order_status", "delivery_issue"]},
+    
+    # contraction test cases
+    {"input": "I can't log in", "expected": ["login_issue"]},
+    {"input": "I'm being charged twice", "expected": ["double_charge"]},
+    {"input": "I need help", "expected": ["general_help"]},
 ]
 
 
