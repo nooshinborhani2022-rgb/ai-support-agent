@@ -1,4 +1,6 @@
-# Contraction mapping
+import re
+
+
 CONTRACTIONS = {
     "can't": "cannot",
     "won't": "will not",
@@ -13,8 +15,6 @@ CONTRACTIONS = {
     "they're": "they are",
 }
 
-import re
-
 
 STOPWORDS = {
     "i", "me", "my", "you", "your", "the", "a", "an", "is", "are", "am",
@@ -22,6 +22,15 @@ STOPWORDS = {
     "be", "can", "cant", "cannot", "do", "did", "was", "were", "with",
     "working"
 }
+
+
+def expand_contractions(text):
+    text = text.lower()
+
+    for contraction, expanded in CONTRACTIONS.items():
+        text = text.replace(contraction, expanded)
+
+    return text
 
 
 def preprocess_text(text):
