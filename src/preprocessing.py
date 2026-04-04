@@ -34,7 +34,7 @@ def expand_contractions(text):
 
 
 def preprocess_text(text):
-    text = text.lower()
+    text = expand_contractions(text)
     text = re.sub(r"[^\w\s]", "", text)
     words = text.split()
     words = [w for w in words if w not in STOPWORDS]
