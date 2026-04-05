@@ -15,6 +15,18 @@ ACTION_PRIORITY = {
 }
 
 
+DEFAULT_GENERAL_HELP_INTENT = {
+    "topic": "general_help",
+    "score": 1.0,
+    "action": "clarify",
+    "responses": [
+        "I can help. Is your issue about login, billing, payment, or an order?",
+        "Please share a bit more detail so I can guide you to the right support.",
+        "What kind of issue are you facing?"
+    ]
+}
+
+
 def load_faq(file_path="faq.json"):
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -143,25 +155,66 @@ def has_order_cue(user_text):
     ])
 
 
-# 🔥 NEW: vague query detection
-def is_vague_query(user_text):
-    tokens = set(tokenize(user_text))
+def has_strong_domain_cue(user_text):
+    return any([
+        has_login_cue(user_text),
+        has_payment_cue(user_text),
+        has_billing_cue(user_text),
+        has_refund_cue(user_text),
+        has_delivery_cue(user_text),
+        has_order_cue(user_text),
+        has_account_locked_cue(user_text),
+    ])
 
-    vague_words = {
-        "issue",
-        "problem",
+
+def is_vague_query(user_text):
+    original = user_text.lower().strip()
+    normalized = preprocess_text(user_text)
+
+    vague_exact_inputs = {
         "help",
-        "working",
-        "wrong",
+        "help me",
+        "i need help",
+        "problem",
+        "i have a problem",
+        "issue",
+        "i have an issue",
+        "i have issue",
+        "something is wrong",
+        "something wrong",
+        "it's not working",
+        "its not working",
+        "not working",
     }
 
-    if tokens and tokens.issubset(vague_words):
+    vague_phrases = [
+        "need help",
+        "have a problem",
+        "have an issue",
+        "something is wrong",
+        "something wrong",
+        "not working",
+    ]
+
+    if has_strong_domain_cue(user_text):
+        return False
+
+    if original in vague_exact_inputs:
+        return True
+
+    if any(phrase in original for phrase in vague_phrases):
+        return True
+
+    if normalized in {"help", "problem", "issue", "wrong", "not"}:
         return True
 
     return False
 
 
 def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
+    if is_vague_query(user_text):
+        return [DEFAULT_GENERAL_HELP_INTENT]
+
     if not ranked_intents:
         return []
 
