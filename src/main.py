@@ -125,6 +125,12 @@ def has_billing_cue(user_text):
     ])
 
 
+def has_refund_cue(user_text):
+    return has_any_phrase(user_text, [
+        "refund", "money back", "return my money", "get my money back"
+    ])
+
+
 def has_delivery_cue(user_text):
     return has_any_phrase(user_text, [
         "delivery", "late", "shipping", "package", "delayed"
