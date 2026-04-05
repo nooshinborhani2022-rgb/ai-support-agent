@@ -1,9 +1,8 @@
-from src.logger_utils import log_interaction
 from src.preprocessing import preprocess_text
 from src.config import SIMILARITY_THRESHOLD, TOP_K_INTENTS
+from src.logger_utils import log_interaction
 import json
 import random
-from datetime import datetime, timezone
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -117,6 +116,12 @@ def has_login_cue(user_text):
 def has_payment_cue(user_text):
     return has_any_phrase(user_text, [
         "payment", "card declined", "checkout failed", "transaction failed"
+    ])
+
+
+def has_billing_cue(user_text):
+    return has_any_phrase(user_text, [
+        "billing", "bill", "charged", "charge", "payment", "invoice"
     ])
 
 
