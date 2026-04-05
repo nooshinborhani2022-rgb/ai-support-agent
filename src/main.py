@@ -94,7 +94,11 @@ def detect_intents(user_text, faq_data, vectorizer, matrix, mapping):
         tfidf_score = tfidf_scores.get(topic, 0)
         keyword_score = compute_keyword_score(user_text, item.get("keywords", []))
 
-        total_score = (tfidf_score * 2) + (keyword_score * 0.5)
+        # safer scoring: نزدیک به نسخه قبلی، فقط کمی keyword را هوشمندتر می‌کند
+        total_score = (tfidf_score * 2.0) + (keyword_score * 0.5)
+
+        if keyword_score >= 2:
+            total_score += 0.2
 
         if total_score > 0:
             results.append({
