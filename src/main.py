@@ -143,6 +143,24 @@ def has_order_cue(user_text):
     ])
 
 
+# 🔥 NEW: vague query detection
+def is_vague_query(user_text):
+    tokens = set(tokenize(user_text))
+
+    vague_words = {
+        "issue",
+        "problem",
+        "help",
+        "working",
+        "wrong",
+    }
+
+    if tokens and tokens.issubset(vague_words):
+        return True
+
+    return False
+
+
 def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
     if not ranked_intents:
         return []
