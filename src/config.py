@@ -15,6 +15,16 @@ ACTION_PRIORITY = {
 
 # Multi-intent settings
 ENABLE_MULTI_INTENT = True
+SECOND_INTENT_RATIO = 0.75
+
+# Ambiguity handling
+REQUIRE_STRONG_CUE_FOR_SECOND_INTENT = True
+GENERIC_AMBIGUOUS_WORDS = {
+    "issue",
+    "problem",
+    "help",
+    "working",
+}
 
 # Logging settings
 LOG_FILE = "chat_log.jsonl"
