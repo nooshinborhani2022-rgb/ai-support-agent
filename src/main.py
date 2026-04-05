@@ -94,7 +94,6 @@ def detect_intents(user_text, faq_data, vectorizer, matrix, mapping):
         tfidf_score = tfidf_scores.get(topic, 0)
         keyword_score = compute_keyword_score(user_text, item.get("keywords", []))
 
-        # safer scoring: نزدیک به نسخه قبلی، فقط کمی keyword را هوشمندتر می‌کند
         total_score = (tfidf_score * 2.0) + (keyword_score * 0.5)
 
         if keyword_score >= 2:
@@ -260,6 +259,14 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
 
         if t == "payment_failed" and "login_issue" in topics:
             if not has_payment_cue(user_text):
+                continue
+
+        if t == "billing_question" and "refund_request" in topics:
+            if not has_billing_cue(user_text):
+                continue
+
+        if t == "refund_request" and "billing_question" in topics:
+            if not has_refund_cue(user_text):
                 continue
 
         if t == "delivery_issue" and "order_status" in topics:
