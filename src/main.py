@@ -326,7 +326,6 @@ def generate_response(selected_intents):
 
 def main():
     faq_data = load_faq()
-
     vectorizer, matrix, mapping = build_tfidf_index(faq_data)
 
     print("AI Support Agent is running. Type 'exit' to quit.\n")
@@ -338,20 +337,26 @@ def main():
             print("Bot: Goodbye!")
             break
 
-        # NEW: sentiment detection
         sentiment = detect_sentiment(user)
 
         ranked = detect_intents(user, faq_data, vectorizer, matrix, mapping)
         selected = select_top_intents(ranked, user)
         response = generate_response(selected)
 
-        # NEW: apply tone
         prefix = get_sentiment_prefix(sentiment["label"])
         final_response = prefix + response
 
         print("Bot:", final_response)
 
-        log_interaction(user, selected, final_response, sentiment)
+        primary_intent = selected[0]["topic"] if selected else None
+
+        log_interaction(
+            user,
+            selected,
+            final_response,
+            sentiment,
+            primary_intent
+        )
 
 
 if __name__ == "__main__":
