@@ -96,6 +96,14 @@ def detect_sentiment(user_text):
     }
 
 
+# NEW: helper function
+def get_sentiment_label(user_text):
+    """
+    Returns only the sentiment label (simple interface).
+    """
+    return detect_sentiment(user_text)["label"]
+
+
 def get_sentiment_prefix(sentiment_label):
     prefixes = {
         "neutral": "",
