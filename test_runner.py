@@ -75,7 +75,7 @@ TEST_CASES = [
     {"input": "I need billing help", "expected": ["billing_question"]},
     {"input": "I want a refund", "expected": ["refund_request"]},
 
-    # NEW: regression test for urgent multi-intent
+    # regression test for urgent multi-intent
     {"input": "I need help ASAP, I can't log in and my payment failed", "expected": ["login_issue", "payment_failed"]},
 ]
 
@@ -84,6 +84,7 @@ SENTIMENT_TEST_CASES = [
     {"input": "where is my order", "expected": "neutral"},
     {"input": "this is not working", "expected": "frustrated"},
     {"input": "this is terrible!", "expected": "angry"},
+    {"input": "I am very angry!!!", "expected": "angry"},
     {"input": "I need help ASAP", "expected": "urgent"},
 ]
 
