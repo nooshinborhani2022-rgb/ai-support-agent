@@ -1,7 +1,7 @@
 from src.preprocessing import preprocess_text
 from src.config import SIMILARITY_THRESHOLD, TOP_K_INTENTS
 from src.logger_utils import log_interaction
-from src.sentiment import detect_sentiment, get_sentiment_prefix
+from src.sentiment import detect_sentiment, get_sentiment_prefix, get_sentiment_label
 
 import json
 import random
@@ -26,6 +26,14 @@ DEFAULT_GENERAL_HELP_INTENT = {
         "Please share a bit more detail so I can guide you to the right support.",
         "What kind of issue are you facing?"
     ]
+}
+
+
+URGENT_PRIORITY_TOPICS = {
+    "account_locked",
+    "login_issue",
+    "payment_failed",
+    "fraud_report",
 }
 
 
@@ -84,7 +92,25 @@ def compute_keyword_score(user_text, keywords):
     return score
 
 
-def detect_intents(user_text, faq_data, vectorizer, matrix, mapping):
+def apply_sentiment_score_boost(results, sentiment_label):
+    if sentiment_label != "urgent":
+        return results
+
+    boosted_results = []
+
+    for item in results:
+        updated_item = item.copy()
+
+        if updated_item["topic"] in URGENT_PRIORITY_TOPICS:
+            updated_item["score"] = round(updated_item["score"] + 0.3, 3)
+
+        boosted_results.append(updated_item)
+
+    boosted_results.sort(key=lambda x: x["score"], reverse=True)
+    return boosted_results
+
+
+def detect_intents(user_text, faq_data, vectorizer, matrix, mapping, sentiment_label=None):
     results = []
 
     tfidf_scores = compute_tfidf_score(user_text, vectorizer, matrix, mapping, faq_data)
@@ -110,7 +136,7 @@ def detect_intents(user_text, faq_data, vectorizer, matrix, mapping):
             })
 
     results.sort(key=lambda x: x["score"], reverse=True)
-    return results
+    return apply_sentiment_score_boost(results, sentiment_label)
 
 
 def has_any_phrase(user_text, phrases):
@@ -338,8 +364,16 @@ def main():
             break
 
         sentiment = detect_sentiment(user)
+        sentiment_label = get_sentiment_label(user)
 
-        ranked = detect_intents(user, faq_data, vectorizer, matrix, mapping)
+        ranked = detect_intents(
+            user,
+            faq_data,
+            vectorizer,
+            matrix,
+            mapping,
+            sentiment_label=sentiment_label
+        )
         selected = select_top_intents(ranked, user)
         response = generate_response(selected)
 
