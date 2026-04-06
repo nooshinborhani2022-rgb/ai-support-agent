@@ -19,6 +19,7 @@ def analyze_logs(logs):
     total_messages = len(logs)
     primary_intents = Counter()
     actions = Counter()
+    sentiment_counts = Counter()
     fallback_count = 0
 
     fallback_queries = []
@@ -29,6 +30,7 @@ def analyze_logs(logs):
         response = log.get("response", "")
         intents = log.get("intents", [])
         user_message = log.get("user_message", "")
+        sentiment = log.get("sentiment", {})
 
         if primary_intent:
             primary_intents[primary_intent] += 1
@@ -37,6 +39,10 @@ def analyze_logs(logs):
             action = intent.get("action")
             if action:
                 actions[action] += 1
+
+        sentiment_label = sentiment.get("label")
+        if sentiment_label:
+            sentiment_counts[sentiment_label] += 1
 
         if "I didn’t understand" in response or "Could you rephrase" in response:
             fallback_count += 1
@@ -56,6 +62,10 @@ def analyze_logs(logs):
     print("\nAction counts:")
     for action, count in actions.most_common():
         print(f"- {action}: {count}")
+
+    print("\nSentiment distribution:")
+    for label, count in sentiment_counts.most_common():
+        print(f"- {label}: {count}")
 
     print("\nFallback queries:")
     for q in fallback_queries[:10]:
