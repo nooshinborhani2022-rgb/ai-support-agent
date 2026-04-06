@@ -51,9 +51,23 @@ SENTIMENT_KEYWORDS = {
 }
 
 
+SENTIMENT_PRIORITY = [
+    "urgent",
+    "angry",
+    "frustrated",
+]
+
+
 def normalize_for_sentiment(text):
     text = expand_contractions(text.lower())
     return " ".join(text.split())
+
+
+def choose_sentiment_label(scores):
+    for label in SENTIMENT_PRIORITY:
+        if scores[label] > 0:
+            return label
+    return "neutral"
 
 
 def detect_sentiment(user_text):
@@ -80,14 +94,7 @@ def detect_sentiment(user_text):
     if "!" in user_text:
         scores["angry"] += 1
 
-    if scores["urgent"] > 0:
-        sentiment = "urgent"
-    elif scores["angry"] > 0:
-        sentiment = "angry"
-    elif scores["frustrated"] > 0:
-        sentiment = "frustrated"
-    else:
-        sentiment = "neutral"
+    sentiment = choose_sentiment_label(scores)
 
     return {
         "label": sentiment,
@@ -96,7 +103,6 @@ def detect_sentiment(user_text):
     }
 
 
-# NEW: helper function
 def get_sentiment_label(user_text):
     """
     Returns only the sentiment label (simple interface).
