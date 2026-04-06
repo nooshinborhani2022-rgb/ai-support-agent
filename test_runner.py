@@ -74,6 +74,9 @@ TEST_CASES = [
     {"input": "it's not working", "expected": ["general_help"]},
     {"input": "I need billing help", "expected": ["billing_question"]},
     {"input": "I want a refund", "expected": ["refund_request"]},
+
+    # NEW: regression test for urgent multi-intent
+    {"input": "I need help ASAP, I can't log in and my payment failed", "expected": ["login_issue", "payment_failed"]},
 ]
 
 
@@ -105,11 +108,20 @@ def run_intent_tests():
         user_text = test["input"]
         expected = sorted(test["expected"])
 
-        ranked = detect_intents(user_text, faq_data, vectorizer, matrix, mapping)
+        sentiment = detect_sentiment(user_text)
+        sentiment_label = sentiment["label"]
+
+        ranked = detect_intents(
+            user_text,
+            faq_data,
+            vectorizer,
+            matrix,
+            mapping,
+            sentiment_label=sentiment_label
+        )
         selected = select_top_intents(ranked, user_text)
         predicted = sorted([intent["topic"] for intent in selected])
         response = generate_response(selected)
-        sentiment = detect_sentiment(user_text)
 
         success = predicted == expected
 
