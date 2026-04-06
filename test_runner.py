@@ -109,6 +109,7 @@ def run_intent_tests():
         selected = select_top_intents(ranked, user_text)
         predicted = sorted([intent["topic"] for intent in selected])
         response = generate_response(selected)
+        sentiment = detect_sentiment(user_text)
 
         success = predicted == expected
 
@@ -123,6 +124,7 @@ def run_intent_tests():
         print(f"Input:     {user_text}")
         print(f"Expected:  {expected}")
         print(f"Predicted: {predicted}")
+        print(f"Sentiment: {sentiment['label']}")
         print(f"Response:  {response}\n")
 
         logs.append({
@@ -130,6 +132,7 @@ def run_intent_tests():
             "intents": selected,
             "response": response,
             "primary_intent": selected[0]["topic"] if selected else None,
+            "sentiment": sentiment,
         })
 
     total = passed + failed
