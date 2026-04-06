@@ -99,9 +99,9 @@ def detect_sentiment(user_text):
 def get_sentiment_prefix(sentiment_label):
     prefixes = {
         "neutral": "",
-        "frustrated": "I understand this is frustrating. ",
-        "angry": "I'm sorry you're dealing with this. ",
-        "urgent": "I understand this is urgent. ",
+        "frustrated": "I understand how frustrating this must be. ",
+        "angry": "I'm sorry you're dealing with this experience. ",
+        "urgent": "I understand this is urgent, and I'll help as quickly as possible. ",
     }
 
     return prefixes.get(sentiment_label, "")
