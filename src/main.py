@@ -1,6 +1,8 @@
 from src.preprocessing import preprocess_text
 from src.config import SIMILARITY_THRESHOLD, TOP_K_INTENTS
 from src.logger_utils import log_interaction
+from src.sentiment import detect_sentiment, get_sentiment_prefix
+
 import json
 import random
 
@@ -336,12 +338,20 @@ def main():
             print("Bot: Goodbye!")
             break
 
+        # NEW: sentiment detection
+        sentiment = detect_sentiment(user)
+
         ranked = detect_intents(user, faq_data, vectorizer, matrix, mapping)
         selected = select_top_intents(ranked, user)
         response = generate_response(selected)
 
-        print("Bot:", response)
-        log_interaction(user, selected, response)
+        # NEW: apply tone
+        prefix = get_sentiment_prefix(sentiment["label"])
+        final_response = prefix + response
+
+        print("Bot:", final_response)
+
+        log_interaction(user, selected, final_response)
 
 
 if __name__ == "__main__":
