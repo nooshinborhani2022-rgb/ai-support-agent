@@ -351,7 +351,7 @@ def main():
 
         print("Bot:", final_response)
 
-        log_interaction(user, selected, final_response)
+        log_interaction(user, selected, final_response, sentiment)
 
 
 if __name__ == "__main__":
