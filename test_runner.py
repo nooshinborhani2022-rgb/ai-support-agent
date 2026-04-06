@@ -5,6 +5,8 @@ from src.main import (
     select_top_intents,
     generate_response,
 )
+from src.sentiment import detect_sentiment
+
 import json
 import subprocess
 
@@ -75,13 +77,21 @@ TEST_CASES = [
 ]
 
 
+SENTIMENT_TEST_CASES = [
+    {"input": "where is my order", "expected": "neutral"},
+    {"input": "this is not working", "expected": "frustrated"},
+    {"input": "this is terrible!", "expected": "angry"},
+    {"input": "I need help ASAP", "expected": "urgent"},
+]
+
+
 def save_test_logs(logs, file_path="chat_log.jsonl"):
     with open(file_path, "w", encoding="utf-8") as f:
         for entry in logs:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
-def run_tests():
+def run_intent_tests():
     faq_data = load_faq()
     vectorizer, matrix, mapping = build_tfidf_index(faq_data)
 
@@ -89,7 +99,7 @@ def run_tests():
     failed = 0
     logs = []
 
-    print("\nRunning full validation suite...\n")
+    print("\nRunning intent validation suite...\n")
 
     for idx, test in enumerate(TEST_CASES, start=1):
         user_text = test["input"]
@@ -118,25 +128,73 @@ def run_tests():
         logs.append({
             "user_message": user_text,
             "intents": selected,
-            "response": response
+            "response": response,
+            "primary_intent": selected[0]["topic"] if selected else None,
         })
 
     total = passed + failed
     accuracy = (passed / total) * 100 if total > 0 else 0
 
     print("=" * 60)
-    print(f"Passed:   {passed}")
-    print(f"Failed:   {failed}")
-    print(f"Accuracy: {accuracy:.2f}%")
+    print(f"Intent Tests Passed:   {passed}")
+    print(f"Intent Tests Failed:   {failed}")
+    print(f"Intent Accuracy:       {accuracy:.2f}%")
     print("=" * 60)
 
     save_test_logs(logs)
     print("\nSaved test interactions to chat_log.jsonl\n")
 
-    print("Running analyze_logs.py...\n")
+    return failed == 0
+
+
+def run_sentiment_tests():
+    passed = 0
+    failed = 0
+
+    print("\nRunning sentiment validation suite...\n")
+
+    for idx, test in enumerate(SENTIMENT_TEST_CASES, start=1):
+        user_text = test["input"]
+        expected = test["expected"]
+
+        result = detect_sentiment(user_text)
+        predicted = result["label"]
+
+        success = predicted == expected
+
+        if success:
+            passed += 1
+            status = "PASS"
+        else:
+            failed += 1
+            status = "FAIL"
+
+        print(f"S{idx:02d}. {status}")
+        print(f"Input:     {user_text}")
+        print(f"Expected:  {expected}")
+        print(f"Predicted: {predicted}")
+        print(f"Details:   {result}\n")
+
+    total = passed + failed
+    accuracy = (passed / total) * 100 if total > 0 else 0
+
+    print("=" * 60)
+    print(f"Sentiment Tests Passed:   {passed}")
+    print(f"Sentiment Tests Failed:   {failed}")
+    print(f"Sentiment Accuracy:       {accuracy:.2f}%")
+    print("=" * 60)
+
+    return failed == 0
+
+
+def run_tests():
+    intent_ok = run_intent_tests()
+    sentiment_ok = run_sentiment_tests()
+
+    print("\nRunning analyze_logs.py...\n")
     subprocess.run(["python", "analyze_logs.py"])
 
-    if failed == 0:
+    if intent_ok and sentiment_ok:
         print("\nAll tests passed.")
     else:
         print("\nSome tests failed. Review the failed cases above.")
