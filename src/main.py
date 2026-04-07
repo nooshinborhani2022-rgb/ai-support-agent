@@ -432,11 +432,12 @@ def main():
         prefix = get_sentiment_prefix(sentiment["label"])
         final_response = prefix + response
 
-        print(f"Detected sentiment: {sentiment_label}")
-        print("Bot:", final_response)
-
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
+
+        print(f"Detected sentiment: {sentiment_label}")
+        print(f"Final action: {final_action}")
+        print("Bot:", final_response)
 
         log_interaction(
             user,
