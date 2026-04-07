@@ -380,10 +380,24 @@ def get_confidence(selected_intents):
     return selected_intents[0]["score"]
 
 
-def apply_low_confidence_fallback(selected_intents, confidence):
-    if confidence >= LOW_CONFIDENCE_THRESHOLD:
-        return selected_intents
-    return [DEFAULT_GENERAL_HELP_INTENT]
+def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_label):
+    if confidence < LOW_CONFIDENCE_THRESHOLD:
+        return [DEFAULT_GENERAL_HELP_INTENT]
+
+    updated_intents = []
+
+    for intent in selected_intents:
+        updated_intent = intent.copy()
+
+        if sentiment_label == "angry" and confidence < 0.7:
+            updated_intent["action"] = "escalate"
+
+        if sentiment_label == "frustrated" and confidence < 0.6:
+            updated_intent["action"] = "clarify"
+
+        updated_intents.append(updated_intent)
+
+    return updated_intents
 
 
 def generate_response(selected_intents, sentiment_label=None):
@@ -443,7 +457,11 @@ def main():
             selected = apply_sentiment_routing(selected, sentiment_label)
 
         confidence = get_confidence(selected)
-        selected = apply_low_confidence_fallback(selected, confidence)
+        selected = apply_confidence_sentiment_rules(
+            selected,
+            confidence,
+            sentiment_label
+        )
 
         response = generate_response(selected, sentiment_label=sentiment_label)
 
