@@ -338,19 +338,20 @@ def sort_intents_by_priority(intents):
 
 def apply_sentiment_routing(selected_intents, sentiment_label):
     """
-    Simple sentiment-aware routing rule:
+    Sentiment-aware routing rules:
     - urgent + clarify -> answer
+    - angry + answer -> escalate
     """
-    if sentiment_label != "urgent":
-        return selected_intents
-
     updated_intents = []
 
     for intent in selected_intents:
         updated_intent = intent.copy()
 
-        if updated_intent["action"] == "clarify":
+        if sentiment_label == "urgent" and updated_intent["action"] == "clarify":
             updated_intent["action"] = "answer"
+
+        if sentiment_label == "angry" and updated_intent["action"] == "answer":
+            updated_intent["action"] = "escalate"
 
         updated_intents.append(updated_intent)
 
