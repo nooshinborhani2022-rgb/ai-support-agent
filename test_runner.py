@@ -4,6 +4,8 @@ from src.main import (
     detect_intents,
     select_top_intents,
     generate_response,
+    apply_sentiment_routing,
+    get_final_action,
 )
 from src.sentiment import detect_sentiment
 
@@ -89,6 +91,25 @@ SENTIMENT_TEST_CASES = [
 ]
 
 
+ROUTING_TEST_CASES = [
+    {
+        "input": "I need help ASAP",
+        "expected_sentiment": "urgent",
+        "expected_final_action": "answer",
+    },
+    {
+        "input": "this is terrible, my payment failed",
+        "expected_sentiment": "angry",
+        "expected_final_action": "escalate",
+    },
+    {
+        "input": "it's not working",
+        "expected_sentiment": "frustrated",
+        "expected_final_action": "answer",
+    },
+]
+
+
 def save_test_logs(logs, file_path="chat_log.jsonl"):
     with open(file_path, "w", encoding="utf-8") as f:
         for entry in logs:
@@ -121,8 +142,11 @@ def run_intent_tests():
             sentiment_label=sentiment_label
         )
         selected = select_top_intents(ranked, user_text)
+        selected = apply_sentiment_routing(selected, sentiment_label)
+
         predicted = sorted([intent["topic"] for intent in selected])
-        response = generate_response(selected)
+        response = generate_response(selected, sentiment_label=sentiment_label)
+        final_action = get_final_action(selected)
 
         success = predicted == expected
 
@@ -134,11 +158,12 @@ def run_intent_tests():
             status = "FAIL"
 
         print(f"{idx:02d}. {status}")
-        print(f"Input:     {user_text}")
-        print(f"Expected:  {expected}")
-        print(f"Predicted: {predicted}")
-        print(f"Sentiment: {sentiment['label']}")
-        print(f"Response:  {response}\n")
+        print(f"Input:        {user_text}")
+        print(f"Expected:     {expected}")
+        print(f"Predicted:    {predicted}")
+        print(f"Sentiment:    {sentiment_label}")
+        print(f"Final action: {final_action}")
+        print(f"Response:     {response}\n")
 
         logs.append({
             "user_message": user_text,
@@ -146,6 +171,7 @@ def run_intent_tests():
             "response": response,
             "primary_intent": selected[0]["topic"] if selected else None,
             "sentiment": sentiment,
+            "final_action": final_action,
         })
 
     total = passed + failed
@@ -203,14 +229,76 @@ def run_sentiment_tests():
     return failed == 0
 
 
+def run_routing_tests():
+    faq_data = load_faq()
+    vectorizer, matrix, mapping = build_tfidf_index(faq_data)
+
+    passed = 0
+    failed = 0
+
+    print("\nRunning routing validation suite...\n")
+
+    for idx, test in enumerate(ROUTING_TEST_CASES, start=1):
+        user_text = test["input"]
+        expected_sentiment = test["expected_sentiment"]
+        expected_final_action = test["expected_final_action"]
+
+        sentiment = detect_sentiment(user_text)
+        sentiment_label = sentiment["label"]
+
+        ranked = detect_intents(
+            user_text,
+            faq_data,
+            vectorizer,
+            matrix,
+            mapping,
+            sentiment_label=sentiment_label
+        )
+        selected = select_top_intents(ranked, user_text)
+        selected = apply_sentiment_routing(selected, sentiment_label)
+
+        final_action = get_final_action(selected)
+
+        success = (
+            sentiment_label == expected_sentiment
+            and final_action == expected_final_action
+        )
+
+        if success:
+            passed += 1
+            status = "PASS"
+        else:
+            failed += 1
+            status = "FAIL"
+
+        print(f"R{idx:02d}. {status}")
+        print(f"Input:                {user_text}")
+        print(f"Expected sentiment:   {expected_sentiment}")
+        print(f"Predicted sentiment:  {sentiment_label}")
+        print(f"Expected action:      {expected_final_action}")
+        print(f"Predicted action:     {final_action}\n")
+
+    total = passed + failed
+    accuracy = (passed / total) * 100 if total > 0 else 0
+
+    print("=" * 60)
+    print(f"Routing Tests Passed:   {passed}")
+    print(f"Routing Tests Failed:   {failed}")
+    print(f"Routing Accuracy:       {accuracy:.2f}%")
+    print("=" * 60)
+
+    return failed == 0
+
+
 def run_tests():
     intent_ok = run_intent_tests()
     sentiment_ok = run_sentiment_tests()
+    routing_ok = run_routing_tests()
 
     print("\nRunning analyze_logs.py...\n")
     subprocess.run(["python", "analyze_logs.py"])
 
-    if intent_ok and sentiment_ok:
+    if intent_ok and sentiment_ok and routing_ok:
         print("\nAll tests passed.")
     else:
         print("\nSome tests failed. Review the failed cases above.")
