@@ -341,6 +341,7 @@ def apply_sentiment_routing(selected_intents, sentiment_label):
     Sentiment-aware routing rules:
     - urgent + clarify -> answer
     - angry + answer -> escalate
+    - frustrated + clarify -> answer
     """
     updated_intents = []
 
@@ -352,6 +353,9 @@ def apply_sentiment_routing(selected_intents, sentiment_label):
 
         if sentiment_label == "angry" and updated_intent["action"] == "answer":
             updated_intent["action"] = "escalate"
+
+        if sentiment_label == "frustrated" and updated_intent["action"] == "clarify":
+            updated_intent["action"] = "answer"
 
         updated_intents.append(updated_intent)
 
