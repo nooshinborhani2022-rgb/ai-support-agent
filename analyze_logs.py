@@ -19,6 +19,7 @@ def analyze_logs(logs):
     total_messages = len(logs)
     primary_intents = Counter()
     actions = Counter()
+    final_actions = Counter()
     sentiment_counts = Counter()
     fallback_count = 0
 
@@ -31,6 +32,7 @@ def analyze_logs(logs):
         intents = log.get("intents", [])
         user_message = log.get("user_message", "")
         sentiment = log.get("sentiment", {})
+        final_action = log.get("final_action")
 
         if primary_intent:
             primary_intents[primary_intent] += 1
@@ -39,6 +41,9 @@ def analyze_logs(logs):
             action = intent.get("action")
             if action:
                 actions[action] += 1
+
+        if final_action:
+            final_actions[final_action] += 1
 
         sentiment_label = sentiment.get("label")
         if sentiment_label:
@@ -59,8 +64,12 @@ def analyze_logs(logs):
     for intent, count in primary_intents.most_common():
         print(f"- {intent}: {count}")
 
-    print("\nAction counts:")
+    print("\nAction counts (per intent):")
     for action, count in actions.most_common():
+        print(f"- {action}: {count}")
+
+    print("\nFinal action distribution:")
+    for action, count in final_actions.most_common():
         print(f"- {action}: {count}")
 
     print("\nSentiment distribution:")
