@@ -357,6 +357,14 @@ def apply_sentiment_routing(selected_intents, sentiment_label):
     return updated_intents
 
 
+def get_final_action(selected_intents):
+    if not selected_intents:
+        return None
+
+    ordered = sort_intents_by_priority(selected_intents)
+    return ordered[0]["action"]
+
+
 def generate_response(selected_intents, sentiment_label=None):
     if not selected_intents:
         return "I'm sorry, I didn’t understand. Could you rephrase?"
@@ -416,13 +424,15 @@ def main():
         print("Bot:", final_response)
 
         primary_intent = selected[0]["topic"] if selected else None
+        final_action = get_final_action(selected)
 
         log_interaction(
             user,
             selected,
             final_response,
             sentiment,
-            primary_intent
+            primary_intent,
+            final_action
         )
 
 
