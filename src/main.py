@@ -325,6 +325,10 @@ def get_single_response(intent):
     return "I can help with that."
 
 
+def get_urgent_general_help_response():
+    return "Please tell me if this is about login, payment, billing, or an order so I can help right away."
+
+
 def sort_intents_by_priority(intents):
     return sorted(
         intents,
@@ -353,14 +357,19 @@ def apply_sentiment_routing(selected_intents, sentiment_label):
     return updated_intents
 
 
-def generate_response(selected_intents):
+def generate_response(selected_intents, sentiment_label=None):
     if not selected_intents:
         return "I'm sorry, I didn’t understand. Could you rephrase?"
 
     ordered = sort_intents_by_priority(selected_intents)
 
     if len(ordered) == 1:
-        return get_single_response(ordered[0])
+        intent = ordered[0]
+
+        if sentiment_label == "urgent" and intent["topic"] == "general_help":
+            return get_urgent_general_help_response()
+
+        return get_single_response(intent)
 
     t1 = topic_label(ordered[0]["topic"])
     t2 = topic_label(ordered[1]["topic"])
@@ -398,7 +407,7 @@ def main():
         selected = select_top_intents(ranked, user)
         selected = apply_sentiment_routing(selected, sentiment_label)
 
-        response = generate_response(selected)
+        response = generate_response(selected, sentiment_label=sentiment_label)
 
         prefix = get_sentiment_prefix(sentiment["label"])
         final_response = prefix + response
