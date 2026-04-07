@@ -334,10 +334,23 @@ def sort_intents_by_priority(intents):
 
 def apply_sentiment_routing(selected_intents, sentiment_label):
     """
-    Placeholder for sentiment-aware routing.
-    For now, this function does not change behavior yet.
+    Simple sentiment-aware routing rule:
+    - urgent + clarify -> answer
     """
-    return selected_intents
+    if sentiment_label != "urgent":
+        return selected_intents
+
+    updated_intents = []
+
+    for intent in selected_intents:
+        updated_intent = intent.copy()
+
+        if updated_intent["action"] == "clarify":
+            updated_intent["action"] = "answer"
+
+        updated_intents.append(updated_intent)
+
+    return updated_intents
 
 
 def generate_response(selected_intents):
