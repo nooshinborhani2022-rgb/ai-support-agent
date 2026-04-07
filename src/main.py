@@ -332,6 +332,14 @@ def sort_intents_by_priority(intents):
     )
 
 
+def apply_sentiment_routing(selected_intents, sentiment_label):
+    """
+    Placeholder for sentiment-aware routing.
+    For now, this function does not change behavior yet.
+    """
+    return selected_intents
+
+
 def generate_response(selected_intents):
     if not selected_intents:
         return "I'm sorry, I didn’t understand. Could you rephrase?"
@@ -375,6 +383,8 @@ def main():
             sentiment_label=sentiment_label
         )
         selected = select_top_intents(ranked, user)
+        selected = apply_sentiment_routing(selected, sentiment_label)
+
         response = generate_response(selected)
 
         prefix = get_sentiment_prefix(sentiment["label"])
