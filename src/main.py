@@ -17,6 +17,9 @@ ACTION_PRIORITY = {
 }
 
 
+LOW_CONFIDENCE_THRESHOLD = 0.4
+
+
 DEFAULT_GENERAL_HELP_INTENT = {
     "topic": "general_help",
     "score": 1.0,
@@ -380,6 +383,12 @@ def get_confidence(selected_intents):
     return selected_intents[0]["score"]
 
 
+def apply_low_confidence_fallback(selected_intents, confidence):
+    if confidence >= LOW_CONFIDENCE_THRESHOLD:
+        return selected_intents
+    return [DEFAULT_GENERAL_HELP_INTENT]
+
+
 def generate_response(selected_intents, sentiment_label=None):
     if not selected_intents:
         return "I'm sorry, I didn’t understand. Could you rephrase?"
@@ -433,6 +442,9 @@ def main():
         selected = select_top_intents(ranked, user)
         selected = apply_sentiment_routing(selected, sentiment_label)
 
+        confidence = get_confidence(selected)
+        selected = apply_low_confidence_fallback(selected, confidence)
+
         response = generate_response(selected, sentiment_label=sentiment_label)
 
         prefix = get_sentiment_prefix(sentiment["label"])
@@ -440,7 +452,6 @@ def main():
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
-        confidence = get_confidence(selected)
 
         print(f"Detected sentiment: {sentiment_label}")
         print(f"Final action: {final_action}")
