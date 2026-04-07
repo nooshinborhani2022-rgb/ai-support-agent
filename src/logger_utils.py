@@ -9,7 +9,8 @@ def log_interaction(
     response,
     sentiment=None,
     primary_intent=None,
-    final_action=None
+    final_action=None,
+    confidence=None
 ):
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
@@ -26,6 +27,9 @@ def log_interaction(
 
     if final_action is not None:
         log_entry["final_action"] = final_action
+
+    if confidence is not None:
+        log_entry["confidence"] = confidence
 
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")

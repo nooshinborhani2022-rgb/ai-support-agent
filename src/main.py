@@ -374,6 +374,12 @@ def get_final_action(selected_intents):
     return ordered[0]["action"]
 
 
+def get_confidence(selected_intents):
+    if not selected_intents:
+        return 0.0
+    return selected_intents[0]["score"]
+
+
 def generate_response(selected_intents, sentiment_label=None):
     if not selected_intents:
         return "I'm sorry, I didn’t understand. Could you rephrase?"
@@ -434,9 +440,11 @@ def main():
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
+        confidence = get_confidence(selected)
 
         print(f"Detected sentiment: {sentiment_label}")
         print(f"Final action: {final_action}")
+        print(f"Confidence: {confidence}")
         print("Bot:", final_response)
 
         log_interaction(
@@ -445,7 +453,8 @@ def main():
             final_response,
             sentiment,
             primary_intent,
-            final_action
+            final_action,
+            confidence
         )
 
 
