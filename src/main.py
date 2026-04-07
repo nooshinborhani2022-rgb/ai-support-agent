@@ -329,6 +329,10 @@ def get_urgent_general_help_response():
     return "Please tell me if this is about login, payment, billing, or an order so I can help right away."
 
 
+def get_frustrated_general_help_response():
+    return "Please tell me whether this is a login, payment, billing, or order issue, and I’ll guide you step by step."
+
+
 def sort_intents_by_priority(intents):
     return sorted(
         intents,
@@ -381,6 +385,9 @@ def generate_response(selected_intents, sentiment_label=None):
 
         if sentiment_label == "urgent" and intent["topic"] == "general_help":
             return get_urgent_general_help_response()
+
+        if sentiment_label == "frustrated" and intent["topic"] == "general_help":
+            return get_frustrated_general_help_response()
 
         return get_single_response(intent)
 
