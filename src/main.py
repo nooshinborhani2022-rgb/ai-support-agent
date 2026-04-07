@@ -204,6 +204,7 @@ def has_strong_domain_cue(user_text):
 def is_vague_query(user_text):
     original = user_text.lower().strip()
     normalized = preprocess_text(user_text)
+    tokens = normalized.split()
 
     vague_exact_inputs = {
         "help",
@@ -239,7 +240,9 @@ def is_vague_query(user_text):
     if any(phrase in original for phrase in vague_phrases):
         return True
 
-    if normalized in {"help", "problem", "issue", "wrong", "not"}:
+    weak_words = {"help", "problem", "issue", "wrong"}
+
+    if len(tokens) <= 4 and any(word in tokens for word in weak_words):
         return True
 
     return False
@@ -344,12 +347,6 @@ def sort_intents_by_priority(intents):
 
 
 def apply_sentiment_routing(selected_intents, sentiment_label):
-    """
-    Sentiment-aware routing rules:
-    - urgent + clarify -> answer
-    - angry + answer -> escalate
-    - frustrated + clarify -> answer
-    """
     updated_intents = []
 
     for intent in selected_intents:
@@ -431,16 +428,19 @@ def main():
         sentiment = detect_sentiment(user)
         sentiment_label = get_sentiment_label(user)
 
-        ranked = detect_intents(
-            user,
-            faq_data,
-            vectorizer,
-            matrix,
-            mapping,
-            sentiment_label=sentiment_label
-        )
-        selected = select_top_intents(ranked, user)
-        selected = apply_sentiment_routing(selected, sentiment_label)
+        if is_vague_query(user):
+            selected = [DEFAULT_GENERAL_HELP_INTENT]
+        else:
+            ranked = detect_intents(
+                user,
+                faq_data,
+                vectorizer,
+                matrix,
+                mapping,
+                sentiment_label=sentiment_label
+            )
+            selected = select_top_intents(ranked, user)
+            selected = apply_sentiment_routing(selected, sentiment_label)
 
         confidence = get_confidence(selected)
         selected = apply_low_confidence_fallback(selected, confidence)
