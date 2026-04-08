@@ -40,6 +40,14 @@ URGENT_PRIORITY_TOPICS = {
 }
 
 
+ANSWER_STYLE_RESPONSES = {
+    "general_help": "Please tell me whether this is about login, payment, billing, or an order, and I’ll help you from there.",
+    "login_issue": "I can help with your login issue. Please try resetting your password first, and if that does not work, let me know whether you see an error message or a lockout notice.",
+    "billing_question": "I can help with your billing question. Please tell me whether this is about an invoice, a plan charge, or a subscription fee.",
+    "order_status": "I can help you check your order status. Please share your order details or tracking information if you have them.",
+}
+
+
 def load_faq(file_path="faq.json"):
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -339,6 +347,22 @@ def get_frustrated_general_help_response():
     return "Please tell me whether this is a login, payment, billing, or order issue, and I’ll guide you step by step."
 
 
+def get_action_consistent_response(intent, sentiment_label=None):
+    topic = intent["topic"]
+    action = intent["action"]
+
+    if sentiment_label == "urgent" and topic == "general_help":
+        return get_urgent_general_help_response()
+
+    if sentiment_label == "frustrated" and topic == "general_help":
+        return get_frustrated_general_help_response()
+
+    if action == "answer" and topic in ANSWER_STYLE_RESPONSES:
+        return ANSWER_STYLE_RESPONSES[topic]
+
+    return get_single_response(intent)
+
+
 def sort_intents_by_priority(intents):
     return sorted(
         intents,
@@ -407,21 +431,13 @@ def generate_response(selected_intents, sentiment_label=None):
     ordered = sort_intents_by_priority(selected_intents)
 
     if len(ordered) == 1:
-        intent = ordered[0]
-
-        if sentiment_label == "urgent" and intent["topic"] == "general_help":
-            return get_urgent_general_help_response()
-
-        if sentiment_label == "frustrated" and intent["topic"] == "general_help":
-            return get_frustrated_general_help_response()
-
-        return get_single_response(intent)
+        return get_action_consistent_response(ordered[0], sentiment_label)
 
     t1 = topic_label(ordered[0]["topic"])
     t2 = topic_label(ordered[1]["topic"])
 
-    r1 = get_single_response(ordered[0])
-    r2 = get_single_response(ordered[1])
+    r1 = get_action_consistent_response(ordered[0], sentiment_label)
+    r2 = get_action_consistent_response(ordered[1], sentiment_label)
 
     return f"I can help with both your {t1} and {t2}.\n\nFirst, {r1}\n\nAlso, {r2}"
 
