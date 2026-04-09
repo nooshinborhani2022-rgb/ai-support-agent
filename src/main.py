@@ -167,21 +167,75 @@ def has_login_cue(user_text):
     ])
 
 
+def has_password_reset_cue(user_text):
+    return has_any_phrase(user_text, [
+        "forgot password",
+        "reset password",
+        "change password",
+        "new password",
+        "lost password",
+        "cant remember password"
+    ])
+
+
 def has_payment_cue(user_text):
     return has_any_phrase(user_text, [
         "payment", "card declined", "checkout failed", "transaction failed"
     ])
 
 
+def has_double_charge_cue(user_text):
+    return has_any_phrase(user_text, [
+        "charged twice",
+        "double charge",
+        "duplicate payment",
+        "billed twice",
+        "double charged",
+        "charged two times",
+        "billed two times"
+    ])
+
+
 def has_billing_cue(user_text):
     return has_any_phrase(user_text, [
-        "billing", "bill", "charged", "charge", "payment", "invoice"
+        "billing",
+        "bill",
+        "invoice",
+        "subscription fee",
+        "plan cost",
+        "bill question"
+    ])
+
+
+def has_charge_explanation_cue(user_text):
+    return has_any_phrase(user_text, [
+        "explain charge",
+        "what is this charge",
+        "why was i charged",
+        "why did you charge me",
+        "dont understand this charge",
+        "do not understand this charge",
+        "what am i being charged for",
+        "you charged me"
     ])
 
 
 def has_refund_cue(user_text):
     return has_any_phrase(user_text, [
         "refund", "money back", "return my money", "get my money back"
+    ])
+
+
+def has_subscription_cancel_cue(user_text):
+    return has_any_phrase(user_text, [
+        "cancel subscription", "unsubscribe", "stop plan", "cancel plan", "end subscription"
+    ])
+
+
+def has_fraud_cue(user_text):
+    return has_any_phrase(user_text, [
+        "fraud", "scam", "unauthorized charge", "stolen card", "suspicious charge",
+        "someone used my card", "used without permission"
     ])
 
 
@@ -197,6 +251,32 @@ def has_order_cue(user_text):
     ])
 
 
+TOPIC_CUE_FUNCTIONS = {
+    "password_reset": has_password_reset_cue,
+    "login_issue": has_login_cue,
+    "account_locked": has_account_locked_cue,
+    "payment_failed": has_payment_cue,
+    "double_charge": has_double_charge_cue,
+    "charge_explanation": has_charge_explanation_cue,
+    "refund_request": has_refund_cue,
+    "billing_question": has_billing_cue,
+    "subscription_cancel": has_subscription_cancel_cue,
+    "fraud_report": has_fraud_cue,
+    "order_status": has_order_cue,
+    "delivery_issue": has_delivery_cue,
+}
+
+
+def get_strong_cue_topics(user_text):
+    strong_topics = set()
+
+    for topic, cue_fn in TOPIC_CUE_FUNCTIONS.items():
+        if cue_fn(user_text):
+            strong_topics.add(topic)
+
+    return strong_topics
+
+
 def has_strong_domain_cue(user_text):
     return any([
         has_login_cue(user_text),
@@ -206,6 +286,11 @@ def has_strong_domain_cue(user_text):
         has_delivery_cue(user_text),
         has_order_cue(user_text),
         has_account_locked_cue(user_text),
+        has_password_reset_cue(user_text),
+        has_double_charge_cue(user_text),
+        has_charge_explanation_cue(user_text),
+        has_subscription_cancel_cue(user_text),
+        has_fraud_cue(user_text),
     ])
 
 
@@ -280,6 +365,25 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
                     candidates.append(intent)
                     break
 
+    strong_cue_topics = get_strong_cue_topics(user_text)
+
+    if len(strong_cue_topics) >= 2 and len(candidates) < max_intents:
+        for intent in ranked_intents:
+            if intent["topic"] == "general_help":
+                continue
+
+            if intent["score"] < min_score:
+                continue
+
+            if intent["topic"] not in strong_cue_topics:
+                continue
+
+            if not any(c["topic"] == intent["topic"] for c in candidates):
+                candidates.append(intent)
+
+            if len(candidates) >= max_intents:
+                break
+
     selected = []
     topics = set()
 
@@ -294,14 +398,7 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
 
         if t == "double_charge" and "charge_explanation" in topics:
             selected = [x for x in selected if x["topic"] != "charge_explanation"]
-
-        if t == "login_issue" and "payment_failed" in topics:
-            if not has_login_cue(user_text):
-                continue
-
-        if t == "payment_failed" and "login_issue" in topics:
-            if not has_payment_cue(user_text):
-                continue
+            topics.discard("charge_explanation")
 
         if t == "billing_question" and "refund_request" in topics:
             if not has_billing_cue(user_text):
@@ -309,6 +406,25 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
 
         if t == "refund_request" and "billing_question" in topics:
             if not has_refund_cue(user_text):
+                continue
+
+        if t == "billing_question" and "charge_explanation" in topics:
+            if not has_billing_cue(user_text):
+                continue
+            if has_charge_explanation_cue(user_text):
+                continue
+
+        if t == "charge_explanation" and "billing_question" in topics:
+            if has_charge_explanation_cue(user_text):
+                selected = [x for x in selected if x["topic"] != "billing_question"]
+                topics.discard("billing_question")
+
+        if t == "login_issue" and "payment_failed" in topics:
+            if not has_login_cue(user_text):
+                continue
+
+        if t == "payment_failed" and "login_issue" in topics:
+            if not has_payment_cue(user_text):
                 continue
 
         if t == "delivery_issue" and "order_status" in topics:
