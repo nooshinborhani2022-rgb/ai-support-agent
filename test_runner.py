@@ -72,12 +72,18 @@ TEST_CASES = [
     {"input": "I'm being charged twice", "expected": ["double_charge"]},
     {"input": "I need general help", "expected": ["general_help"]},
 
-    # regression tests for ambiguity handling
+    # ambiguity regression
     {"input": "it's not working", "expected": ["general_help"]},
     {"input": "I need billing help", "expected": ["billing_question"]},
     {"input": "I want a refund", "expected": ["refund_request"]},
 
-    # regression test for urgent multi-intent
+    # 🔥 NEW STRONG MULTI-INTENT TESTS
+    {"input": "I cant login and I was charged twice", "expected": ["login_issue", "double_charge"]},
+    {"input": "my payment failed and I want a refund", "expected": ["payment_failed", "refund_request"]},
+    {"input": "access denied and I can't log in", "expected": ["account_locked", "login_issue"]},
+    {"input": "I was charged twice and I want a refund ASAP", "expected": ["double_charge", "refund_request"]},
+
+    # urgent regression
     {"input": "I need help ASAP, I can't log in and my payment failed", "expected": ["login_issue", "payment_failed"]},
 ]
 
