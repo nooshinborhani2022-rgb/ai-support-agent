@@ -756,22 +756,25 @@ def get_confidence(selected_intents):
 
 def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_label):
     if confidence < LOW_CONFIDENCE_THRESHOLD:
-        return [DEFAULT_GENERAL_HELP_INTENT]
+        return [DEFAULT_GENERAL_HELP_INTENT], "low_confidence_fallback"
 
     updated_intents = []
+    routing_reason = "normal_routing"
 
     for intent in selected_intents:
         updated_intent = intent.copy()
 
         if sentiment_label == "angry" and confidence < 0.7:
             updated_intent["action"] = "escalate"
+            routing_reason = "sentiment_override_angry"
 
-        if sentiment_label == "frustrated" and confidence < 0.6:
+        elif sentiment_label == "frustrated" and confidence < 0.6:
             updated_intent["action"] = "clarify"
+            routing_reason = "sentiment_override_frustrated"
 
         updated_intents.append(updated_intent)
 
-    return updated_intents
+    return updated_intents, routing_reason
 
 
 def generate_response(selected_intents, sentiment_label=None):
@@ -851,7 +854,7 @@ def main():
         top2_score = selected[1]["score"] if len(selected) > 1 else 0.0
         score_gap = round(top1_score - top2_score, 3)
 
-        selected = apply_confidence_sentiment_rules(
+        selected, routing_reason = apply_confidence_sentiment_rules(
             selected,
             confidence,
             sentiment_label
@@ -870,7 +873,7 @@ def main():
         final_action = get_final_action(selected)
 
         print(f"Detected sentiment: {sentiment_label}")
-        print(f"Final action: {final_action}")
+        print(f"Final action: {final_action} (reason={routing_reason})")
         print(f"Confidence: {confidence} (top1={top1_score}, top2={top2_score}, gap={score_gap})")
         print("Bot:", final_response)
 
@@ -884,7 +887,8 @@ def main():
             confidence,
             top1_score,
             top2_score,
-            score_gap
+            score_gap,
+            routing_reason
         )
 
 

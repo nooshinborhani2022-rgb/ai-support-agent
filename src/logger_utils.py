@@ -13,7 +13,8 @@ def log_interaction(
     confidence=None,
     top1_score=None,
     top2_score=None,
-    score_gap=None
+    score_gap=None,
+    routing_reason=None
 ):
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
@@ -42,6 +43,9 @@ def log_interaction(
 
     if score_gap is not None:
         log_entry["score_gap"] = score_gap
+
+    if routing_reason is not None:
+        log_entry["routing_reason"] = routing_reason
 
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
