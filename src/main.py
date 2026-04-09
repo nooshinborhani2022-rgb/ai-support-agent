@@ -743,7 +743,17 @@ def get_final_action(selected_intents):
 def get_confidence(selected_intents):
     if not selected_intents:
         return 0.0
-    return selected_intents[0]["score"]
+
+    top1 = selected_intents[0]["score"]
+
+    if len(selected_intents) > 1:
+        top2 = selected_intents[1]["score"]
+    else:
+        top2 = 0.0
+
+    confidence = round(top1 - top2, 3)
+
+    return confidence
 
 
 def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_label):
