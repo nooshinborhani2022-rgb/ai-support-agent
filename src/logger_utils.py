@@ -10,7 +10,10 @@ def log_interaction(
     sentiment=None,
     primary_intent=None,
     final_action=None,
-    confidence=None
+    confidence=None,
+    top1_score=None,
+    top2_score=None,
+    score_gap=None
 ):
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
@@ -30,6 +33,15 @@ def log_interaction(
 
     if confidence is not None:
         log_entry["confidence"] = confidence
+
+    if top1_score is not None:
+        log_entry["top1_score"] = top1_score
+
+    if top2_score is not None:
+        log_entry["top2_score"] = top2_score
+
+    if score_gap is not None:
+        log_entry["score_gap"] = score_gap
 
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")

@@ -1,5 +1,4 @@
 from src.preprocessing import preprocess_text, expand_contractions
-from src.config import SIMILARITY_THRESHOLD, TOP_K_INTENTS
 from src.logger_utils import log_interaction
 from src.sentiment import detect_sentiment, get_sentiment_prefix, get_sentiment_label
 
@@ -752,7 +751,6 @@ def get_confidence(selected_intents):
         top2 = 0.0
 
     confidence = round(top1 - top2, 3)
-
     return confidence
 
 
@@ -848,6 +846,11 @@ def main():
                 selected = apply_sentiment_routing(selected, sentiment_label)
 
         confidence = get_confidence(selected)
+
+        top1_score = selected[0]["score"] if selected else 0.0
+        top2_score = selected[1]["score"] if len(selected) > 1 else 0.0
+        score_gap = round(top1_score - top2_score, 3)
+
         selected = apply_confidence_sentiment_rules(
             selected,
             confidence,
@@ -868,7 +871,7 @@ def main():
 
         print(f"Detected sentiment: {sentiment_label}")
         print(f"Final action: {final_action}")
-        print(f"Confidence: {confidence}")
+        print(f"Confidence: {confidence} (top1={top1_score}, top2={top2_score}, gap={score_gap})")
         print("Bot:", final_response)
 
         log_interaction(
@@ -878,7 +881,10 @@ def main():
             sentiment,
             primary_intent,
             final_action,
-            confidence
+            confidence,
+            top1_score,
+            top2_score,
+            score_gap
         )
 
 
