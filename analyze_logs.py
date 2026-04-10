@@ -21,10 +21,14 @@ def analyze_logs(logs):
     actions = Counter()
     final_actions = Counter()
     sentiment_counts = Counter()
-    fallback_count = 0
+    routing_reasons = Counter()
 
+    fallback_count = 0
     fallback_queries = []
     multi_intent_queries = []
+
+    confidence_values = []
+    score_gaps = []
 
     for log in logs:
         primary_intent = log.get("primary_intent")
@@ -33,6 +37,9 @@ def analyze_logs(logs):
         user_message = log.get("user_message", "")
         sentiment = log.get("sentiment", {})
         final_action = log.get("final_action")
+        routing_reason = log.get("routing_reason")
+        confidence = log.get("confidence")
+        score_gap = log.get("score_gap")
 
         if primary_intent:
             primary_intents[primary_intent] += 1
@@ -49,12 +56,24 @@ def analyze_logs(logs):
         if sentiment_label:
             sentiment_counts[sentiment_label] += 1
 
+        if routing_reason:
+            routing_reasons[routing_reason] += 1
+
+        if confidence is not None:
+            confidence_values.append(confidence)
+
+        if score_gap is not None:
+            score_gaps.append(score_gap)
+
         if "I didn’t understand" in response or "Could you rephrase" in response:
             fallback_count += 1
             fallback_queries.append(user_message)
 
         if len(intents) > 1:
             multi_intent_queries.append(user_message)
+
+    avg_confidence = sum(confidence_values) / len(confidence_values) if confidence_values else 0.0
+    avg_score_gap = sum(score_gaps) / len(score_gaps) if score_gaps else 0.0
 
     print("\n=== Log Analysis Report ===")
     print(f"Total messages: {total_messages}")
@@ -75,6 +94,18 @@ def analyze_logs(logs):
     print("\nSentiment distribution:")
     for label, count in sentiment_counts.most_common():
         print(f"- {label}: {count}")
+
+    print("\nRouting reason distribution:")
+    for reason, count in routing_reasons.most_common():
+        print(f"- {reason}: {count}")
+
+    print(f"\nAverage confidence: {avg_confidence:.3f}")
+    print(f"Average score gap: {avg_score_gap:.3f}")
+
+    print("\nExplainability summary:")
+    print(f"- low_confidence_fallback: {routing_reasons.get('low_confidence_fallback', 0)}")
+    print(f"- sentiment_override_angry: {routing_reasons.get('sentiment_override_angry', 0)}")
+    print(f"- sentiment_override_frustrated: {routing_reasons.get('sentiment_override_frustrated', 0)}")
 
     print("\nFallback queries:")
     for q in fallback_queries[:10]:

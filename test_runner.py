@@ -6,6 +6,10 @@ from src.main import (
     generate_response,
     apply_sentiment_routing,
     get_final_action,
+    get_confidence,
+    apply_confidence_sentiment_rules,
+    has_success_signal,
+    has_no_issue_signal,
 )
 from src.sentiment import detect_sentiment
 
@@ -72,21 +76,17 @@ TEST_CASES = [
     {"input": "I'm being charged twice", "expected": ["double_charge"]},
     {"input": "I need general help", "expected": ["general_help"]},
 
-    # ambiguity regression
     {"input": "it's not working", "expected": ["general_help"]},
     {"input": "I need billing help", "expected": ["billing_question"]},
     {"input": "I want a refund", "expected": ["refund_request"]},
 
-    # strong multi-intent regression
     {"input": "I cant login and I was charged twice", "expected": ["login_issue", "double_charge"]},
     {"input": "my payment failed and I want a refund", "expected": ["payment_failed", "refund_request"]},
     {"input": "access denied and I can't log in", "expected": ["account_locked", "login_issue"]},
     {"input": "I was charged twice and I want a refund ASAP", "expected": ["double_charge", "refund_request"]},
 
-    # urgent regression
     {"input": "I need help ASAP, I can't log in and my payment failed", "expected": ["login_issue", "payment_failed"]},
 
-    # commit 34: negation + success regression
     {"input": "I can login", "expected": ["success"]},
     {"input": "It works now", "expected": ["success"]},
     {"input": "I was not charged twice", "expected": ["no_issue"]},
@@ -138,6 +138,26 @@ def save_test_logs(logs, file_path="chat_log.jsonl"):
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+def build_special_case_selection(user_text):
+    if has_success_signal(user_text):
+        return [{
+            "topic": "success",
+            "score": 1.0,
+            "action": "answer",
+            "responses": []
+        }]
+
+    if has_no_issue_signal(user_text):
+        return [{
+            "topic": "no_issue",
+            "score": 1.0,
+            "action": "answer",
+            "responses": []
+        }]
+
+    return None
+
+
 def run_intent_tests():
     faq_data = load_faq()
     vectorizer, matrix, mapping = build_tfidf_index(faq_data)
@@ -155,27 +175,9 @@ def run_intent_tests():
         sentiment = detect_sentiment(user_text)
         sentiment_label = sentiment["label"]
 
-        if user_text.lower() in [
-            "i can login",
-            "it works now",
-            "i was not charged twice",
-            "i am not locked out",
-        ]:
-            if user_text.lower() in ["i can login", "it works now"]:
-                selected = [{
-                    "topic": "success",
-                    "score": 1.0,
-                    "action": "answer",
-                    "responses": []
-                }]
-            else:
-                selected = [{
-                    "topic": "no_issue",
-                    "score": 1.0,
-                    "action": "answer",
-                    "responses": []
-                }]
-        else:
+        selected = build_special_case_selection(user_text)
+
+        if selected is None:
             ranked = detect_intents(
                 user_text,
                 faq_data,
@@ -188,8 +190,20 @@ def run_intent_tests():
             selected = apply_sentiment_routing(selected, sentiment_label)
 
         predicted = sorted([intent["topic"] for intent in selected])
-        response = generate_response(selected, sentiment_label=sentiment_label)
-        final_action = get_final_action(selected)
+
+        confidence = get_confidence(selected)
+        top1_score = selected[0]["score"] if selected else 0.0
+        top2_score = selected[1]["score"] if len(selected) > 1 else 0.0
+        score_gap = round(top1_score - top2_score, 3)
+
+        final_selected, routing_reason = apply_confidence_sentiment_rules(
+            selected,
+            confidence,
+            sentiment_label
+        )
+
+        response = generate_response(final_selected, sentiment_label=sentiment_label)
+        final_action = get_final_action(final_selected)
 
         success = predicted == expected
 
@@ -201,20 +215,27 @@ def run_intent_tests():
             status = "FAIL"
 
         print(f"{idx:02d}. {status}")
-        print(f"Input:        {user_text}")
-        print(f"Expected:     {expected}")
-        print(f"Predicted:    {predicted}")
-        print(f"Sentiment:    {sentiment_label}")
-        print(f"Final action: {final_action}")
-        print(f"Response:     {response}\n")
+        print(f"Input:          {user_text}")
+        print(f"Expected:       {expected}")
+        print(f"Predicted:      {predicted}")
+        print(f"Sentiment:      {sentiment_label}")
+        print(f"Final action:   {final_action}")
+        print(f"Routing reason: {routing_reason}")
+        print(f"Confidence:     {confidence:.3f} (top1={top1_score}, top2={top2_score}, gap={score_gap})")
+        print(f"Response:       {response}\n")
 
         logs.append({
             "user_message": user_text,
-            "intents": selected,
+            "intents": final_selected,
             "response": response,
-            "primary_intent": selected[0]["topic"] if selected else None,
+            "primary_intent": final_selected[0]["topic"] if final_selected else None,
             "sentiment": sentiment,
             "final_action": final_action,
+            "confidence": round(confidence, 3),
+            "top1_score": top1_score,
+            "top2_score": top2_score,
+            "score_gap": score_gap,
+            "routing_reason": routing_reason,
         })
 
     total = passed + failed
@@ -289,21 +310,9 @@ def run_routing_tests():
         sentiment = detect_sentiment(user_text)
         sentiment_label = sentiment["label"]
 
-        if user_text.lower() in ["i can login", "it works now"]:
-            selected = [{
-                "topic": "success",
-                "score": 1.0,
-                "action": "answer",
-                "responses": []
-            }]
-        elif user_text.lower() in ["i was not charged twice", "i am not locked out"]:
-            selected = [{
-                "topic": "no_issue",
-                "score": 1.0,
-                "action": "answer",
-                "responses": []
-            }]
-        else:
+        selected = build_special_case_selection(user_text)
+
+        if selected is None:
             ranked = detect_intents(
                 user_text,
                 faq_data,
@@ -315,7 +324,14 @@ def run_routing_tests():
             selected = select_top_intents(ranked, user_text)
             selected = apply_sentiment_routing(selected, sentiment_label)
 
-        final_action = get_final_action(selected)
+        confidence = get_confidence(selected)
+        final_selected, routing_reason = apply_confidence_sentiment_rules(
+            selected,
+            confidence,
+            sentiment_label
+        )
+
+        final_action = get_final_action(final_selected)
 
         success = (
             sentiment_label == expected_sentiment
@@ -334,7 +350,9 @@ def run_routing_tests():
         print(f"Expected sentiment:   {expected_sentiment}")
         print(f"Predicted sentiment:  {sentiment_label}")
         print(f"Expected action:      {expected_final_action}")
-        print(f"Predicted action:     {final_action}\n")
+        print(f"Predicted action:     {final_action}")
+        print(f"Routing reason:       {routing_reason}")
+        print(f"Confidence:           {confidence:.3f}\n")
 
     total = passed + failed
     accuracy = (passed / total) * 100 if total > 0 else 0
