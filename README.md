@@ -13,6 +13,8 @@ A hybrid AI-powered customer support agent that combines rule-based logic with s
 * Conflict resolution between overlapping intents
 * Vague query handling
 
+---
+
 ### 💬 Sentiment Awareness
 
 * Sentiment detection:
@@ -22,6 +24,8 @@ A hybrid AI-powered customer support agent that combines rule-based logic with s
   * angry
   * urgent
 * Sentiment-aware routing (affects final action)
+
+---
 
 ### 🎯 Decision Engine
 
@@ -35,6 +39,29 @@ A hybrid AI-powered customer support agent that combines rule-based logic with s
   * clarify
   * escalate
 
+---
+
+### 🧠 Advanced Decision Behavior (NEW)
+
+#### ✔ Smart Low-Confidence Handling
+
+* Detects when multiple intents exist but confidence is low
+* Instead of generic fallback, generates **context-aware clarification**
+
+Example:
+
+```
+"It looks like this may involve both your payment and refund request..."
+```
+
+#### ✔ Multi-Intent Conservative Routing
+
+* Detects multiple intents aggressively
+* Commits only when confidence is sufficient
+* Avoids incorrect answers by falling back intelligently
+
+---
+
 ### 🔍 Explainability (XAI)
 
 * Routing reasons:
@@ -43,11 +70,51 @@ A hybrid AI-powered customer support agent that combines rule-based logic with s
   * low_confidence_fallback
   * sentiment_override_angry
   * sentiment_override_frustrated
+
 * Confidence breakdown:
 
   * top1_score
   * top2_score
   * score_gap
+  * **pre_rule_confidence (NEW)**
+
+---
+
+### 📊 Confidence Transparency (NEW)
+
+The system now distinguishes between:
+
+* **Pre-rule confidence** → real model uncertainty
+* **Final confidence** → after routing decisions
+
+Example:
+
+```
+Confidence: 1.0 (pre_rule=0.131, top1=1.0, top2=0.0, gap=1.0)
+```
+
+---
+
+### 🎭 Dynamic Response Tone (NEW)
+
+#### ✔ Empathy-aware
+
+* Adjusts tone based on user sentiment
+
+#### ✔ Action-aware
+
+* Escalate → reassurance
+* Clarify → guided response
+
+#### ✔ Confidence-aware
+
+* Low confidence → cautious tone:
+
+```
+"I’m not fully sure I understood correctly..."
+```
+
+---
 
 ### 📊 Logging & Analysis
 
@@ -59,6 +126,9 @@ A hybrid AI-powered customer support agent that combines rule-based logic with s
   * sentiment distribution
   * routing reason distribution
   * confidence metrics
+  * **multi-intent behavior (raw vs final vs reduced) (NEW)**
+
+---
 
 ### 🧪 Testing
 
@@ -89,7 +159,7 @@ Confidence Calculation (score gap)
    ↓
 Routing Logic (confidence + sentiment)
    ↓
-Response Generation
+Response Generation (dynamic tone)
    ↓
 Logging & Explainability
 ```
@@ -101,9 +171,10 @@ Logging & Explainability
 The system provides transparency into its decision-making:
 
 * Detected sentiment
-* Selected intents (topics)
+* Predicted topics (before rules) ✅
+* Final topics (after rules) ✅
 * Final action (answer / clarify / escalate)
-* Confidence score (based on score gap)
+* Confidence score (with pre-rule insight)
 * Routing reason:
 
   * normal_routing
@@ -114,9 +185,10 @@ The system provides transparency into its decision-making:
 
 ```
 Detected sentiment: frustrated
-Selected topics: ['login_issue', 'double_charge']
-Final action: escalate (reason=normal_routing)
-Confidence: 1.279 (top1=3.153, top2=1.874, gap=1.279)
+Predicted topics before rules: ['payment_failed', 'refund_request']
+Final topics after rules: ['general_help']
+Final action: clarify (reason=low_confidence_fallback)
+Confidence: 1.0 (pre_rule=0.131, top1=1.0, top2=0.0, gap=1.0)
 ```
 
 ---
@@ -138,7 +210,12 @@ This provides:
 * Routing reason distribution
 * Average confidence
 * Score gap statistics
-* Multi-intent queries
+
+### 🧠 Multi-Intent Analysis (NEW)
+
+* Raw multi-intent queries (before rules)
+* Final multi-intent queries (after rules)
+* Reduced multi-intent cases (fallback)
 
 ---
 
@@ -153,7 +230,7 @@ pip install -r requirements.txt
 ### 2. Run the chatbot
 
 ```bash
-python src/main.py
+python -m src.main
 ```
 
 ---
@@ -181,7 +258,7 @@ src/
  ├── preprocessing.py
  ├── sentiment.py
  ├── logger_utils.py
- ├── config.py
+ ├── confidence_utils.py
 
 analyze_logs.py
 test_runner.py
@@ -201,6 +278,8 @@ README.md
 * Explainable AI (XAI)
 * Logging and analytics
 * Regression-safe testing
+* **Confidence-aware behavior (NEW)**
+* **Dynamic response tone (NEW)**
 
 ---
 
@@ -231,4 +310,3 @@ It is a **hybrid AI support system** designed with:
 ## 👤 Author
 
 Developed by Nooshin Borhani Rayeni
-
