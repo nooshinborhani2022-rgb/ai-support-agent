@@ -58,9 +58,9 @@ URGENT_PRIORITY_TOPICS = {
 
 ANSWER_STYLE_RESPONSES = {
     "general_help": "Please tell me whether this is about login, payment, billing, or an order, and I’ll help you from there.",
-    "login_issue": "Please try resetting your password first, and if that does not work, let me know whether you see an error message or a lockout notice.",
+    "login_issue": "Try resetting your password first. If that doesn’t work, let me know if you see an error message or a lockout notice.",
     "billing_question": "Please tell me whether this is about an invoice, a plan charge, or a subscription fee.",
-    "order_status": "Please share your order details or tracking information if you have them, and I’ll help you check the status.",
+    "order_status": "Share your order details or tracking info, and I’ll help you check the status.",
 }
 
 
@@ -709,8 +709,8 @@ def get_action_consistent_response(intent, sentiment_label=None):
 def merge_responses(r1, r2, t1, t2):
     return (
         f"I can help with both your {t1} and {t2}.\n\n"
-        f"For your {t1}, {r1}\n\n"
-        f"For your {t2}, {r2}"
+        f"For your {t1}:\n{r1}\n\n"
+        f"For your {t2}:\n{r2}"
     )
 
 
@@ -789,6 +789,7 @@ def generate_response(selected_intents, sentiment_label=None):
 
     return merge_responses(r1, r2, t1, t2)
 
+
 def add_empathy_and_politeness(response, sentiment_label, topics, confidence=None):
     if topics and topics[0] in {"success", "no_issue"}:
         return response
@@ -806,14 +807,6 @@ def add_empathy_and_politeness(response, sentiment_label, topics, confidence=Non
     empathy = empathy_map.get(sentiment_label, "")
     return f"{empathy} {response}".strip()
 
-def apply_confidence_tone(response, confidence):
-    if confidence < 0.3:
-        return f"I’m not fully sure I understood correctly, but {response}"
-
-    if confidence < 0.6:
-        return f"Based on what I understand, {response}"
-
-    return response
 
 def apply_action_tone(response, final_action):
     if final_action == "escalate":
@@ -823,6 +816,29 @@ def apply_action_tone(response, final_action):
         return response + "\n\nOnce I have a bit more detail, I’ll guide you step by step."
 
     return response
+
+
+def apply_confidence_tone(response, confidence):
+    if confidence < 0.3:
+        return f"I’m not fully sure I understood correctly, but {response}"
+
+    if confidence < 0.6:
+        return f"Based on what I understand, {response}"
+
+    return response
+
+
+def get_low_confidence_multi_intent_response(predicted_topics):
+    topic_labels = [topic.replace("_", " ") for topic in predicted_topics[:2]]
+
+    if len(topic_labels) < 2:
+        return DEFAULT_GENERAL_HELP_INTENT["responses"][0]
+
+    return (
+        f"It looks like this may involve both your {topic_labels[0]} and {topic_labels[1]}. "
+        f"Please tell me which part you’d like help with first, and I’ll guide you from there."
+    )
+
 
 def main():
     faq_data = load_faq()
@@ -893,47 +909,48 @@ def main():
         confidence = get_confidence(selected)
         top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
-        response = generate_response(selected, sentiment_label=sentiment_label)
+        if routing_reason == "low_confidence_fallback" and len(predicted_topics_before_rules) > 1:
+            response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
+        else:
+            response = generate_response(selected, sentiment_label=sentiment_label)
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
 
         final_response = add_empathy_and_politeness(
-        response,
-        sentiment_label,
-        final_topics_after_rules,
-        pre_rule_confidence
+            response,
+            sentiment_label,
+            final_topics_after_rules,
+            pre_rule_confidence
         )
+
         final_response = apply_action_tone(final_response, final_action)
         final_response = apply_confidence_tone(final_response, pre_rule_confidence)
-
-        primary_intent = selected[0]["topic"] if selected else None
-        final_action = get_final_action(selected)
 
         print(f"Detected sentiment: {sentiment_label}")
         print(f"Predicted topics before rules: {predicted_topics_before_rules}")
         print(f"Final topics after rules: {final_topics_after_rules}")
         print(f"Final action: {final_action} (reason={routing_reason})")
         print(
-    f"Confidence: {confidence} "
-    f"(pre_rule={pre_rule_confidence}, top1={top1_score}, top2={top2_score}, gap={score_gap})"
-    )
+            f"Confidence: {confidence} "
+            f"(pre_rule={pre_rule_confidence}, top1={top1_score}, top2={top2_score}, gap={score_gap})"
+        )
         print("Bot:", final_response)
 
         log_interaction(
-            user,
-            selected,
-            final_response,
-            sentiment,
-            primary_intent,
-            final_action,
-            confidence,
-            top1_score,
-            top2_score,
-            score_gap,
-            routing_reason,
+            user_message=user,
+            intents=selected,
+            response=final_response,
+            sentiment=sentiment,
+            primary_intent=primary_intent,
+            final_action=final_action,
+            confidence=confidence,
+            top1_score=top1_score,
+            top2_score=top2_score,
+            score_gap=score_gap,
+            routing_reason=routing_reason,
             predicted_topics_before_rules=predicted_topics_before_rules,
-            final_topics_after_rules=final_topics_after_rules
+            final_topics_after_rules=final_topics_after_rules,
         )
 
 
