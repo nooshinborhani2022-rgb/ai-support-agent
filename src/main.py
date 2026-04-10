@@ -1,6 +1,6 @@
 from src.preprocessing import preprocess_text, expand_contractions
 from src.logger_utils import log_interaction
-from src.sentiment import detect_sentiment, get_sentiment_prefix
+from src.sentiment import detect_sentiment
 from src.confidence_utils import get_confidence, extract_confidence_details
 
 import json
@@ -58,9 +58,9 @@ URGENT_PRIORITY_TOPICS = {
 
 ANSWER_STYLE_RESPONSES = {
     "general_help": "Please tell me whether this is about login, payment, billing, or an order, and I’ll help you from there.",
-    "login_issue": "I can help with your login issue. Please try resetting your password first, and if that does not work, let me know whether you see an error message or a lockout notice.",
-    "billing_question": "I can help with your billing question. Please tell me whether this is about an invoice, a plan charge, or a subscription fee.",
-    "order_status": "I can help you check your order status. Please share your order details or tracking information if you have them.",
+    "login_issue": "Please try resetting your password first, and if that does not work, let me know whether you see an error message or a lockout notice.",
+    "billing_question": "Please tell me whether this is about an invoice, a plan charge, or a subscription fee.",
+    "order_status": "Please share your order details or tracking information if you have them, and I’ll help you check the status.",
 }
 
 
@@ -101,6 +101,7 @@ def has_success_signal(user_text):
         "i was able to log in",
         "i was able to sign in",
         "it worked",
+        "it worked for me",
         "it is working now",
         "its working now",
         "it works now",
@@ -705,6 +706,14 @@ def get_action_consistent_response(intent, sentiment_label=None):
     return get_single_response(intent)
 
 
+def merge_responses(r1, r2, t1, t2):
+    return (
+        f"I can help with both your {t1} and {t2}.\n\n"
+        f"For your {t1}, {r1}\n\n"
+        f"For your {t2}, {r2}"
+    )
+
+
 def sort_intents_by_priority(intents):
     return sorted(
         intents,
@@ -778,7 +787,22 @@ def generate_response(selected_intents, sentiment_label=None):
     r1 = get_action_consistent_response(ordered[0], sentiment_label)
     r2 = get_action_consistent_response(ordered[1], sentiment_label)
 
-    return f"I can help with both your {t1} and {t2}.\n\nFirst, {r1}\n\nAlso, {r2}"
+    return merge_responses(r1, r2, t1, t2)
+
+
+def add_empathy_and_politeness(response, sentiment_label, topics):
+    if topics and topics[0] in {"success", "no_issue"}:
+        return response
+
+    empathy_map = {
+        "angry": "I'm really sorry you're dealing with this. I understand how frustrating this must be, and I'll do my best to help.",
+        "frustrated": "I understand how frustrating this must be, and I'll do my best to help.",
+        "urgent": "I understand this is urgent, and I'll help you as quickly as possible.",
+        "neutral": "Thank you for reaching out. I'll be happy to help you with this."
+    }
+
+    empathy = empathy_map.get(sentiment_label, "")
+    return f"{empathy} {response}".strip()
 
 
 def main():
@@ -847,17 +871,11 @@ def main():
         top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
         response = generate_response(selected, sentiment_label=sentiment_label)
-
-        if selected and selected[0]["topic"] in {"success", "no_issue"}:
-            prefix = ""
-        else:
-            prefix = get_sentiment_prefix(sentiment_label)
-
-        final_response = prefix + response
+        selected_topics = [intent["topic"] for intent in selected]
+        final_response = add_empathy_and_politeness(response, sentiment_label, selected_topics)
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
-        selected_topics = [intent["topic"] for intent in selected]
 
         print(f"Detected sentiment: {sentiment_label}")
         print(f"Selected topics: {selected_topics}")
