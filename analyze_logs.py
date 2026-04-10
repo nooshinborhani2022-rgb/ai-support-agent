@@ -25,7 +25,10 @@ def analyze_logs(logs):
 
     fallback_count = 0
     fallback_queries = []
-    multi_intent_queries = []
+
+    final_multi_intent_queries = []
+    raw_multi_intent_queries = []
+    reduced_multi_intent_queries = []
 
     confidence_values = []
     score_gaps = []
@@ -40,6 +43,9 @@ def analyze_logs(logs):
         routing_reason = log.get("routing_reason")
         confidence = log.get("confidence")
         score_gap = log.get("score_gap")
+
+        predicted_topics_before_rules = log.get("predicted_topics_before_rules", [])
+        final_topics_after_rules = log.get("final_topics_after_rules", [])
 
         if primary_intent:
             primary_intents[primary_intent] += 1
@@ -69,8 +75,14 @@ def analyze_logs(logs):
             fallback_count += 1
             fallback_queries.append(user_message)
 
-        if len(intents) > 1:
-            multi_intent_queries.append(user_message)
+        if len(predicted_topics_before_rules) > 1:
+            raw_multi_intent_queries.append(user_message)
+
+        if len(final_topics_after_rules) > 1:
+            final_multi_intent_queries.append(user_message)
+
+        if len(predicted_topics_before_rules) > 1 and len(final_topics_after_rules) <= 1:
+            reduced_multi_intent_queries.append(user_message)
 
     avg_confidence = sum(confidence_values) / len(confidence_values) if confidence_values else 0.0
     avg_score_gap = sum(score_gaps) / len(score_gaps) if score_gaps else 0.0
@@ -107,12 +119,24 @@ def analyze_logs(logs):
     print(f"- sentiment_override_angry: {routing_reasons.get('sentiment_override_angry', 0)}")
     print(f"- sentiment_override_frustrated: {routing_reasons.get('sentiment_override_frustrated', 0)}")
 
+    print(f"\nRaw multi-intent query count (before rules): {len(raw_multi_intent_queries)}")
+    print(f"Final multi-intent query count (after rules): {len(final_multi_intent_queries)}")
+    print(f"Reduced multi-intent query count: {len(reduced_multi_intent_queries)}")
+
     print("\nFallback queries:")
     for q in fallback_queries[:10]:
         print(f"- {q}")
 
-    print("\nMulti-intent queries:")
-    for q in multi_intent_queries[:10]:
+    print("\nRaw multi-intent queries (before rules):")
+    for q in raw_multi_intent_queries[:10]:
+        print(f"- {q}")
+
+    print("\nFinal multi-intent queries (after rules):")
+    for q in final_multi_intent_queries[:10]:
+        print(f"- {q}")
+
+    print("\nReduced multi-intent queries:")
+    for q in reduced_multi_intent_queries[:10]:
         print(f"- {q}")
 
 

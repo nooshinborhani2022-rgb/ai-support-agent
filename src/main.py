@@ -859,6 +859,8 @@ def main():
                 selected = select_top_intents(ranked, user)
                 selected = apply_sentiment_routing(selected, sentiment_label)
 
+        predicted_topics_before_rules = [intent["topic"] for intent in selected]
+
         pre_rule_confidence = get_confidence(selected)
 
         selected, routing_reason = apply_confidence_sentiment_rules(
@@ -867,18 +869,24 @@ def main():
             sentiment_label
         )
 
+        final_topics_after_rules = [intent["topic"] for intent in selected]
+
         confidence = get_confidence(selected)
         top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
         response = generate_response(selected, sentiment_label=sentiment_label)
-        selected_topics = [intent["topic"] for intent in selected]
-        final_response = add_empathy_and_politeness(response, sentiment_label, selected_topics)
+        final_response = add_empathy_and_politeness(
+            response,
+            sentiment_label,
+            final_topics_after_rules
+        )
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
 
         print(f"Detected sentiment: {sentiment_label}")
-        print(f"Selected topics: {selected_topics}")
+        print(f"Predicted topics before rules: {predicted_topics_before_rules}")
+        print(f"Final topics after rules: {final_topics_after_rules}")
         print(f"Final action: {final_action} (reason={routing_reason})")
         print(f"Confidence: {confidence} (top1={top1_score}, top2={top2_score}, gap={score_gap})")
         print("Bot:", final_response)
@@ -894,7 +902,9 @@ def main():
             top1_score,
             top2_score,
             score_gap,
-            routing_reason
+            routing_reason,
+            predicted_topics_before_rules=predicted_topics_before_rules,
+            final_topics_after_rules=final_topics_after_rules
         )
 
 

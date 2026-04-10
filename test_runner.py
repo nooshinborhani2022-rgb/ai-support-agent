@@ -10,6 +10,8 @@ from src.main import (
     apply_confidence_sentiment_rules,
     has_success_signal,
     has_no_issue_signal,
+    SUCCESS_RESPONSES,
+    NO_ISSUE_RESPONSES,
 )
 from src.sentiment import detect_sentiment
 
@@ -144,7 +146,7 @@ def build_special_case_selection(user_text):
             "topic": "success",
             "score": 1.0,
             "action": "answer",
-            "responses": []
+            "responses": SUCCESS_RESPONSES
         }]
 
     if has_no_issue_signal(user_text):
@@ -152,7 +154,7 @@ def build_special_case_selection(user_text):
             "topic": "no_issue",
             "score": 1.0,
             "action": "answer",
-            "responses": []
+            "responses": NO_ISSUE_RESPONSES
         }]
 
     return None
@@ -190,17 +192,22 @@ def run_intent_tests():
             selected = apply_sentiment_routing(selected, sentiment_label)
 
         predicted = sorted([intent["topic"] for intent in selected])
+        predicted_topics_before_rules = [intent["topic"] for intent in selected]
 
-        confidence = get_confidence(selected)
-        top1_score = selected[0]["score"] if selected else 0.0
-        top2_score = selected[1]["score"] if len(selected) > 1 else 0.0
-        score_gap = round(top1_score - top2_score, 3)
+        pre_rule_confidence = get_confidence(selected)
 
         final_selected, routing_reason = apply_confidence_sentiment_rules(
             selected,
-            confidence,
+            pre_rule_confidence,
             sentiment_label
         )
+
+        final_topics_after_rules = [intent["topic"] for intent in final_selected]
+
+        confidence = get_confidence(final_selected)
+        top1_score = final_selected[0]["score"] if final_selected else 0.0
+        top2_score = final_selected[1]["score"] if len(final_selected) > 1 else 0.0
+        score_gap = round(top1_score - top2_score, 3)
 
         response = generate_response(final_selected, sentiment_label=sentiment_label)
         final_action = get_final_action(final_selected)
@@ -236,6 +243,8 @@ def run_intent_tests():
             "top2_score": top2_score,
             "score_gap": score_gap,
             "routing_reason": routing_reason,
+            "predicted_topics_before_rules": predicted_topics_before_rules,
+            "final_topics_after_rules": final_topics_after_rules,
         })
 
     total = passed + failed

@@ -14,7 +14,9 @@ def log_interaction(
     top1_score=None,
     top2_score=None,
     score_gap=None,
-    routing_reason=None
+    routing_reason=None,
+    predicted_topics_before_rules=None,
+    final_topics_after_rules=None,
 ):
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
@@ -46,6 +48,12 @@ def log_interaction(
 
     if routing_reason is not None:
         log_entry["routing_reason"] = routing_reason
+
+    if predicted_topics_before_rules is not None:
+        log_entry["predicted_topics_before_rules"] = predicted_topics_before_rules
+
+    if final_topics_after_rules is not None:
+        log_entry["final_topics_after_rules"] = final_topics_after_rules
 
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
