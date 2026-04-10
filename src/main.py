@@ -804,6 +804,14 @@ def add_empathy_and_politeness(response, sentiment_label, topics):
     empathy = empathy_map.get(sentiment_label, "")
     return f"{empathy} {response}".strip()
 
+def apply_action_tone(response, final_action):
+    if final_action == "escalate":
+        return response + "\n\nI'll make sure this is handled as quickly as possible."
+
+    if final_action == "clarify":
+        return response + "\n\nOnce I have a bit more detail, I’ll guide you step by step."
+
+    return response
 
 def main():
     faq_data = load_faq()
@@ -875,11 +883,16 @@ def main():
         top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
         response = generate_response(selected, sentiment_label=sentiment_label)
+
+        primary_intent = selected[0]["topic"] if selected else None
+        final_action = get_final_action(selected)
+
         final_response = add_empathy_and_politeness(
-            response,
-            sentiment_label,
-            final_topics_after_rules
-        )
+        response,
+        sentiment_label,
+        final_topics_after_rules
+)
+        final_response = apply_action_tone(final_response, final_action)
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
