@@ -1,156 +1,233 @@
-# AI Customer Support Agent
+# 🤖 AI Support Agent
 
-A hybrid AI-powered customer support chatbot designed to handle real-world support queries using a combination of rule-based logic, TF-IDF retrieval, multi-intent detection, and basic sentiment awareness.
+A hybrid AI-powered customer support agent that combines rule-based logic with statistical NLP to deliver accurate, explainable, and production-ready support responses.
 
-## Features
-- Intent detection (single + multi-intent)
-- Action-based routing:
-  - Answer
-  - Clarify
-  - Escalate
-- TF-IDF + keyword hybrid matching
-- Vague query handling (e.g. "it's not working")
-- Conflict resolution between intents
-- Basic sentiment detection:
-  - neutral
-  - frustrated
-  - angry
-  - urgent
-- Sentiment-aware response tone
-- Sentiment-aware urgent intent boosting
-- Logging system (`chat_log.jsonl`)
-- Log analysis
-- Full validation test suite (100% accuracy)
+---
 
-## How It Works
+## 🚀 Features
 
-### 1. Preprocessing
-- Lowercasing
-- Contraction expansion (e.g. "can't" → "cannot")
-- Stopword removal
+### 🧠 NLP & Intent Detection
 
-### 2. Intent Detection
-- TF-IDF similarity
-- Keyword matching
-- Hybrid scoring
+* Hybrid intent detection (TF-IDF + keyword matching)
+* Strong multi-intent detection
+* Conflict resolution between overlapping intents
+* Vague query handling
 
-### 3. Multi-Intent Handling
-- Select top intents
-- Apply conflict resolution rules
-- Prevent false multi-intent predictions
+### 💬 Sentiment Awareness
 
-### 4. Sentiment Detection
-- Rule-based sentiment detection
-- Keyword-based matching
-- Contraction-aware normalization
-- Priority-based sentiment label selection
+* Sentiment detection:
 
-### 5. Response Generation
-- Single intent → direct response
-- Multi-intent → combined response
-- Sentiment-aware tone prefix
-- Routing:
-  - Answer
-  - Clarify
-  - Escalate
+  * neutral
+  * frustrated
+  * angry
+  * urgent
+* Sentiment-aware routing (affects final action)
 
-## Recent Improvements
+### 🎯 Decision Engine
 
-### Vague Query Handling
-Handles ambiguous inputs like:
-- "it's not working"
-- "I have a problem"
-- "help me"
+* Confidence scoring using score gap:
 
-These are safely routed to `general_help` instead of incorrect intents.
+  * `confidence = top1_score - top2_score`
+* Confidence-aware routing
+* Action types:
 
-### Contraction Normalization
-Expands contractions:
-- "I'm" → "I am"
-- "can't" → "cannot"
-- "it's" → "it is"
+  * answer
+  * clarify
+  * escalate
 
-Improves matching quality for both TF-IDF and keywords.
+### 🔍 Explainability (XAI)
 
-### Intent Disambiguation
-Reduced confusion between:
-- `billing_question`
-- `refund_request`
+* Routing reasons:
 
-Using domain-specific cues.
+  * normal_routing
+  * low_confidence_fallback
+  * sentiment_override_angry
+  * sentiment_override_frustrated
+* Confidence breakdown:
 
-### Hybrid Scoring Improvements
-- TF-IDF + keyword scoring combined
-- Stable weighting to avoid breaking multi-intent detection
+  * top1_score
+  * top2_score
+  * score_gap
 
-### Sentiment Analysis (Phase E - Step 1)
-Added a simple rule-based sentiment layer with support for:
-- `neutral`
-- `frustrated`
-- `angry`
-- `urgent`
+### 📊 Logging & Analysis
 
-Current sentiment usage:
-- adds empathetic response prefixes
-- stores sentiment results in logs
-- supports sentiment distribution analysis
-- gives a small boost to urgent high-priority intents
+* Structured logs (`chat_log.jsonl`)
+* Log analysis includes:
 
-### Regression Testing
-Added tests for:
-- Vague queries
-- Billing vs refund edge cases
-- Urgent multi-intent queries
-- Angry sentiment detection
+  * intent distribution
+  * action distribution
+  * sentiment distribution
+  * routing reason distribution
+  * confidence metrics
 
-Ensures future changes don’t break existing behavior.
+### 🧪 Testing
 
-## Testing
+* Intent tests
+* Sentiment tests
+* Routing tests
+* Regression tests:
 
-Run full validation:
+  * multi-intent behavior
+  * success / no_issue handling
 
-```bash
-python test_runner.py
+---
+
+## 🧠 System Architecture
+
+```
+User Input
+   ↓
+Preprocessing
+   ↓
+Intent Detection (TF-IDF + Keywords)
+   ↓
+Multi-Intent Selection + Conflict Resolution
+   ↓
+Sentiment Detection
+   ↓
+Confidence Calculation (score gap)
+   ↓
+Routing Logic (confidence + sentiment)
+   ↓
+Response Generation
+   ↓
+Logging & Explainability
 ```
 
-## Logging & Analysis
+---
 
-Logs are saved in:
+## 🔍 Explainability
 
-```bash
-chat_log.jsonl
+The system provides transparency into its decision-making:
+
+* Detected sentiment
+* Selected intents (topics)
+* Final action (answer / clarify / escalate)
+* Confidence score (based on score gap)
+* Routing reason:
+
+  * normal_routing
+  * low_confidence_fallback
+  * sentiment overrides
+
+### Example Output
+
+```
+Detected sentiment: frustrated
+Selected topics: ['login_issue', 'double_charge']
+Final action: escalate (reason=normal_routing)
+Confidence: 1.279 (top1=3.153, top2=1.874, gap=1.279)
 ```
 
-Analyze logs:
+---
+
+## 📊 Log Analysis
+
+Run:
 
 ```bash
 python analyze_logs.py
 ```
 
-## Current Capabilities
-- Multi-intent detection
-- Hybrid intent scoring
-- Clarify / Answer / Escalate routing
-- Vague query detection
-- Basic sentiment detection
-- Sentiment-aware tone handling
-- Sentiment-aware urgent boosting
-- Logging + analytics
-- 100% test accuracy
+This provides:
 
-## Tech Stack
-- Python
-- scikit-learn (TF-IDF, cosine similarity)
-- Rule-based NLP
-- JSON-based dataset
+* Total messages
+* Intent distribution
+* Final action distribution
+* Sentiment distribution
+* Routing reason distribution
+* Average confidence
+* Score gap statistics
+* Multi-intent queries
 
-## Future Work
-- Embedding-based retrieval
-- ML-based intent classification
-- Sentiment-aware routing
-- Explainable AI (XAI)
-- Benchmarking (BANKING77, CLINC150, etc.)
-- FastAPI + UI deployment
+---
 
-## Project Status
-Active development — improving NLP, ML, and product capabilities step by step.
+## ▶️ How to Run
+
+### 1. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Run the chatbot
+
+```bash
+python src/main.py
+```
+
+---
+
+## 🧪 Run Tests
+
+```bash
+python test_runner.py
+```
+
+Includes:
+
+* Intent validation
+* Sentiment validation
+* Routing validation
+* Regression tests
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+ ├── main.py
+ ├── preprocessing.py
+ ├── sentiment.py
+ ├── logger_utils.py
+ ├── config.py
+
+analyze_logs.py
+test_runner.py
+faq.json
+chat_log.jsonl
+README.md
+```
+
+---
+
+## 🧩 Key Capabilities
+
+* Hybrid AI (rules + statistical NLP)
+* Multi-intent understanding
+* Sentiment-aware decision making
+* Confidence-based routing
+* Explainable AI (XAI)
+* Logging and analytics
+* Regression-safe testing
+
+---
+
+## 🚀 Future Roadmap
+
+* Embeddings-based semantic search
+* ML intent classifier (LogReg / Transformer)
+* Context-aware multi-turn conversations
+* Advanced explainability (feature-level reasoning)
+* Benchmarking (BANKING77, CLINC150)
+* API deployment (FastAPI)
+* UI dashboard
+
+---
+
+## 📌 Summary
+
+This project is not a simple chatbot.
+It is a **hybrid AI support system** designed with:
+
+* Explainability
+* Reliability
+* Observability
+* Production-readiness
+
+---
+
+## 👤 Author
+
+Developed by Nooshin Borhani Rayeni
