@@ -789,9 +789,11 @@ def generate_response(selected_intents, sentiment_label=None):
 
     return merge_responses(r1, r2, t1, t2)
 
-
-def add_empathy_and_politeness(response, sentiment_label, topics):
+def add_empathy_and_politeness(response, sentiment_label, topics, confidence=None):
     if topics and topics[0] in {"success", "no_issue"}:
+        return response
+
+    if confidence is not None and confidence < 0.6:
         return response
 
     empathy_map = {
@@ -803,6 +805,15 @@ def add_empathy_and_politeness(response, sentiment_label, topics):
 
     empathy = empathy_map.get(sentiment_label, "")
     return f"{empathy} {response}".strip()
+
+def apply_confidence_tone(response, confidence):
+    if confidence < 0.3:
+        return f"I’m not fully sure I understood correctly, but {response}"
+
+    if confidence < 0.6:
+        return f"Based on what I understand, {response}"
+
+    return response
 
 def apply_action_tone(response, final_action):
     if final_action == "escalate":
@@ -890,9 +901,11 @@ def main():
         final_response = add_empathy_and_politeness(
         response,
         sentiment_label,
-        final_topics_after_rules
-)
+        final_topics_after_rules,
+        pre_rule_confidence
+        )
         final_response = apply_action_tone(final_response, final_action)
+        final_response = apply_confidence_tone(final_response, pre_rule_confidence)
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
@@ -901,7 +914,10 @@ def main():
         print(f"Predicted topics before rules: {predicted_topics_before_rules}")
         print(f"Final topics after rules: {final_topics_after_rules}")
         print(f"Final action: {final_action} (reason={routing_reason})")
-        print(f"Confidence: {confidence} (top1={top1_score}, top2={top2_score}, gap={score_gap})")
+        print(
+    f"Confidence: {confidence} "
+    f"(pre_rule={pre_rule_confidence}, top1={top1_score}, top2={top2_score}, gap={score_gap})"
+    )
         print("Bot:", final_response)
 
         log_interaction(
