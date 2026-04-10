@@ -1,6 +1,7 @@
 from src.preprocessing import preprocess_text, expand_contractions
 from src.logger_utils import log_interaction
-from src.sentiment import detect_sentiment, get_sentiment_prefix, get_sentiment_label
+from src.sentiment import detect_sentiment, get_sentiment_prefix
+from src.confidence_utils import get_confidence, extract_confidence_details
 
 import json
 import random
@@ -739,21 +740,6 @@ def get_final_action(selected_intents):
     return ordered[0]["action"]
 
 
-def get_confidence(selected_intents):
-    if not selected_intents:
-        return 0.0
-
-    top1 = selected_intents[0]["score"]
-
-    if len(selected_intents) > 1:
-        top2 = selected_intents[1]["score"]
-    else:
-        top2 = 0.0
-
-    confidence = round(top1 - top2, 3)
-    return confidence
-
-
 def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_label):
     if confidence < LOW_CONFIDENCE_THRESHOLD:
         return [DEFAULT_GENERAL_HELP_INTENT], "low_confidence_fallback"
@@ -809,7 +795,7 @@ def main():
             break
 
         sentiment = detect_sentiment(user)
-        sentiment_label = get_sentiment_label(user)
+        sentiment_label = sentiment["label"]
 
         if has_success_signal(user):
             selected = [{
@@ -849,36 +835,36 @@ def main():
                 selected = select_top_intents(ranked, user)
                 selected = apply_sentiment_routing(selected, sentiment_label)
 
-        confidence = get_confidence(selected)
-
-        top1_score = selected[0]["score"] if selected else 0.0
-        top2_score = selected[1]["score"] if len(selected) > 1 else 0.0
-        score_gap = round(top1_score - top2_score, 3)
+        pre_rule_confidence = get_confidence(selected)
 
         selected, routing_reason = apply_confidence_sentiment_rules(
             selected,
-            confidence,
+            pre_rule_confidence,
             sentiment_label
         )
+
+        confidence = get_confidence(selected)
+        top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
         response = generate_response(selected, sentiment_label=sentiment_label)
 
         if selected and selected[0]["topic"] in {"success", "no_issue"}:
             prefix = ""
         else:
-            prefix = get_sentiment_prefix(sentiment["label"])
+            prefix = get_sentiment_prefix(sentiment_label)
 
         final_response = prefix + response
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
-
         selected_topics = [intent["topic"] for intent in selected]
+
         print(f"Detected sentiment: {sentiment_label}")
         print(f"Selected topics: {selected_topics}")
         print(f"Final action: {final_action} (reason={routing_reason})")
         print(f"Confidence: {confidence} (top1={top1_score}, top2={top2_score}, gap={score_gap})")
         print("Bot:", final_response)
+
         log_interaction(
             user,
             selected,
