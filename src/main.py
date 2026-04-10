@@ -827,6 +827,7 @@ def main():
             }]
         elif is_vague_query(user):
             selected = [DEFAULT_GENERAL_HELP_INTENT]
+            selected = apply_sentiment_routing(selected, sentiment_label)
         else:
             ranked = detect_intents(
                 user,
@@ -872,11 +873,12 @@ def main():
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
 
+        selected_topics = [intent["topic"] for intent in selected]
         print(f"Detected sentiment: {sentiment_label}")
+        print(f"Selected topics: {selected_topics}")
         print(f"Final action: {final_action} (reason={routing_reason})")
         print(f"Confidence: {confidence} (top1={top1_score}, top2={top2_score}, gap={score_gap})")
         print("Bot:", final_response)
-
         log_interaction(
             user,
             selected,
