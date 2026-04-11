@@ -87,6 +87,10 @@ def analyze_logs(logs):
     avg_confidence = sum(confidence_values) / len(confidence_values) if confidence_values else 0.0
     avg_score_gap = sum(score_gaps) / len(score_gaps) if score_gaps else 0.0
 
+    print("\n==============================")
+    print("   AI Support Agent Analytics")
+    print("==============================")
+
     print("\n=== Log Analysis Report ===")
     print(f"Total messages: {total_messages}")
     print(f"Fallback responses: {fallback_count}")
@@ -138,6 +142,18 @@ def analyze_logs(logs):
     print("\nReduced multi-intent queries:")
     for q in reduced_multi_intent_queries[:10]:
         print(f"- {q}")
+
+    print("\n------------------------------")
+    print("\n=== Insights ===")
+
+    if fallback_count > 0:
+        print(f"- {fallback_count} queries required clarification due to low confidence.")
+
+    if len(reduced_multi_intent_queries) > 0:
+        print(f"- {len(reduced_multi_intent_queries)} multi-intent cases were simplified for safety.")
+
+    if avg_confidence < 1.0:
+        print("- Some queries show low confidence → consider improving intent separation.")
 
 
 def main():
