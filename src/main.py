@@ -706,6 +706,28 @@ def get_action_consistent_response(intent, sentiment_label=None):
     return get_single_response(intent)
 
 
+def get_partial_answer_for_topic(topic):
+    partial_answers = {
+        "login_issue": "For the login part, please try resetting your password first and let me know if you see an error message or a lockout notice.",
+        "account_locked": "For the account access part, please check whether you see a lockout or access denied message.",
+        "payment_failed": "For the payment part, please try the payment again and check whether your card was declined or the checkout failed.",
+        "double_charge": "For the billing part, I can help review whether this looks like a duplicate charge.",
+        "refund_request": "For the refund part, I can help with the request once I understand what happened with the payment or charge.",
+        "billing_question": "For the billing part, I can help explain whether this is related to an invoice, subscription fee, or plan charge.",
+        "order_status": "For the order part, I can help check the current order status if you share the order details.",
+        "delivery_issue": "For the delivery part, I can help look into whether the package is delayed or still in transit.",
+        "charge_explanation": "For the charge part, I can help explain what the charge may be related to.",
+        "subscription_cancel": "For the subscription part, I can help with cancellation steps.",
+        "fraud_report": "For the security part, this may need urgent review if the charge looks unauthorized.",
+        "password_reset": "For the password part, I can help you with reset steps."
+    }
+
+    return partial_answers.get(
+        topic,
+        "I can help with part of this issue."
+    )
+
+
 def merge_responses(r1, r2, t1, t2):
     return (
         f"I can help with both your {t1} and {t2}.\n\n"
@@ -829,14 +851,21 @@ def apply_confidence_tone(response, confidence):
 
 
 def get_low_confidence_multi_intent_response(predicted_topics):
-    topic_labels = [topic.replace("_", " ") for topic in predicted_topics[:2]]
-
-    if len(topic_labels) < 2:
+    if not predicted_topics:
         return DEFAULT_GENERAL_HELP_INTENT["responses"][0]
 
+    topic_labels = [topic.replace("_", " ") for topic in predicted_topics[:2]]
+
+    if len(predicted_topics) < 2:
+        return DEFAULT_GENERAL_HELP_INTENT["responses"][0]
+
+    first_topic = predicted_topics[0]
+    partial_answer = get_partial_answer_for_topic(first_topic)
+
     return (
-        f"It looks like this may involve both your {topic_labels[0]} and {topic_labels[1]}. "
-        f"Please tell me which part you’d like help with first, and I’ll guide you from there."
+        f"It looks like this may involve both your {topic_labels[0]} and {topic_labels[1]}.\n\n"
+        f"{partial_answer}\n\n"
+        f"To help with the {topic_labels[1]} part, could you clarify that part a little more first?"
     )
 
 
