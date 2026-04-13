@@ -72,10 +72,40 @@ ANSWER_STYLE_RESPONSES = {
 }
 
 CLARIFICATION_OPTIONS = {
+    "account": [
+        "a login issue",
+        "an account lockout",
+        "a password reset",
+    ],
     "charge": [
         "a charge you don’t recognize",
         "a duplicate charge",
         "a refund request",
+    ],
+    "billing": [
+        "an invoice question",
+        "a subscription fee question",
+        "a general billing issue",
+    ],
+    "payment": [
+        "a failed payment",
+        "a declined card or checkout problem",
+        "a refund request",
+    ],
+    "subscription": [
+        "canceling your subscription",
+        "a subscription fee question",
+        "another billing issue",
+    ],
+    "security": [
+        "a suspicious or unauthorized charge",
+        "a duplicate charge",
+        "a charge you don’t recognize",
+    ],
+    "order": [
+        "an order status update",
+        "a delayed delivery",
+        "a missing package",
     ],
 }
 
@@ -588,8 +618,8 @@ def is_vague_query(user_text):
         "not working",
     ]
 
-    if has_strong_domain_cue(user_text):
-        return False
+    if detect_clarification_domain(user_text):
+        return True
 
     if original in vague_exact_inputs:
         return True
@@ -952,28 +982,28 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
     if not conversation_state["awaiting_clarification"]:
         return False
 
+    last_topics = conversation_state.get("last_topics", [])
+    if not last_topics:
+        return False
+
+    last_topic = last_topics[0]
+
+
+    if not last_topic.endswith("_clarification"):
+        return False
+
+    domain = last_topic.replace("_clarification", "")
+
+    new_domain = detect_clarification_domain(user_text)
+
+
+    if new_domain and new_domain != domain:
+        return False
+
     normalized = normalize_phrase_text(user_text)
     token_count = len(normalized.split())
 
-    followup_starters = [
-        "for ",
-        "about ",
-        "it is ",
-        "its ",
-        "it's ",
-        "because ",
-        "regarding ",
-        "the refund",
-        "the charge",
-        "the payment",
-        "the order",
-        "the delivery",
-    ]
-
-    if token_count <= 8:
-        return True
-
-    if any(normalized.startswith(prefix.strip()) for prefix in followup_starters):
+    if token_count <= 6:
         return True
 
     return False
@@ -1012,10 +1042,98 @@ def get_clarification_refined_response(user_text, selected_intents):
 def detect_clarification_domain(user_text):
     normalized = normalize_phrase_text(user_text)
 
-    charge_words = ["charge", "charged", "billing", "payment"]
+    security_words = [
+        "fraud",
+        "scam",
+        "unauthorized",
+        "suspicious",
+        "stolen card",
+        "used my card",
+        "without permission",
+        "not mine",
+    ]
+
+    account_words = [
+        "account",
+        "login",
+        "log in",
+        "sign in",
+        "password",
+        "locked",
+        "lockout",
+        "access denied",
+        "blocked",
+    ]
+
+    charge_words = [
+        "charge",
+        "charged",
+        "double charge",
+        "charged twice",
+        "billed twice",
+        "duplicate payment",
+        "money back",
+        "refund",
+    ]
+
+    payment_words = [
+        "payment",
+        "card",
+        "checkout",
+        "transaction",
+        "declined",
+        "payment failed",
+        "payment not going through",
+    ]
+
+    billing_words = [
+        "billing",
+        "invoice",
+        "bill",
+        "subscription fee",
+        "plan cost",
+    ]
+
+    subscription_words = [
+        "subscription",
+        "unsubscribe",
+        "cancel plan",
+        "cancel subscription",
+        "stop plan",
+        "end subscription",
+    ]
+
+    order_words = [
+        "order",
+        "delivery",
+        "package",
+        "shipping",
+        "track",
+        "late",
+        "delayed",
+        "shipment",
+    ]
+
+    if any(word in normalized for word in security_words):
+        return "security"
+
+    if any(word in normalized for word in account_words):
+        return "account"
+
+    if any(word in normalized for word in subscription_words):
+        return "subscription"
+
+    if any(word in normalized for word in billing_words):
+        return "billing"
+
+    if any(word in normalized for word in payment_words):
+        return "payment"
 
     if any(word in normalized for word in charge_words):
         return "charge"
+
+    if any(word in normalized for word in order_words):
+        return "order"
 
     return None
 
@@ -1028,10 +1146,15 @@ def generate_domain_clarification(domain):
     if len(options) == 2:
         return f"Just to clarify, is this about {options[0]} or {options[1]}?"
 
-    return (
-        f"Just to clarify, is this about {options[0]}, "
-        f"{options[1]}, or {options[2]}?"
-    )
+    if len(options) == 3:
+        return (
+            f"Just to clarify, is this about {options[0]}, "
+            f"{options[1]}, or {options[2]}?"
+        )
+
+    leading = ", ".join(options[:-1])
+    trailing = options[-1]
+    return f"Just to clarify, is this about {leading}, or {trailing}?"
 
 def generate_clarification_question(predicted_topics):
     if not predicted_topics or len(predicted_topics) < 2:
@@ -1181,6 +1304,10 @@ def main():
             pre_rule_confidence,
             sentiment_label,
     )
+        # ensure clarification topics always stay clarify
+        for intent in selected:
+          if intent["topic"].endswith("_clarification"):
+              intent["action"] = "clarify"
         if (
     routing_reason == "low_confidence_multi_intent"
     and should_skip_clarification_for_strong_multi_intent(
