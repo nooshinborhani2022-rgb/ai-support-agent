@@ -618,18 +618,24 @@ def is_vague_query(user_text):
         "not working",
     ]
 
-    if detect_clarification_domain(user_text):
-        return True
+    weak_words = {"help", "problem", "issue", "wrong"}
+    domain = detect_clarification_domain(user_text)
 
+    # 1) کاملاً مبهم
     if original in vague_exact_inputs:
         return True
 
     if any(phrase in original for phrase in vague_phrases):
         return True
 
-    weak_words = {"help", "problem", "issue", "wrong"}
 
-    if len(tokens) <= 4 and any(word in tokens for word in weak_words):
+    if domain is not None and any(word in original for word in weak_words):
+        return True
+
+    if has_strong_domain_cue(user_text):
+        return False
+
+    if len(tokens) <= 6 and any(word in tokens for word in weak_words):
         return True
 
     return False
@@ -1042,18 +1048,19 @@ def get_clarification_refined_response(user_text, selected_intents):
 def detect_clarification_domain(user_text):
     normalized = normalize_phrase_text(user_text)
 
-    security_words = [
+    security_phrases = [
         "fraud",
         "scam",
-        "unauthorized",
-        "suspicious",
+        "unauthorized charge",
+        "suspicious charge",
         "stolen card",
         "used my card",
         "without permission",
         "not mine",
+        "suspicious",
     ]
 
-    account_words = [
+    account_phrases = [
         "account",
         "login",
         "log in",
@@ -1065,45 +1072,7 @@ def detect_clarification_domain(user_text):
         "blocked",
     ]
 
-    charge_words = [
-        "charge",
-        "charged",
-        "double charge",
-        "charged twice",
-        "billed twice",
-        "duplicate payment",
-        "money back",
-        "refund",
-    ]
-
-    payment_words = [
-        "payment",
-        "card",
-        "checkout",
-        "transaction",
-        "declined",
-        "payment failed",
-        "payment not going through",
-    ]
-
-    billing_words = [
-        "billing",
-        "invoice",
-        "bill",
-        "subscription fee",
-        "plan cost",
-    ]
-
-    subscription_words = [
-        "subscription",
-        "unsubscribe",
-        "cancel plan",
-        "cancel subscription",
-        "stop plan",
-        "end subscription",
-    ]
-
-    order_words = [
+    order_phrases = [
         "order",
         "delivery",
         "package",
@@ -1114,26 +1083,66 @@ def detect_clarification_domain(user_text):
         "shipment",
     ]
 
-    if any(word in normalized for word in security_words):
+    payment_phrases = [
+        "payment",
+        "card",
+        "checkout",
+        "transaction",
+        "declined",
+        "payment failed",
+        "payment problem",
+        "card problem",
+        "checkout problem",
+    ]
+
+    billing_phrases = [
+        "billing",
+        "invoice",
+        "bill",
+        "subscription fee",
+        "plan cost",
+    ]
+
+    subscription_phrases = [
+        "subscription",
+        "unsubscribe",
+        "cancel plan",
+        "cancel subscription",
+        "stop plan",
+        "end subscription",
+    ]
+
+    charge_phrases = [
+        "charge",
+        "charged",
+        "charged twice",
+        "double charge",
+        "billed twice",
+        "duplicate payment",
+        "refund",
+        "money back",
+    ]
+
+    if any(phrase in normalized for phrase in security_phrases):
         return "security"
 
-    if any(word in normalized for word in account_words):
+    if any(phrase in normalized for phrase in account_phrases):
         return "account"
 
-    if any(word in normalized for word in subscription_words):
-        return "subscription"
+    if any(phrase in normalized for phrase in order_phrases):
+        return "order"
 
-    if any(word in normalized for word in billing_words):
-        return "billing"
-
-    if any(word in normalized for word in payment_words):
+    if any(phrase in normalized for phrase in payment_phrases):
         return "payment"
 
-    if any(word in normalized for word in charge_words):
-        return "charge"
+    if any(phrase in normalized for phrase in billing_phrases):
+        return "billing"
 
-    if any(word in normalized for word in order_words):
-        return "order"
+    if any(phrase in normalized for phrase in subscription_phrases):
+        return "subscription"
+
+    if any(phrase in normalized for phrase in charge_phrases):
+        return "charge"
 
     return None
 
