@@ -917,6 +917,39 @@ def create_conversation_state():
         "last_routing_reason": None,
     }
 
+def should_treat_as_clarification_followup(user_text, conversation_state):
+    if not conversation_state["awaiting_clarification"]:
+        return False
+
+    normalized = normalize_phrase_text(user_text)
+    token_count = len(normalized.split())
+
+    followup_starters = [
+        "for ",
+        "about ",
+        "it is ",
+        "its ",
+        "it's ",
+        "because ",
+        "regarding ",
+        "the refund",
+        "the charge",
+        "the payment",
+        "the order",
+        "the delivery",
+    ]
+
+    if token_count <= 8:
+        return True
+
+    if any(normalized.startswith(prefix.strip()) for prefix in followup_starters):
+        return True
+
+    return False
+
+def merge_with_clarification_context(user_text, conversation_state):
+    previous_message = conversation_state.get("last_user_message") or ""
+    return f"{previous_message} {user_text}".strip()
 
 def main():
     faq_data = load_faq()
@@ -928,33 +961,38 @@ def main():
     while True:
         user = input("You: ").strip()
 
+        effective_user = user
+        if should_treat_as_clarification_followup(user, conversation_state):
+            effective_user = merge_with_clarification_context(user, conversation_state)
+            print(f"[follow-up merged] {effective_user}")
+
         if user.lower() in ["exit", "bye", "quit"]:
             print("Bot: Goodbye!")
             break
 
-        sentiment = detect_sentiment(user)
+        sentiment = detect_sentiment(effective_user)
         sentiment_label = sentiment["label"]
 
-        if has_success_signal(user):
+        if has_success_signal(effective_user):
             selected = [{
                 "topic": "success",
                 "score": 1.0,
                 "action": "answer",
                 "responses": SUCCESS_RESPONSES
             }]
-        elif has_no_issue_signal(user):
+        elif has_no_issue_signal(effective_user):
             selected = [{
                 "topic": "no_issue",
                 "score": 1.0,
                 "action": "answer",
                 "responses": NO_ISSUE_RESPONSES
             }]
-        elif is_vague_query(user):
+        elif is_vague_query(effective_user):
             selected = [DEFAULT_GENERAL_HELP_INTENT]
             selected = apply_sentiment_routing(selected, sentiment_label)
         else:
             ranked = detect_intents(
-                user,
+                effective_user,
                 faq_data,
                 vectorizer,
                 matrix,
@@ -970,7 +1008,7 @@ def main():
                     "responses": NO_ISSUE_RESPONSES
                 }]
             else:
-                selected = select_top_intents(ranked, user)
+                selected = select_top_intents(ranked, effective_user)
                 selected = apply_sentiment_routing(selected, sentiment_label)
 
         predicted_topics_before_rules = [intent["topic"] for intent in selected]
