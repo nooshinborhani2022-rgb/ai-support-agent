@@ -770,11 +770,53 @@ def get_final_action(selected_intents):
     ordered = sort_intents_by_priority(selected_intents)
     return ordered[0]["action"]
 
+def should_escalate_to_human(selected_intents, sentiment_label, confidence):
+    if not selected_intents:
+        return False
+
+    topics = [intent["topic"] for intent in selected_intents]
+
+    # 🚨 High-risk topics → always escalate
+    high_risk_topics = {
+        "fraud_report",
+    }
+
+    if any(t in high_risk_topics for t in topics):
+        return True
+
+    # 🚨 Account security combinations
+    if "account_locked" in topics and "fraud_report" in topics:
+        return True
+
+    # 🚨 Angry + low confidence + billing/security
+    if sentiment_label == "angry" and confidence < 0.5:
+        if any(t in {"payment_failed", "double_charge", "charge_explanation"} for t in topics):
+            return True
+
+    return False
+
 
 def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_label):
+    # 🔴 Low confidence handling
     if confidence < LOW_CONFIDENCE_THRESHOLD:
+
+        # 🚨 Smart human escalation
+        if should_escalate_to_human(selected_intents, sentiment_label, confidence):
+            updated = []
+            for intent in selected_intents:
+                new_intent = intent.copy()
+                new_intent["action"] = "escalate"
+                updated.append(new_intent)
+            return updated, "human_escalation"
+
+        # 🟡 Multi-intent but not critical → keep intents
+        if len(selected_intents) > 1:
+            return selected_intents, "low_confidence_multi_intent"
+
+        # ⚪ Fallback
         return [DEFAULT_GENERAL_HELP_INTENT], "low_confidence_fallback"
 
+    # 🟢 Normal confidence
     updated_intents = []
     routing_reason = "normal_routing"
 
@@ -792,7 +834,6 @@ def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_lab
         updated_intents.append(updated_intent)
 
     return updated_intents, routing_reason
-
 
 def generate_response(selected_intents, sentiment_label=None):
     if not selected_intents:
@@ -902,6 +943,7 @@ def main():
         elif is_vague_query(user):
             selected = [DEFAULT_GENERAL_HELP_INTENT]
             selected = apply_sentiment_routing(selected, sentiment_label)
+
         else:
             ranked = detect_intents(
                 user,
@@ -932,13 +974,21 @@ def main():
             pre_rule_confidence,
             sentiment_label
         )
+        # ✅ Fix action for low-confidence multi-intent
+        if routing_reason == "low_confidence_multi_intent":
+            updated = []
+        for intent in selected:
+            new_intent = intent.copy()
+            new_intent["action"] = "clarify"
+            updated.append(new_intent)
+            selected = updated
 
         final_topics_after_rules = [intent["topic"] for intent in selected]
 
         confidence = get_confidence(selected)
         top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
-        if routing_reason == "low_confidence_fallback" and len(predicted_topics_before_rules) > 1:
+        if routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
             response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
         else:
             response = generate_response(selected, sentiment_label=sentiment_label)
