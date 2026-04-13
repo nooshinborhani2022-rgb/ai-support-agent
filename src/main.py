@@ -883,11 +883,13 @@ def add_empathy_and_politeness(response, sentiment_label, topics, confidence=Non
     return f"{empathy} {response}".strip()
 
 
-def apply_action_tone(response, final_action):
+def apply_action_tone(response, final_action, skip_clarify_tail=False):
     if final_action == "escalate":
         return response + "\n\nI'll make sure this is handled as quickly as possible."
 
     if final_action == "clarify":
+        if skip_clarify_tail:
+            return response
         return response + "\n\nOnce I have a bit more detail, I’ll guide you step by step."
 
     return response
@@ -1009,6 +1011,7 @@ def main():
             break
 
         effective_user = user
+        skip_clarify_tail = False
         is_followup_clarification = should_treat_as_clarification_followup(user, conversation_state)
 
         if is_followup_clarification:
@@ -1088,6 +1091,7 @@ def main():
             refined_response = get_clarification_refined_response(effective_user, selected)
             if refined_response is not None:
                 response = refined_response
+                skip_clarify_tail = True
             elif routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
                 response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
             else:
@@ -1108,7 +1112,11 @@ def main():
             pre_rule_confidence,
         )
 
-        final_response = apply_action_tone(final_response, final_action)
+        final_response = apply_action_tone(
+        final_response,
+        final_action,
+        skip_clarify_tail=skip_clarify_tail
+        )
         final_response = apply_confidence_tone(final_response, pre_rule_confidence)
 
         print(f"Detected sentiment: {sentiment_label}")
