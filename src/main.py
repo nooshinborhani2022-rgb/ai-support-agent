@@ -1028,6 +1028,31 @@ def generate_clarification_question(predicted_topics):
 
     return None
 
+def should_skip_clarification_for_strong_multi_intent(user_text, predicted_topics):
+    if not predicted_topics or len(predicted_topics) < 2:
+        return False
+
+    normalized = normalize_phrase_text(user_text)
+
+    strong_topic_phrases = {
+        "payment_failed": ["payment failed", "card declined", "checkout failed"],
+        "refund_request": ["refund", "money back", "return my money"],
+        "login_issue": ["cant login", "cannot login", "log in", "sign in"],
+        "account_locked": ["account locked", "locked out", "access denied"],
+        "double_charge": ["charged twice", "double charge", "billed twice"],
+        "order_status": ["where is my order", "track order", "order status"],
+        "delivery_issue": ["delivery is late", "late delivery", "package delayed"],
+    }
+
+    matches = 0
+
+    for topic in predicted_topics[:2]:
+        phrases = strong_topic_phrases.get(topic, [])
+        if any(normalize_phrase_text(phrase) in normalized for phrase in phrases):
+            matches += 1
+
+    return matches >= 2
+
 def main():
     faq_data = load_faq()
     vectorizer, matrix, mapping = build_tfidf_index(faq_data)
@@ -1104,13 +1129,34 @@ def main():
             selected,
             pre_rule_confidence,
             sentiment_label,
+    )
+        if (
+    routing_reason == "low_confidence_multi_intent"
+    and should_skip_clarification_for_strong_multi_intent(
+        effective_user,
+        predicted_topics_before_rules
         )
+    ):
+            updated = []
+            for intent in selected:
+                new_intent = intent.copy()
+                new_intent["action"] = "answer"
+                updated.append(new_intent)
+                selected = updated
+                routing_reason = "strong_multi_intent_answer"
 
         if routing_reason == "low_confidence_multi_intent":
             updated = []
             for intent in selected:
                 new_intent = intent.copy()
                 new_intent["action"] = "clarify"
+                updated.append(new_intent)
+                selected = updated
+        elif routing_reason == "strong_multi_intent_answer":
+            updated = []
+            for intent in selected:
+                new_intent = intent.copy()
+                new_intent["action"] = "answer"
                 updated.append(new_intent)
             selected = updated
 
