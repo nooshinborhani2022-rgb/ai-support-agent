@@ -14,7 +14,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 ACTION_PRIORITY = {
     "escalate": 0,
     "answer": 1,
-    "clarify": 2
+    "clarify": 2,
 }
 
 
@@ -36,8 +36,8 @@ DEFAULT_GENERAL_HELP_INTENT = {
     "responses": [
         "I can help. Is your issue about login, billing, payment, or an order?",
         "Please share a bit more detail so I can guide you to the right support.",
-        "What kind of issue are you facing?"
-    ]
+        "What kind of issue are you facing?",
+    ],
 }
 
 
@@ -52,7 +52,7 @@ SUCCESS_RESPONSES = [
 NO_ISSUE_RESPONSES = [
     "Got it. Let me know if you need help with anything.",
     "Thanks for confirming. If anything comes up, I’m here to help.",
-    "Sounds good. Let me know if you run into any issues."
+    "Sounds good. Let me know if you run into any issues.",
 ]
 
 
@@ -101,46 +101,52 @@ def has_any_phrase(user_text, phrases, blocked_phrases=None):
 
 
 def has_success_signal(user_text):
-    return has_any_normalized_phrase(user_text, [
-        "i can login",
-        "i can log in",
-        "i can sign in",
-        "i was able to login",
-        "i was able to log in",
-        "i was able to sign in",
-        "it worked",
-        "it worked for me",
-        "it is working now",
-        "its working now",
-        "it works now",
-        "fixed it",
-        "problem solved",
-        "issue resolved",
-        "now it works",
-        "everything works",
-        "payment worked",
-        "payment went through"
-    ])
+    return has_any_normalized_phrase(
+        user_text,
+        [
+            "i can login",
+            "i can log in",
+            "i can sign in",
+            "i was able to login",
+            "i was able to log in",
+            "i was able to sign in",
+            "it worked",
+            "it worked for me",
+            "it is working now",
+            "its working now",
+            "it works now",
+            "fixed it",
+            "problem solved",
+            "issue resolved",
+            "now it works",
+            "everything works",
+            "payment worked",
+            "payment went through",
+        ],
+    )
 
 
 def has_no_issue_signal(user_text):
-    return has_any_normalized_phrase(user_text, [
-        "i am not locked out",
-        "im not locked out",
-        "i'm not locked out",
-        "my account is not locked",
-        "account is not locked",
-        "i was not charged twice",
-        "i wasnt charged twice",
-        "i wasn't charged twice",
-        "i was not billed twice",
-        "i wasnt billed twice",
-        "i wasn't billed twice",
-        "i was not double charged",
-        "i am not being charged twice",
-        "i am not blocked",
-        "my account is not blocked"
-    ])
+    return has_any_normalized_phrase(
+        user_text,
+        [
+            "i am not locked out",
+            "im not locked out",
+            "i'm not locked out",
+            "my account is not locked",
+            "account is not locked",
+            "i was not charged twice",
+            "i wasnt charged twice",
+            "i wasn't charged twice",
+            "i was not billed twice",
+            "i wasnt billed twice",
+            "i wasn't billed twice",
+            "i was not double charged",
+            "i am not being charged twice",
+            "i am not blocked",
+            "my account is not blocked",
+        ],
+    )
 
 
 def get_topic_blocked_phrases(topic):
@@ -154,7 +160,7 @@ def get_topic_blocked_phrases(topic):
             "able to sign in",
             "successfully login",
             "successfully log in",
-            "successfully sign in"
+            "successfully sign in",
         ],
         "account_locked": [
             "not locked out",
@@ -169,7 +175,7 @@ def get_topic_blocked_phrases(topic):
             "not blocked",
             "account not blocked",
             "account is not blocked",
-            "my account is not blocked"
+            "my account is not blocked",
         ],
         "payment_failed": [
             "payment worked",
@@ -177,7 +183,7 @@ def get_topic_blocked_phrases(topic):
             "payment succeeded",
             "payment did not fail",
             "payment was not declined",
-            "card was not declined"
+            "card was not declined",
         ],
         "double_charge": [
             "not charged twice",
@@ -188,7 +194,7 @@ def get_topic_blocked_phrases(topic):
             "was not billed twice",
             "not double charged",
             "not a double charge",
-            "no duplicate payment"
+            "no duplicate payment",
         ],
         "charge_explanation": [
             "was not charged",
@@ -197,27 +203,27 @@ def get_topic_blocked_phrases(topic):
             "not charged",
             "did not charge me",
             "didnt charge me",
-            "didn't charge me"
+            "didn't charge me",
         ],
         "refund_request": [
             "do not refund",
             "dont refund",
             "don't refund",
             "not asking for a refund",
-            "no refund"
+            "no refund",
         ],
         "fraud_report": [
             "not fraud",
             "no fraud",
             "not a scam",
-            "no scam"
+            "no scam",
         ],
         "delivery_issue": [
             "not late",
             "not delayed",
             "package arrived",
             "delivery arrived",
-            "shipping was fine"
+            "shipping was fine",
         ],
     }
 
@@ -316,12 +322,14 @@ def detect_intents(user_text, faq_data, vectorizer, matrix, mapping, sentiment_l
             total_score += 0.2
 
         if total_score > 0:
-            results.append({
-                "topic": topic,
-                "score": round(total_score, 3),
-                "action": action,
-                "responses": item.get("responses", [])
-            })
+            results.append(
+                {
+                    "topic": topic,
+                    "score": round(total_score, 3),
+                    "action": action,
+                    "responses": item.get("responses", []),
+                }
+            )
 
     results.sort(key=lambda x: x["score"], reverse=True)
     return apply_sentiment_score_boost(results, sentiment_label)
@@ -334,9 +342,9 @@ def has_account_locked_cue(user_text):
             "account locked",
             "locked out",
             "account blocked",
-            "access denied"
+            "access denied",
         ],
-        blocked_phrases=get_topic_blocked_phrases("account_locked")
+        blocked_phrases=get_topic_blocked_phrases("account_locked"),
     )
 
 
@@ -350,21 +358,24 @@ def has_login_cue(user_text):
             "cant login",
             "cannot login",
             "cannot log in",
-            "cant log in"
+            "cant log in",
         ],
-        blocked_phrases=get_topic_blocked_phrases("login_issue")
+        blocked_phrases=get_topic_blocked_phrases("login_issue"),
     )
 
 
 def has_password_reset_cue(user_text):
-    return has_any_phrase(user_text, [
-        "forgot password",
-        "reset password",
-        "change password",
-        "new password",
-        "lost password",
-        "cant remember password"
-    ])
+    return has_any_phrase(
+        user_text,
+        [
+            "forgot password",
+            "reset password",
+            "change password",
+            "new password",
+            "lost password",
+            "cant remember password",
+        ],
+    )
 
 
 def has_payment_cue(user_text):
@@ -375,9 +386,9 @@ def has_payment_cue(user_text):
             "card declined",
             "checkout failed",
             "transaction failed",
-            "payment failed"
+            "payment failed",
         ],
-        blocked_phrases=get_topic_blocked_phrases("payment_failed")
+        blocked_phrases=get_topic_blocked_phrases("payment_failed"),
     )
 
 
@@ -391,21 +402,24 @@ def has_double_charge_cue(user_text):
             "billed twice",
             "double charged",
             "charged two times",
-            "billed two times"
+            "billed two times",
         ],
-        blocked_phrases=get_topic_blocked_phrases("double_charge")
+        blocked_phrases=get_topic_blocked_phrases("double_charge"),
     )
 
 
 def has_billing_cue(user_text):
-    return has_any_phrase(user_text, [
-        "billing",
-        "bill",
-        "invoice",
-        "subscription fee",
-        "plan cost",
-        "bill question"
-    ])
+    return has_any_phrase(
+        user_text,
+        [
+            "billing",
+            "bill",
+            "invoice",
+            "subscription fee",
+            "plan cost",
+            "bill question",
+        ],
+    )
 
 
 def has_charge_explanation_cue(user_text):
@@ -419,9 +433,9 @@ def has_charge_explanation_cue(user_text):
             "dont understand this charge",
             "do not understand this charge",
             "what am i being charged for",
-            "you charged me"
+            "you charged me",
         ],
-        blocked_phrases=get_topic_blocked_phrases("charge_explanation")
+        blocked_phrases=get_topic_blocked_phrases("charge_explanation"),
     )
 
 
@@ -432,20 +446,23 @@ def has_refund_cue(user_text):
             "refund",
             "money back",
             "return my money",
-            "get my money back"
+            "get my money back",
         ],
-        blocked_phrases=get_topic_blocked_phrases("refund_request")
+        blocked_phrases=get_topic_blocked_phrases("refund_request"),
     )
 
 
 def has_subscription_cancel_cue(user_text):
-    return has_any_phrase(user_text, [
-        "cancel subscription",
-        "unsubscribe",
-        "stop plan",
-        "cancel plan",
-        "end subscription"
-    ])
+    return has_any_phrase(
+        user_text,
+        [
+            "cancel subscription",
+            "unsubscribe",
+            "stop plan",
+            "cancel plan",
+            "end subscription",
+        ],
+    )
 
 
 def has_fraud_cue(user_text):
@@ -458,9 +475,9 @@ def has_fraud_cue(user_text):
             "stolen card",
             "suspicious charge",
             "someone used my card",
-            "used without permission"
+            "used without permission",
         ],
-        blocked_phrases=get_topic_blocked_phrases("fraud_report")
+        blocked_phrases=get_topic_blocked_phrases("fraud_report"),
     )
 
 
@@ -472,18 +489,21 @@ def has_delivery_cue(user_text):
             "late",
             "shipping",
             "package",
-            "delayed"
+            "delayed",
         ],
-        blocked_phrases=get_topic_blocked_phrases("delivery_issue")
+        blocked_phrases=get_topic_blocked_phrases("delivery_issue"),
     )
 
 
 def has_order_cue(user_text):
-    return has_any_phrase(user_text, [
-        "order",
-        "track order",
-        "where is my order"
-    ])
+    return has_any_phrase(
+        user_text,
+        [
+            "order",
+            "track order",
+            "where is my order",
+        ],
+    )
 
 
 TOPIC_CUE_FUNCTIONS = {
@@ -513,20 +533,22 @@ def get_strong_cue_topics(user_text):
 
 
 def has_strong_domain_cue(user_text):
-    return any([
-        has_login_cue(user_text),
-        has_payment_cue(user_text),
-        has_billing_cue(user_text),
-        has_refund_cue(user_text),
-        has_delivery_cue(user_text),
-        has_order_cue(user_text),
-        has_account_locked_cue(user_text),
-        has_password_reset_cue(user_text),
-        has_double_charge_cue(user_text),
-        has_charge_explanation_cue(user_text),
-        has_subscription_cancel_cue(user_text),
-        has_fraud_cue(user_text),
-    ])
+    return any(
+        [
+            has_login_cue(user_text),
+            has_payment_cue(user_text),
+            has_billing_cue(user_text),
+            has_refund_cue(user_text),
+            has_delivery_cue(user_text),
+            has_order_cue(user_text),
+            has_account_locked_cue(user_text),
+            has_password_reset_cue(user_text),
+            has_double_charge_cue(user_text),
+            has_charge_explanation_cue(user_text),
+            has_subscription_cancel_cue(user_text),
+            has_fraud_cue(user_text),
+        ]
+    )
 
 
 def is_vague_query(user_text):
@@ -585,10 +607,7 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
 
     top_score = ranked_intents[0]["score"]
 
-    candidates = [
-        i for i in ranked_intents
-        if i["score"] >= top_score * 0.75
-    ]
+    candidates = [i for i in ranked_intents if i["score"] >= top_score * 0.75]
 
     if any(i["topic"] != "general_help" for i in candidates):
         candidates = [i for i in candidates if i["topic"] != "general_help"]
@@ -606,16 +625,12 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
         for intent in ranked_intents:
             if intent["topic"] == "general_help":
                 continue
-
             if intent["score"] < min_score:
                 continue
-
             if intent["topic"] not in strong_cue_topics:
                 continue
-
             if not any(c["topic"] == intent["topic"] for c in candidates):
                 candidates.append(intent)
-
             if len(candidates) >= max_intents:
                 break
 
@@ -686,7 +701,6 @@ def topic_label(topic):
 def get_single_response(intent):
     if intent.get("responses"):
         return random.choice(intent["responses"])
-
     return "I can help with that."
 
 
@@ -727,7 +741,7 @@ def get_partial_answer_for_topic(topic):
         "charge_explanation": "For the charge part, I can help explain what the charge may be related to.",
         "subscription_cancel": "For the subscription part, I can help with cancellation steps.",
         "fraud_report": "For the security part, this may need urgent review if the charge looks unauthorized.",
-        "password_reset": "For the password part, I can help you with reset steps."
+        "password_reset": "For the password part, I can help you with reset steps.",
     }
 
     return partial_answers.get(topic, "I can help with part of this issue.")
@@ -744,7 +758,7 @@ def merge_responses(r1, r2, t1, t2):
 def sort_intents_by_priority(intents):
     return sorted(
         intents,
-        key=lambda x: (ACTION_PRIORITY.get(x["action"], 99), -x["score"])
+        key=lambda x: (ACTION_PRIORITY.get(x["action"], 99), -x["score"]),
     )
 
 
@@ -862,7 +876,7 @@ def add_empathy_and_politeness(response, sentiment_label, topics, confidence=Non
         "angry": "I'm really sorry you're dealing with this. I understand how frustrating this must be, and I'll do my best to help.",
         "frustrated": "I understand how frustrating this must be, and I'll do my best to help.",
         "urgent": "I understand this is urgent, and I'll help you as quickly as possible.",
-        "neutral": "Thank you for reaching out. I'll be happy to help you with this."
+        "neutral": "Thank you for reaching out. I'll be happy to help you with this.",
     }
 
     empathy = empathy_map.get(sentiment_label, "")
@@ -917,6 +931,7 @@ def create_conversation_state():
         "last_routing_reason": None,
     }
 
+
 def should_treat_as_clarification_followup(user_text, conversation_state):
     if not conversation_state["awaiting_clarification"]:
         return False
@@ -947,9 +962,37 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
 
     return False
 
+
 def merge_with_clarification_context(user_text, conversation_state):
     previous_message = conversation_state.get("last_user_message") or ""
     return f"{previous_message} {user_text}".strip()
+
+
+def get_clarification_refined_response(user_text, selected_intents):
+    topics = [intent["topic"] for intent in selected_intents]
+    normalized = normalize_phrase_text(user_text)
+
+    if "refund_request" in topics and "completed charge" in normalized:
+        return (
+            "Thanks, that helps. It sounds like you're asking for a refund for a completed charge. "
+            "Please go to your account dashboard and open the order or charge details to start the refund request. "
+            "If the charge looks incorrect or unexpected, I can help you review that too."
+        )
+
+    if "refund_request" in topics and "yesterday" in normalized:
+        return (
+            "Thanks, that helps. Since this was a recent completed charge, you can start by checking the charge details "
+            "in your account and submitting a refund request from the billing or order history section."
+        )
+
+    if "login_issue" in topics and "reset" in normalized:
+        return (
+            "Thanks, that helps. Since this is still a login issue after trying reset-related steps, "
+            "please tell me whether you're seeing a password error, a lockout message, or a verification problem."
+        )
+
+    return None
+
 
 def main():
     faq_data = load_faq()
@@ -961,32 +1004,38 @@ def main():
     while True:
         user = input("You: ").strip()
 
-        effective_user = user
-        if should_treat_as_clarification_followup(user, conversation_state):
-            effective_user = merge_with_clarification_context(user, conversation_state)
-            print(f"[follow-up merged] {effective_user}")
-
         if user.lower() in ["exit", "bye", "quit"]:
             print("Bot: Goodbye!")
             break
+
+        effective_user = user
+        is_followup_clarification = should_treat_as_clarification_followup(user, conversation_state)
+
+        if is_followup_clarification:
+            effective_user = merge_with_clarification_context(user, conversation_state)
+            print(f"[follow-up merged] {effective_user}")
 
         sentiment = detect_sentiment(effective_user)
         sentiment_label = sentiment["label"]
 
         if has_success_signal(effective_user):
-            selected = [{
-                "topic": "success",
-                "score": 1.0,
-                "action": "answer",
-                "responses": SUCCESS_RESPONSES
-            }]
+            selected = [
+                {
+                    "topic": "success",
+                    "score": 1.0,
+                    "action": "answer",
+                    "responses": SUCCESS_RESPONSES,
+                }
+            ]
         elif has_no_issue_signal(effective_user):
-            selected = [{
-                "topic": "no_issue",
-                "score": 1.0,
-                "action": "answer",
-                "responses": NO_ISSUE_RESPONSES
-            }]
+            selected = [
+                {
+                    "topic": "no_issue",
+                    "score": 1.0,
+                    "action": "answer",
+                    "responses": NO_ISSUE_RESPONSES,
+                }
+            ]
         elif is_vague_query(effective_user):
             selected = [DEFAULT_GENERAL_HELP_INTENT]
             selected = apply_sentiment_routing(selected, sentiment_label)
@@ -997,28 +1046,29 @@ def main():
                 vectorizer,
                 matrix,
                 mapping,
-                sentiment_label=sentiment_label
+                sentiment_label=sentiment_label,
             )
 
             if not ranked:
-                selected = [{
-                    "topic": "no_issue",
-                    "score": 1.0,
-                    "action": "answer",
-                    "responses": NO_ISSUE_RESPONSES
-                }]
+                selected = [
+                    {
+                        "topic": "no_issue",
+                        "score": 1.0,
+                        "action": "answer",
+                        "responses": NO_ISSUE_RESPONSES,
+                    }
+                ]
             else:
                 selected = select_top_intents(ranked, effective_user)
                 selected = apply_sentiment_routing(selected, sentiment_label)
 
         predicted_topics_before_rules = [intent["topic"] for intent in selected]
-
         pre_rule_confidence = get_confidence(selected)
 
         selected, routing_reason = apply_confidence_sentiment_rules(
             selected,
             pre_rule_confidence,
-            sentiment_label
+            sentiment_label,
         )
 
         if routing_reason == "low_confidence_multi_intent":
@@ -1034,10 +1084,19 @@ def main():
         confidence = get_confidence(selected)
         top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
-        if routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
-            response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
+        if is_followup_clarification:
+            refined_response = get_clarification_refined_response(effective_user, selected)
+            if refined_response is not None:
+                response = refined_response
+            elif routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
+                response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
+            else:
+                response = generate_response(selected, sentiment_label=sentiment_label)
         else:
-            response = generate_response(selected, sentiment_label=sentiment_label)
+            if routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
+                response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
+            else:
+                response = generate_response(selected, sentiment_label=sentiment_label)
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
@@ -1046,7 +1105,7 @@ def main():
             response,
             sentiment_label,
             final_topics_after_rules,
-            pre_rule_confidence
+            pre_rule_confidence,
         )
 
         final_response = apply_action_tone(final_response, final_action)
@@ -1078,7 +1137,7 @@ def main():
             final_topics_after_rules=final_topics_after_rules,
         )
 
-        conversation_state["awaiting_clarification"] = (final_action == "clarify")
+        conversation_state["awaiting_clarification"] = final_action == "clarify"
         conversation_state["last_user_message"] = user
         conversation_state["last_topics"] = final_topics_after_rules
         conversation_state["last_action"] = final_action
