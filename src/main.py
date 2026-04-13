@@ -20,6 +20,14 @@ ACTION_PRIORITY = {
 
 LOW_CONFIDENCE_THRESHOLD = 0.4
 
+INITIAL_CONVERSATION_STATE = {
+    "awaiting_clarification": False,
+    "last_user_message": None,
+    "last_topics": [],
+    "last_action": None,
+    "last_routing_reason": None,
+}
+
 
 DEFAULT_GENERAL_HELP_INTENT = {
     "topic": "general_help",
@@ -722,10 +730,7 @@ def get_partial_answer_for_topic(topic):
         "password_reset": "For the password part, I can help you with reset steps."
     }
 
-    return partial_answers.get(
-        topic,
-        "I can help with part of this issue."
-    )
+    return partial_answers.get(topic, "I can help with part of this issue.")
 
 
 def merge_responses(r1, r2, t1, t2):
@@ -770,13 +775,13 @@ def get_final_action(selected_intents):
     ordered = sort_intents_by_priority(selected_intents)
     return ordered[0]["action"]
 
+
 def should_escalate_to_human(selected_intents, sentiment_label, confidence):
     if not selected_intents:
         return False
 
     topics = [intent["topic"] for intent in selected_intents]
 
-    # 🚨 High-risk topics → always escalate
     high_risk_topics = {
         "fraud_report",
     }
@@ -784,11 +789,9 @@ def should_escalate_to_human(selected_intents, sentiment_label, confidence):
     if any(t in high_risk_topics for t in topics):
         return True
 
-    # 🚨 Account security combinations
     if "account_locked" in topics and "fraud_report" in topics:
         return True
 
-    # 🚨 Angry + low confidence + billing/security
     if sentiment_label == "angry" and confidence < 0.5:
         if any(t in {"payment_failed", "double_charge", "charge_explanation"} for t in topics):
             return True
@@ -797,10 +800,7 @@ def should_escalate_to_human(selected_intents, sentiment_label, confidence):
 
 
 def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_label):
-    # 🔴 Low confidence handling
     if confidence < LOW_CONFIDENCE_THRESHOLD:
-
-        # 🚨 Smart human escalation
         if should_escalate_to_human(selected_intents, sentiment_label, confidence):
             updated = []
             for intent in selected_intents:
@@ -809,14 +809,11 @@ def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_lab
                 updated.append(new_intent)
             return updated, "human_escalation"
 
-        # 🟡 Multi-intent but not critical → keep intents
         if len(selected_intents) > 1:
             return selected_intents, "low_confidence_multi_intent"
 
-        # ⚪ Fallback
         return [DEFAULT_GENERAL_HELP_INTENT], "low_confidence_fallback"
 
-    # 🟢 Normal confidence
     updated_intents = []
     routing_reason = "normal_routing"
 
@@ -834,6 +831,7 @@ def apply_confidence_sentiment_rules(selected_intents, confidence, sentiment_lab
         updated_intents.append(updated_intent)
 
     return updated_intents, routing_reason
+
 
 def generate_response(selected_intents, sentiment_label=None):
     if not selected_intents:
@@ -910,9 +908,20 @@ def get_low_confidence_multi_intent_response(predicted_topics):
     )
 
 
+def create_conversation_state():
+    return {
+        "awaiting_clarification": False,
+        "last_user_message": None,
+        "last_topics": [],
+        "last_action": None,
+        "last_routing_reason": None,
+    }
+
+
 def main():
     faq_data = load_faq()
     vectorizer, matrix, mapping = build_tfidf_index(faq_data)
+    conversation_state = create_conversation_state()
 
     print("AI Support Agent is running. Type 'exit' to quit.\n")
 
@@ -943,7 +952,6 @@ def main():
         elif is_vague_query(user):
             selected = [DEFAULT_GENERAL_HELP_INTENT]
             selected = apply_sentiment_routing(selected, sentiment_label)
-
         else:
             ranked = detect_intents(
                 user,
@@ -974,13 +982,13 @@ def main():
             pre_rule_confidence,
             sentiment_label
         )
-        # ✅ Fix action for low-confidence multi-intent
+
         if routing_reason == "low_confidence_multi_intent":
             updated = []
-        for intent in selected:
-            new_intent = intent.copy()
-            new_intent["action"] = "clarify"
-            updated.append(new_intent)
+            for intent in selected:
+                new_intent = intent.copy()
+                new_intent["action"] = "clarify"
+                updated.append(new_intent)
             selected = updated
 
         final_topics_after_rules = [intent["topic"] for intent in selected]
@@ -1031,6 +1039,14 @@ def main():
             predicted_topics_before_rules=predicted_topics_before_rules,
             final_topics_after_rules=final_topics_after_rules,
         )
+
+        conversation_state["awaiting_clarification"] = (final_action == "clarify")
+        conversation_state["last_user_message"] = user
+        conversation_state["last_topics"] = final_topics_after_rules
+        conversation_state["last_action"] = final_action
+        conversation_state["last_routing_reason"] = routing_reason
+
+        print(f"State: {conversation_state}")
 
 
 if __name__ == "__main__":
