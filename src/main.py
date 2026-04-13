@@ -917,12 +917,19 @@ def get_low_confidence_multi_intent_response(predicted_topics):
     first_topic = predicted_topics[0]
     partial_answer = get_partial_answer_for_topic(first_topic)
 
-    return (
+    clarification_question = generate_clarification_question(predicted_topics)
+
+    if clarification_question:
+        return (
         f"It looks like this may involve both your {topic_labels[0]} and {topic_labels[1]}.\n\n"
         f"{partial_answer}\n\n"
-        f"To help with the {topic_labels[1]} part, could you clarify that part a little more first?"
+        f"{clarification_question}"
     )
-
+    return (
+    f"It looks like this may involve both your {topic_labels[0]} and {topic_labels[1]}.\n\n"
+    f"{partial_answer}\n\n"
+    f"Could you clarify which part you want help with first?"
+    )
 
 def create_conversation_state():
     return {
@@ -995,6 +1002,31 @@ def get_clarification_refined_response(user_text, selected_intents):
 
     return None
 
+def generate_clarification_question(predicted_topics):
+    if not predicted_topics or len(predicted_topics) < 2:
+        return None
+
+    t1, t2 = predicted_topics[:2]
+
+    topic_map = {
+        "payment_failed": "did the payment fail",
+        "refund_request": "are you asking for a refund",
+        "login_issue": "are you having trouble logging in",
+        "account_locked": "is your account locked",
+        "double_charge": "were you charged twice",
+        "charge_explanation": "do you want an explanation for a charge",
+        "order_status": "are you checking your order status",
+        "delivery_issue": "is your delivery late or delayed",
+        "fraud_report": "are you reporting a suspicious or unauthorized charge",
+    }
+
+    q1 = topic_map.get(t1)
+    q2 = topic_map.get(t2)
+
+    if q1 and q2:
+        return f"Just to clarify, {q1}, or {q2}?"
+
+    return None
 
 def main():
     faq_data = load_faq()
