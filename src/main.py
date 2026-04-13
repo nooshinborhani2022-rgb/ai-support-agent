@@ -71,6 +71,13 @@ ANSWER_STYLE_RESPONSES = {
     "order_status": "Share your order details or tracking info, and I’ll help you check the status.",
 }
 
+CLARIFICATION_OPTIONS = {
+    "charge": [
+        "a charge you don’t recognize",
+        "a duplicate charge",
+        "a refund request",
+    ],
+}
 
 def load_faq(file_path="faq.json"):
     with open(file_path, "r", encoding="utf-8") as f:
@@ -1002,6 +1009,30 @@ def get_clarification_refined_response(user_text, selected_intents):
 
     return None
 
+def detect_clarification_domain(user_text):
+    normalized = normalize_phrase_text(user_text)
+
+    charge_words = ["charge", "charged", "billing", "payment"]
+
+    if any(word in normalized for word in charge_words):
+        return "charge"
+
+    return None
+
+def generate_domain_clarification(domain):
+    options = CLARIFICATION_OPTIONS.get(domain)
+
+    if not options or len(options) < 2:
+        return None
+
+    if len(options) == 2:
+        return f"Just to clarify, is this about {options[0]} or {options[1]}?"
+
+    return (
+        f"Just to clarify, is this about {options[0]}, "
+        f"{options[1]}, or {options[2]}?"
+    )
+
 def generate_clarification_question(predicted_topics):
     if not predicted_topics or len(predicted_topics) < 2:
         return None
@@ -1053,6 +1084,7 @@ def should_skip_clarification_for_strong_multi_intent(user_text, predicted_topic
 
     return matches >= 2
 
+
 def main():
     faq_data = load_faq()
     vectorizer, matrix, mapping = build_tfidf_index(faq_data)
@@ -1087,17 +1119,38 @@ def main():
                     "responses": SUCCESS_RESPONSES,
                 }
             ]
+        if has_success_signal(effective_user):
+            selected = [{
+                "topic": "success",
+                "score": 1.0,
+                "action": "answer",
+                "responses": SUCCESS_RESPONSES
+            }]
         elif has_no_issue_signal(effective_user):
-            selected = [
-                {
-                    "topic": "no_issue",
-                    "score": 1.0,
-                    "action": "answer",
-                    "responses": NO_ISSUE_RESPONSES,
-                }
-            ]
+            selected = [{
+                "topic": "no_issue",
+                "score": 1.0,
+                "action": "answer",
+                "responses": NO_ISSUE_RESPONSES
+            }]
         elif is_vague_query(effective_user):
-            selected = [DEFAULT_GENERAL_HELP_INTENT]
+            domain = detect_clarification_domain(effective_user)
+
+            if domain:
+                clarification = generate_domain_clarification(domain)
+
+                if clarification:
+                    selected = [{
+                        "topic": f"{domain}_clarification",
+                        "score": 1.0,
+                        "action": "clarify",
+                        "responses": [clarification],
+                    }]
+                else:
+                    selected = [DEFAULT_GENERAL_HELP_INTENT]
+            else:
+                selected = [DEFAULT_GENERAL_HELP_INTENT]
+
             selected = apply_sentiment_routing(selected, sentiment_label)
         else:
             ranked = detect_intents(
@@ -1106,18 +1159,16 @@ def main():
                 vectorizer,
                 matrix,
                 mapping,
-                sentiment_label=sentiment_label,
+                sentiment_label=sentiment_label
             )
 
             if not ranked:
-                selected = [
-                    {
-                        "topic": "no_issue",
-                        "score": 1.0,
-                        "action": "answer",
-                        "responses": NO_ISSUE_RESPONSES,
-                    }
-                ]
+                selected = [{
+                    "topic": "no_issue",
+                    "score": 1.0,
+                    "action": "answer",
+                    "responses": NO_ISSUE_RESPONSES
+                }]
             else:
                 selected = select_top_intents(ranked, effective_user)
                 selected = apply_sentiment_routing(selected, sentiment_label)
