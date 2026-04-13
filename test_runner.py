@@ -12,11 +12,16 @@ from src.main import (
     has_no_issue_signal,
     SUCCESS_RESPONSES,
     NO_ISSUE_RESPONSES,
+    create_conversation_state,
+    should_treat_as_clarification_followup,
+    merge_with_clarification_context,
+    get_clarification_refined_response,
 )
 from src.sentiment import detect_sentiment
 
 import json
 import subprocess
+import sys
 
 
 TEST_CASES = [
@@ -134,6 +139,31 @@ ROUTING_TEST_CASES = [
 ]
 
 
+MULTITURN_TEST_CASES = [
+    {
+        "name": "refund clarification follow-up",
+        "initial_user": "my payment failed and I need a refund",
+        "followup_user": "for a completed charge from yesterday",
+        "expected_merged": "my payment failed and I need a refund for a completed charge from yesterday",
+        "selected_intents": [
+            {"topic": "payment_failed", "score": 1.8, "action": "clarify", "responses": []},
+            {"topic": "refund_request", "score": 1.7, "action": "clarify", "responses": []},
+        ],
+        "expected_keywords": ["refund", "completed charge"],
+    },
+    {
+        "name": "login clarification follow-up",
+        "initial_user": "I can't log in",
+        "followup_user": "I already tried reset",
+        "expected_merged": "I can't log in I already tried reset",
+        "selected_intents": [
+            {"topic": "login_issue", "score": 1.9, "action": "clarify", "responses": []},
+        ],
+        "expected_keywords": ["password error", "lockout", "verification"],
+    },
+]
+
+
 def save_test_logs(logs, file_path="chat_log.jsonl"):
     with open(file_path, "w", encoding="utf-8") as f:
         for entry in logs:
@@ -201,6 +231,14 @@ def run_intent_tests():
             pre_rule_confidence,
             sentiment_label
         )
+
+        if routing_reason == "low_confidence_multi_intent":
+            updated = []
+            for intent in final_selected:
+                new_intent = intent.copy()
+                new_intent["action"] = "clarify"
+                updated.append(new_intent)
+            final_selected = updated
 
         final_topics_after_rules = [intent["topic"] for intent in final_selected]
 
@@ -340,6 +378,14 @@ def run_routing_tests():
             sentiment_label
         )
 
+        if routing_reason == "low_confidence_multi_intent":
+            updated = []
+            for intent in final_selected:
+                new_intent = intent.copy()
+                new_intent["action"] = "clarify"
+                updated.append(new_intent)
+            final_selected = updated
+
         final_action = get_final_action(final_selected)
 
         success = (
@@ -375,15 +421,72 @@ def run_routing_tests():
     return failed == 0
 
 
+def run_multiturn_tests():
+    passed = 0
+    failed = 0
+
+    print("\nRunning multi-turn clarification suite...\n")
+
+    for idx, test in enumerate(MULTITURN_TEST_CASES, start=1):
+        state = create_conversation_state()
+        state["awaiting_clarification"] = True
+        state["last_user_message"] = test["initial_user"]
+        state["last_topics"] = [intent["topic"] for intent in test["selected_intents"]]
+        state["last_action"] = "clarify"
+        state["last_routing_reason"] = "low_confidence_multi_intent"
+
+        is_followup = should_treat_as_clarification_followup(test["followup_user"], state)
+        merged = merge_with_clarification_context(test["followup_user"], state)
+        refined = get_clarification_refined_response(merged, test["selected_intents"])
+
+        checks = [
+            is_followup is True,
+            merged == test["expected_merged"],
+            refined is not None,
+        ]
+
+        if refined is not None:
+            for keyword in test["expected_keywords"]:
+                checks.append(keyword.lower() in refined.lower())
+
+        success = all(checks)
+
+        if success:
+            passed += 1
+            status = "PASS"
+        else:
+            failed += 1
+            status = "FAIL"
+
+        print(f"M{idx:02d}. {status}")
+        print(f"Initial user:   {test['initial_user']}")
+        print(f"Follow-up:      {test['followup_user']}")
+        print(f"Is follow-up:   {is_followup}")
+        print(f"Merged text:    {merged}")
+        print(f"Refined:        {refined}\n")
+
+    total = passed + failed
+    accuracy = (passed / total) * 100 if total > 0 else 0
+
+    print("=" * 60)
+    print(f"Multi-turn Tests Passed:   {passed}")
+    print(f"Multi-turn Tests Failed:   {failed}")
+    print(f"Multi-turn Accuracy:       {accuracy:.2f}%")
+    print("=" * 60)
+
+    return failed == 0
+
+
 def run_tests():
     intent_ok = run_intent_tests()
     sentiment_ok = run_sentiment_tests()
     routing_ok = run_routing_tests()
+    multiturn_ok = run_multiturn_tests()
 
     print("\nRunning analyze_logs.py...\n")
-    subprocess.run(["python", "analyze_logs.py"])
+    subprocess.run([sys.executable, "analyze_logs.py"])
 
-    if intent_ok and sentiment_ok and routing_ok:
+    if intent_ok and sentiment_ok and routing_ok and multiturn_ok:
         print("\nAll tests passed.")
     else:
         print("\nSome tests failed. Review the failed cases above.")
