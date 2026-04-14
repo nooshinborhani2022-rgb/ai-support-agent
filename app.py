@@ -129,6 +129,84 @@ with left_col:
         st.session_state.last_result = result
         st.rerun()
 
+def action_badge(action):
+    colors = {
+        "answer": "#16a34a",
+        "clarify": "#f59e0b",
+        "escalate": "#dc2626",
+    }
+
+    color = colors.get(action, "#475569")
+
+    return f"""
+    <div style="
+        display:inline-block;
+        padding:6px 12px;
+        border-radius:999px;
+        background:{color};
+        color:white;
+        font-weight:700;
+        font-size:14px;
+        margin-bottom:10px;
+    ">
+        {action.upper()}
+    </div>
+    """
+
+def sentiment_badge(sentiment):
+    colors = {
+        "neutral": "#64748b",
+        "frustrated": "#f97316",
+        "angry": "#dc2626",
+        "urgent": "#9333ea",
+    }
+
+    color = colors.get(sentiment, "#475569")
+
+    return f"""
+    <div style="
+        display:inline-block;
+        padding:6px 12px;
+        border-radius:999px;
+        background:{color};
+        color:white;
+        font-weight:700;
+        font-size:14px;
+        margin-bottom:10px;
+    ">
+        {sentiment.upper()}
+    </div>
+    """
+
+def intent_badges(intents):
+    colors = [
+        "#0ea5e9",  
+        "#22c55e",  
+        "#a855f7",  
+        "#f97316",  
+    ]
+
+    badges = ""
+    for i, intent in enumerate(intents):
+        color = colors[i % len(colors)]
+        badges += f"""
+        <span style="
+            display:inline-block;
+            padding:5px 10px;
+            border-radius:999px;
+            background:{color};
+            color:white;
+            font-size:13px;
+            font-weight:600;
+            margin-right:6px;
+            margin-bottom:6px;
+        ">
+            {intent}
+        </span>
+        """
+
+    return badges
+
 with right_col:
     st.subheader("Debug Panel")
 
@@ -138,16 +216,28 @@ with right_col:
         st.markdown('<div class="debug-box">', unsafe_allow_html=True)
 
         st.markdown('<div class="metric-label">Sentiment</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{result["sentiment"]}</div>', unsafe_allow_html=True)
+        st.markdown(sentiment_badge(result["sentiment"]), unsafe_allow_html=True)
 
         st.markdown('<div class="metric-label">Intents</div>', unsafe_allow_html=True)
-        st.code("\n".join(result["intents"]) if result["intents"] else "None", language=None)
 
-        st.markdown('<div class="metric-label">Confidence</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{result["confidence"]}</div>', unsafe_allow_html=True)
+        if result["intents"]:
+            st.markdown(intent_badges(result["intents"]), unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="metric-value">None</div>', unsafe_allow_html=True)
+
+            st.markdown('<div class="metric-label">Confidence</div>', unsafe_allow_html=True)
+
+        confidence_value = float(result["confidence"])
+        confidence_percent = max(0, min(int(confidence_value * 100), 100))
+
+        st.progress(confidence_percent)
+        st.markdown(
+        f'<div class="metric-value">{confidence_value:.3f} ({confidence_percent}%)</div>',
+        unsafe_allow_html=True
+        )
 
         st.markdown('<div class="metric-label">Action</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{result["action"]}</div>', unsafe_allow_html=True)
+        st.markdown(action_badge(result["action"]), unsafe_allow_html=True)
 
         st.markdown('<div class="metric-label">Routing Reason</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="metric-value">{result["routing_reason"]}</div>', unsafe_allow_html=True)
@@ -178,3 +268,4 @@ with right_col:
         st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.info("Send a message to see reasoning details here.")
+    
