@@ -90,6 +90,21 @@ st.markdown("""
         background: #0b1220 !important;
         color: #f8fafc !important;
     }
+            
+/* FIX: scenario buttons */
+button[kind="secondary"] {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    padding: 10px !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: #334155 !important;
+    color: white !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -99,10 +114,20 @@ if "engine" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "pending_prompt" not in st.session_state:
+    st.session_state.pending_prompt = None
+
 st.title("🤖 AI Support Agent Demo")
 st.caption("Explainable customer support AI with sentiment, routing, and confidence tracing")
 
 left_col, right_col = st.columns([2, 1])
+
+demo_scenarios = [
+    "I was charged twice and this is ridiculous!!!",
+    "I can't login and my payment failed",
+    "Someone used my card. This charge is not mine.",
+    "I want a refund for a charge from yesterday",
+]
 
 with left_col:
     st.subheader("Chat")
@@ -110,8 +135,22 @@ with left_col:
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
+st.markdown("### Demo Scenarios")
 
-    user_input = st.chat_input("Type your message...")
+scenario_cols = st.columns(2)
+
+for i, scenario in enumerate(demo_scenarios):
+    with scenario_cols[i % 2]:
+        if st.button(scenario, key=f"scenario_{i}"):
+            st.session_state.pending_prompt = scenario
+            st.rerun()
+
+    default_prompt = st.session_state.pending_prompt
+user_input = st.chat_input("Type your message...")
+
+if default_prompt and not user_input:
+    user_input = default_prompt
+    st.session_state.pending_prompt = None
 
     if user_input:
         st.session_state.messages.append({
