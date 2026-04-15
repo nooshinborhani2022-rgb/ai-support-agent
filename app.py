@@ -1,5 +1,6 @@
 import streamlit as st
 from src.engine import SupportEngine
+import time
 
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
@@ -120,6 +121,11 @@ if "pending_prompt" not in st.session_state:
 st.title("🤖 AI Support Agent Demo")
 st.caption("Explainable customer support AI with sentiment, routing, and confidence tracing")
 
+def stream_text(text):
+    for word in text.split():
+        yield word + " "
+        time.sleep(0.03)
+
 left_col, right_col = st.columns([2, 1])
 
 demo_scenarios = [
@@ -156,17 +162,18 @@ if default_prompt and not user_input:
         st.session_state.messages.append({
             "role": "user",
             "content": user_input
-        })
-
-        result = st.session_state.engine.handle_message(user_input)
-
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": result["response"]
-        })
-
-        st.session_state.last_result = result
-        st.rerun()
+            })
+        with st.chat_message("user"):
+            st.markdown(user_input)
+            result = st.session_state.engine.handle_message(user_input)
+        with st.chat_message("assistant"):
+            streamed_response = st.write_stream(stream_text(result["response"]))
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": streamed_response
+                })
+            st.session_state.last_result = result
+            st.rerun()
 
 def action_badge(action):
     colors = {
