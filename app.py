@@ -194,6 +194,86 @@ demo_scenarios = [
     "I want a refund for a charge from yesterday",
 ]
 
+def sentiment_badge(sentiment):
+    colors = {
+        "neutral": "#64748b",
+        "frustrated": "#f97316",
+        "angry": "#dc2626",
+        "urgent": "#9333ea",
+    }
+
+    color = colors.get(sentiment, "#475569")
+
+    return f"""
+    <div style="
+        display:inline-block;
+        padding:6px 12px;
+        border-radius:999px;
+        background:{color};
+        color:white;
+        font-weight:700;
+        font-size:14px;
+        margin-bottom:10px;
+    ">
+        {sentiment.upper()}
+    </div>
+    """
+
+def intent_badges(intents):
+    colors = [
+        "#0ea5e9",
+        "#22c55e",
+        "#a855f7",
+        "#f97316",
+    ]
+
+    badges = ""
+    for i, intent in enumerate(intents):
+        color = colors[i % len(colors)]
+        badges += f"""
+        <span style="
+            display:inline-block;
+            padding:5px 10px;
+            border-radius:999px;
+            background:{color};
+            color:white;
+            font-size:13px;
+            font-weight:600;
+            margin-right:6px;
+            margin-bottom:6px;
+        ">
+            {intent}
+        </span>
+        """
+
+    return badges
+
+
+def action_badge(action):
+    colors = {
+        "answer": "#16a34a",
+        "clarify": "#f59e0b",
+        "escalate": "#dc2626",
+    }
+
+    color = colors.get(action, "#475569")
+
+    return f"""
+    <div style="
+        display:inline-block;
+        padding:6px 12px;
+        border-radius:999px;
+        background:{color};
+        color:white;
+        font-weight:700;
+        font-size:14px;
+        margin-bottom:10px;
+    ">
+        {action.upper()}
+    </div>
+    """
+
+
 with left_col:
     st.subheader("Chat")
 
