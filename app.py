@@ -196,15 +196,16 @@ demo_scenarios = [
 
 with left_col:
     st.subheader("Chat")
+
     if st.button("🗑 Clear Chat"):
         st.session_state.messages = []
         st.session_state.last_result = None
         st.session_state.stats = {
-        "total_messages": 0,
-        "escalations": 0,
-        "clarifications": 0,
-        "last_action": "-"
-          }
+            "total_messages": 0,
+            "escalations": 0,
+            "clarifications": 0,
+            "last_action": "-"
+        }
         st.rerun()
 
     st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
@@ -229,7 +230,7 @@ with left_col:
                 <li>Step-by-step AI reasoning</li>
             </ul>
             <p style="color: #93c5fd; margin-top: 14px;">
-                Try one of the demo scenarios below or type your own message.
+                Try one of the quick actions below or type your own message.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -237,17 +238,53 @@ with left_col:
     st.markdown("### ⚡ Quick Actions")
 
     quick_actions = [
-        ("🔐 Login Issue", "I can't login to my account"),
-        ("💳 Payment Problem", "My payment failed and I was charged"),
-        ("🚨 Fraud Report", "Someone used my card. This charge is not mine."),
-        ("📦 Order Status", "Where is my order?"),
+        {
+            "title": "🔐 Login Issue",
+            "desc": "Password reset, sign-in failure, locked account",
+            "prompt": "I can't login to my account",
+        },
+        {
+            "title": "💳 Payment Problem",
+            "desc": "Failed payment, card declined, billing issue",
+            "prompt": "My payment failed and I was charged",
+        },
+        {
+            "title": "🚨 Fraud Report",
+            "desc": "Unauthorized charge or suspicious transaction",
+            "prompt": "Someone used my card. This charge is not mine.",
+        },
+        {
+            "title": "📦 Order Status",
+            "desc": "Tracking, delays, package status",
+            "prompt": "Where is my order?",
+        },
     ]
 
     cols = st.columns(2)
 
-    for i, (label, prompt) in enumerate(quick_actions):
+    for i, item in enumerate(quick_actions):
         with cols[i % 2]:
-            if st.button(label, key=f"quick_{i}"):
+            st.markdown(f"""
+            <div style="
+                padding:16px;
+                border-radius:16px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                margin-bottom:10px;
+                min-height:110px;
+            ">
+                <div style="font-size:18px; font-weight:700; color:#f8fafc; margin-bottom:6px;">
+                    {item["title"]}
+                </div>
+                <div style="font-size:14px; color:#cbd5e1; line-height:1.5;">
+                    {item["desc"]}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if st.button(f"Use {item['title']}", key=f"quick_{i}"):
+                prompt = item["prompt"]
+
                 st.session_state.messages.append({
                     "role": "user",
                     "content": prompt
@@ -257,8 +294,10 @@ with left_col:
 
                 st.session_state.stats["total_messages"] += 1
                 st.session_state.stats["last_action"] = result["action"]
+
                 if result["action"] == "escalate":
                     st.session_state.stats["escalations"] += 1
+
                 if result["action"] == "clarify":
                     st.session_state.stats["clarifications"] += 1
 
@@ -292,10 +331,12 @@ with left_col:
 
         st.session_state.stats["total_messages"] += 1
         st.session_state.stats["last_action"] = result["action"]
+
         if result["action"] == "escalate":
             st.session_state.stats["escalations"] += 1
-            if result["action"] == "clarify":
-                st.session_state.stats["clarifications"] += 1
+
+        if result["action"] == "clarify":
+            st.session_state.stats["clarifications"] += 1
 
         with st.chat_message("assistant"):
             thinking_placeholder = st.empty()
@@ -320,84 +361,6 @@ with left_col:
 
         st.session_state.last_result = result
         st.rerun()
-
-def action_badge(action):
-    colors = {
-        "answer": "#16a34a",
-        "clarify": "#f59e0b",
-        "escalate": "#dc2626",
-    }
-
-    color = colors.get(action, "#475569")
-
-    return f"""
-    <div style="
-        display:inline-block;
-        padding:6px 12px;
-        border-radius:999px;
-        background:{color};
-        color:white;
-        font-weight:700;
-        font-size:14px;
-        margin-bottom:10px;
-    ">
-        {action.upper()}
-    </div>
-    """
-
-def sentiment_badge(sentiment):
-    colors = {
-        "neutral": "#64748b",
-        "frustrated": "#f97316",
-        "angry": "#dc2626",
-        "urgent": "#9333ea",
-    }
-
-    color = colors.get(sentiment, "#475569")
-
-    return f"""
-    <div style="
-        display:inline-block;
-        padding:6px 12px;
-        border-radius:999px;
-        background:{color};
-        color:white;
-        font-weight:700;
-        font-size:14px;
-        margin-bottom:10px;
-    ">
-        {sentiment.upper()}
-    </div>
-    """
-
-def intent_badges(intents):
-    colors = [
-        "#0ea5e9",  
-        "#22c55e",  
-        "#a855f7",  
-        "#f97316",  
-    ]
-
-    badges = ""
-    for i, intent in enumerate(intents):
-        color = colors[i % len(colors)]
-        badges += f"""
-        <span style="
-            display:inline-block;
-            padding:5px 10px;
-            border-radius:999px;
-            background:{color};
-            color:white;
-            font-size:13px;
-            font-weight:600;
-            margin-right:6px;
-            margin-bottom:6px;
-        ">
-            {intent}
-        </span>
-        """
-
-    return badges
 
 
 with right_col:
