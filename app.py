@@ -273,6 +273,20 @@ def action_badge(action):
     </div>
     """
 
+def build_explanation_text(result):
+    intents = result.get("intents", [])
+    action = result.get("action", "-")
+    confidence = float(result.get("confidence", 0.0))
+    sentiment = result.get("sentiment", "neutral")
+
+    intent_text = ", ".join(intents) if intents else "unknown"
+
+    return (
+        f"Detected intents: {intent_text} • "
+        f"Sentiment: {sentiment} • "
+        f"Action: {action} • "
+        f"Confidence: {confidence:.3f}"
+    )
 
 with left_col:
     st.subheader("Chat")
@@ -383,8 +397,9 @@ with left_col:
 
                 st.session_state.messages.append({
                     "role": "assistant",
-                    "content": result["response"]
-                })
+                    "content": result["response"],
+                    "explanation": build_explanation_text(result)
+                    })
 
                 st.session_state.last_result = result
                 st.rerun()
@@ -393,6 +408,9 @@ with left_col:
         with st.chat_message(message["role"]):
             if message["role"] == "assistant":
                 st.markdown(format_assistant_response(message["content"]))
+
+            if "explanation" in message:
+                st.caption("🧠 " + message["explanation"])
             else:
                 st.markdown(message["content"])
 
@@ -436,8 +454,9 @@ with left_col:
 
         st.session_state.messages.append({
             "role": "assistant",
-            "content": streamed_response
-        })
+            "content": streamed_response,
+            "explanation": build_explanation_text(result)
+            })
 
         st.session_state.last_result = result
         st.rerun()
