@@ -372,27 +372,27 @@ def intent_badges(intents):
     return badges
 
 with right_col:
-
     st.subheader("Mini Analytics")
 
-a1, a2 = st.columns(2)
-a3, a4 = st.columns(2)
+    a1, a2 = st.columns(2)
+    a3, a4 = st.columns(2)
 
-with a1:
-    st.metric("Total Messages", st.session_state.stats["total_messages"])
+    with a1:
+        st.metric("Total Messages", st.session_state.stats["total_messages"])
 
-with a2:
-    st.metric("Escalations", st.session_state.stats["escalations"])
+    with a2:
+        st.metric("Escalations", st.session_state.stats["escalations"])
 
-with a3:
-    st.metric("Clarifications", st.session_state.stats["clarifications"])
+    with a3:
+        st.metric("Clarifications", st.session_state.stats["clarifications"])
 
-with a4:
-    st.metric("Last Action", st.session_state.stats["last_action"])
-    
+    with a4:
+        st.metric("Last Action", st.session_state.stats["last_action"])
+
+    st.markdown("---")
     st.subheader("Debug Panel")
 
-    if "last_result" in st.session_state:
+    if "last_result" in st.session_state and st.session_state.last_result is not None:
         result = st.session_state.last_result
 
         st.markdown('<div class="debug-box">', unsafe_allow_html=True)
@@ -401,21 +401,18 @@ with a4:
         st.markdown(sentiment_badge(result["sentiment"]), unsafe_allow_html=True)
 
         st.markdown('<div class="metric-label">Intents</div>', unsafe_allow_html=True)
-
         if result["intents"]:
             st.markdown(intent_badges(result["intents"]), unsafe_allow_html=True)
         else:
             st.markdown('<div class="metric-value">None</div>', unsafe_allow_html=True)
 
-            st.markdown('<div class="metric-label">Confidence</div>', unsafe_allow_html=True)
-
+        st.markdown('<div class="metric-label">Confidence</div>', unsafe_allow_html=True)
         confidence_value = float(result["confidence"])
         confidence_percent = max(0, min(int(confidence_value * 100), 100))
-
         st.progress(confidence_percent)
         st.markdown(
-        f'<div class="metric-value">{confidence_value:.3f} ({confidence_percent}%)</div>',
-        unsafe_allow_html=True
+            f'<div class="metric-value">{confidence_value:.3f} ({confidence_percent}%)</div>',
+            unsafe_allow_html=True
         )
 
         st.markdown('<div class="metric-label">Action</div>', unsafe_allow_html=True)
@@ -450,4 +447,3 @@ with a4:
         st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.info("Send a message to see reasoning details here.")
-    
