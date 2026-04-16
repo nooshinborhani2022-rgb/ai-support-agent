@@ -172,6 +172,19 @@ def get_thinking_steps():
         "Generating response...",
     ]
 
+def format_assistant_response(text):
+    formatted = text
+
+    formatted = formatted.replace("For your login issue:", "\n\n**🔐 Login issue**\n")
+    formatted = formatted.replace("For your payment failed:", "\n\n**💳 Payment issue**\n")
+    formatted = formatted.replace("For your refund request:", "\n\n**💸 Refund request**\n")
+    formatted = formatted.replace("For your account access part,", "\n\n**🔒 Account access**\n")
+    formatted = formatted.replace("For your billing part,", "\n\n**🧾 Billing**\n")
+    formatted = formatted.replace("For your order part,", "\n\n**📦 Order**\n")
+    formatted = formatted.replace("For your security part,", "\n\n**🚨 Security**\n")
+
+    return formatted.strip()
+
 left_col, right_col = st.columns([2, 1])
 
 demo_scenarios = [
@@ -195,7 +208,7 @@ with left_col:
         st.rerun()
 
     st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
-    
+
     if not st.session_state.messages:
         st.markdown("""
         <div style="
@@ -259,7 +272,10 @@ with left_col:
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+            if message["role"] == "assistant":
+                st.markdown(format_assistant_response(message["content"]))
+            else:
+                st.markdown(message["content"])
 
     user_input = st.chat_input("Type your message...", key="main_chat_input")
 
@@ -382,6 +398,7 @@ def intent_badges(intents):
         """
 
     return badges
+
 
 with right_col:
     st.subheader("Mini Analytics")
