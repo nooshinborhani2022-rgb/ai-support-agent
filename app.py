@@ -106,6 +106,27 @@ button[kind="secondary"]:hover {
     color: white !important;
 }
 
+/* spacing improvements */
+[data-testid="stChatMessage"] {
+    margin-bottom: 12px !important;
+}
+
+/* chat container padding */
+.block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+}
+
+/* nicer input spacing */
+[data-testid="stChatInput"] {
+    margin-top: 15px !important;
+}
+
+/* smoother look for debug panel */
+.debug-box {
+    backdrop-filter: blur(6px);
+}
+                       
 </style>
 """, unsafe_allow_html=True)
 
