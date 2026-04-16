@@ -176,6 +176,31 @@ demo_scenarios = [
 with left_col:
     st.subheader("Chat")
 
+if not st.session_state.messages:
+    st.markdown("""
+    <div style="
+        padding: 28px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        margin-bottom: 20px;
+    ">
+        <h3 style="margin-top: 0; color: #f8fafc;">👋 Welcome to AI Support Agent</h3>
+        <p style="color: #cbd5e1; margin-bottom: 10px;">
+            This demo showcases an explainable customer support AI with:
+        </p>
+        <ul style="color: #cbd5e1; line-height: 1.9;">
+            <li>Multi-intent understanding</li>
+            <li>Sentiment-aware routing</li>
+            <li>Confidence-based decisions</li>
+            <li>Step-by-step AI reasoning</li>
+        </ul>
+        <p style="color: #93c5fd; margin-top: 14px;">
+            Try one of the demo scenarios below or type your own message.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
