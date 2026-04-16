@@ -183,7 +183,19 @@ demo_scenarios = [
 
 with left_col:
     st.subheader("Chat")
+    if st.button("🗑 Clear Chat"):
+        st.session_state.messages = []
+        st.session_state.last_result = None
+        st.session_state.stats = {
+        "total_messages": 0,
+        "escalations": 0,
+        "clarifications": 0,
+        "last_action": "-"
+          }
+        st.rerun()
 
+    st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+    
     if not st.session_state.messages:
         st.markdown("""
         <div style="
