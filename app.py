@@ -139,6 +139,14 @@ if "messages" not in st.session_state:
 if "pending_prompt" not in st.session_state:
     st.session_state.pending_prompt = None
 
+if "stats" not in st.session_state:
+    st.session_state.stats = {
+        "total_messages": 0,
+        "escalations": 0,
+        "clarifications": 0,
+        "last_action": "-"
+    }
+
 st.markdown("""
 <h1 style="margin-bottom: 0;">
 🤖 AI Support Agent
@@ -222,6 +230,13 @@ with left_col:
 
                 result = st.session_state.engine.handle_message(prompt)
 
+                st.session_state.stats["total_messages"] += 1
+                st.session_state.stats["last_action"] = result["action"]
+                if result["action"] == "escalate":
+                    st.session_state.stats["escalations"] += 1
+                if result["action"] == "clarify":
+                    st.session_state.stats["clarifications"] += 1
+
                 st.session_state.messages.append({
                     "role": "assistant",
                     "content": result["response"]
@@ -246,6 +261,13 @@ with left_col:
             st.markdown(user_input)
 
         result = st.session_state.engine.handle_message(user_input)
+
+        st.session_state.stats["total_messages"] += 1
+        st.session_state.stats["last_action"] = result["action"]
+        if result["action"] == "escalate":
+            st.session_state.stats["escalations"] += 1
+            if result["action"] == "clarify":
+                st.session_state.stats["clarifications"] += 1
 
         with st.chat_message("assistant"):
             thinking_placeholder = st.empty()
@@ -350,6 +372,24 @@ def intent_badges(intents):
     return badges
 
 with right_col:
+
+    st.subheader("Mini Analytics")
+
+a1, a2 = st.columns(2)
+a3, a4 = st.columns(2)
+
+with a1:
+    st.metric("Total Messages", st.session_state.stats["total_messages"])
+
+with a2:
+    st.metric("Escalations", st.session_state.stats["escalations"])
+
+with a3:
+    st.metric("Clarifications", st.session_state.stats["clarifications"])
+
+with a4:
+    st.metric("Last Action", st.session_state.stats["last_action"])
+    
     st.subheader("Debug Panel")
 
     if "last_result" in st.session_state:
