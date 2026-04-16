@@ -176,86 +176,100 @@ demo_scenarios = [
 with left_col:
     st.subheader("Chat")
 
-if not st.session_state.messages:
-    st.markdown("""
-    <div style="
-        padding: 28px;
-        border-radius: 20px;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
-        margin-bottom: 20px;
-    ">
-        <h3 style="margin-top: 0; color: #f8fafc;">👋 Welcome to AI Support Agent</h3>
-        <p style="color: #cbd5e1; margin-bottom: 10px;">
-            This demo showcases an explainable customer support AI with:
-        </p>
-        <ul style="color: #cbd5e1; line-height: 1.9;">
-            <li>Multi-intent understanding</li>
-            <li>Sentiment-aware routing</li>
-            <li>Confidence-based decisions</li>
-            <li>Step-by-step AI reasoning</li>
-        </ul>
-        <p style="color: #93c5fd; margin-top: 14px;">
-            Try one of the demo scenarios below or type your own message.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    if not st.session_state.messages:
+        st.markdown("""
+        <div style="
+            padding: 28px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 20px;
+        ">
+            <h3 style="margin-top: 0; color: #f8fafc;">👋 Welcome to AI Support Agent</h3>
+            <p style="color: #cbd5e1; margin-bottom: 10px;">
+                This demo showcases an explainable customer support AI with:
+            </p>
+            <ul style="color: #cbd5e1; line-height: 1.9;">
+                <li>Multi-intent understanding</li>
+                <li>Sentiment-aware routing</li>
+                <li>Confidence-based decisions</li>
+                <li>Step-by-step AI reasoning</li>
+            </ul>
+            <p style="color: #93c5fd; margin-top: 14px;">
+                Try one of the demo scenarios below or type your own message.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("### ⚡ Quick Actions")
+
+    quick_actions = [
+        ("🔐 Login Issue", "I can't login to my account"),
+        ("💳 Payment Problem", "My payment failed and I was charged"),
+        ("🚨 Fraud Report", "Someone used my card. This charge is not mine."),
+        ("📦 Order Status", "Where is my order?"),
+    ]
+
+    cols = st.columns(2)
+
+    for i, (label, prompt) in enumerate(quick_actions):
+        with cols[i % 2]:
+            if st.button(label, key=f"quick_{i}"):
+                st.session_state.messages.append({
+                    "role": "user",
+                    "content": prompt
+                })
+
+                result = st.session_state.engine.handle_message(prompt)
+
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": result["response"]
+                })
+
+                st.session_state.last_result = result
+                st.rerun()
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-st.markdown("### Demo Scenarios")
-
-scenario_cols = st.columns(2)
-
-for i, scenario in enumerate(demo_scenarios):
-    with scenario_cols[i % 2]:
-        if st.button(scenario, key=f"scenario_{i}"):
-            st.session_state.pending_prompt = scenario
-            st.rerun()
-
-    default_prompt = st.session_state.pending_prompt
-user_input = st.chat_input("Type your message...")
-
-if default_prompt and not user_input:
-    user_input = default_prompt
-    st.session_state.pending_prompt = None
+    user_input = st.chat_input("Type your message...", key="main_chat_input")
 
     if user_input:
         st.session_state.messages.append({
-        "role": "user",
-        "content": user_input
-    })
+            "role": "user",
+            "content": user_input
+        })
 
-    with st.chat_message("user"):
-        st.markdown(user_input)
+        with st.chat_message("user"):
+            st.markdown(user_input)
 
-    result = st.session_state.engine.handle_message(user_input)
+        result = st.session_state.engine.handle_message(user_input)
 
-    with st.chat_message("assistant"):
-        thinking_placeholder = st.empty()
-        visible_steps = []
+        with st.chat_message("assistant"):
+            thinking_placeholder = st.empty()
+            visible_steps = []
 
-    for step in get_thinking_steps():
-        visible_steps.append(step)
-        thinking_placeholder.markdown(
-            "```text\n" + "\n".join(visible_steps) + "\n```"
-        )
-        time.sleep(0.55)
+            for step in get_thinking_steps():
+                visible_steps.append(step)
+                thinking_placeholder.markdown(
+                    "```text\n" + "\n".join(visible_steps) + "\n```"
+                )
+                time.sleep(0.55)
 
-    time.sleep(0.5)
-    thinking_placeholder.empty()
+            time.sleep(0.5)
+            thinking_placeholder.empty()
 
-    streamed_response = st.write_stream(stream_text(result["response"]))
+            streamed_response = st.write_stream(stream_text(result["response"]))
 
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": streamed_response
-    })
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": streamed_response
+        })
 
-    st.session_state.last_result = result
-    st.rerun()
+        st.session_state.last_result = result
+        st.rerun()
 
 def action_badge(action):
     colors = {
