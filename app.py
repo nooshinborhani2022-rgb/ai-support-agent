@@ -118,8 +118,17 @@ if "messages" not in st.session_state:
 if "pending_prompt" not in st.session_state:
     st.session_state.pending_prompt = None
 
-st.title("🤖 AI Support Agent Demo")
-st.caption("Explainable customer support AI with sentiment, routing, and confidence tracing")
+st.markdown("""
+<h1 style="margin-bottom: 0;">
+🤖 AI Support Agent
+</h1>
+
+<p style="color:#94a3b8; margin-top:5px;">
+Explainable AI for customer support • Multi-intent • Sentiment-aware • Confidence-driven
+</p>
+
+<hr style="border:1px solid rgba(255,255,255,0.08); margin-top:15px; margin-bottom:25px;">
+""", unsafe_allow_html=True)
 
 def stream_text(text):
     for word in text.split():
