@@ -126,7 +126,52 @@ button[kind="secondary"]:hover {
 .debug-box {
     backdrop-filter: blur(6px);
 }
-                       
+
+.quick-card {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 10px;
+    min-height: 110px;
+    transition: all 0.25s ease;
+}
+
+.quick-card:hover {
+    transform: translateY(-4px);
+    border: 1px solid rgba(147,197,253,0.45);
+    box-shadow: 0 10px 24px rgba(14,165,233,0.18);
+    background: rgba(255,255,255,0.06);
+}            
+
+div.stButton > button {
+    width: 100%;
+    border-radius: 12px !important;
+}
+
+div.stButton > button {
+    width: 100%;
+    min-height: 110px;
+    border-radius: 16px !important;
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    color: #f8fafc !important;
+    text-align: left !important;
+    white-space: pre-wrap !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    line-height: 1.5 !important;
+    padding: 18px !important;
+    transition: all 0.25s ease !important;
+}
+
+div.stButton > button:hover {
+    transform: translateY(-4px);
+    border: 1px solid rgba(147,197,253,0.45) !important;
+    box-shadow: 0 10px 24px rgba(14,165,233,0.18);
+    background: rgba(255,255,255,0.06) !important;
+}      
+                                
 </style>
 """, unsafe_allow_html=True)
 
@@ -331,90 +376,73 @@ with left_col:
 
     st.markdown("### ⚡ Quick Actions")
 
-    quick_actions = [
-        {
-            "title": "🔐 Login Issue",
-            "desc": "Password reset, sign-in failure, locked account",
-            "prompt": "I can't login to my account",
-        },
-        {
-            "title": "💳 Payment Problem",
-            "desc": "Failed payment, card declined, billing issue",
-            "prompt": "My payment failed and I was charged",
-        },
-        {
-            "title": "🚨 Fraud Report",
-            "desc": "Unauthorized charge or suspicious transaction",
-            "prompt": "Someone used my card. This charge is not mine.",
-        },
-        {
-            "title": "📦 Order Status",
-            "desc": "Tracking, delays, package status",
-            "prompt": "Where is my order?",
-        },
-    ]
+quick_actions = [
+    {
+        "title": "🔐 Login Issue",
+        "desc": "Password reset, sign-in failure, locked account",
+        "prompt": "I can't login to my account",
+    },
+    {
+        "title": "💳 Payment Problem",
+        "desc": "Failed payment, card declined, billing issue",
+        "prompt": "My payment failed and I was charged",
+    },
+    {
+        "title": "🚨 Fraud Report",
+        "desc": "Unauthorized charge or suspicious transaction",
+        "prompt": "Someone used my card. This charge is not mine.",
+    },
+    {
+        "title": "📦 Order Status",
+        "desc": "Tracking, delays, package status",
+        "prompt": "Where is my order?",
+    },
+]
 
-    cols = st.columns(2)
+cols = st.columns(2)
 
-    for i, item in enumerate(quick_actions):
-        with cols[i % 2]:
-            st.markdown(f"""
-            <div style="
-                padding:16px;
-                border-radius:16px;
-                background: rgba(255,255,255,0.04);
-                border: 1px solid rgba(255,255,255,0.08);
-                margin-bottom:10px;
-                min-height:110px;
-            ">
-                <div style="font-size:18px; font-weight:700; color:#f8fafc; margin-bottom:6px;">
-                    {item["title"]}
-                </div>
-                <div style="font-size:14px; color:#cbd5e1; line-height:1.5;">
-                    {item["desc"]}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+for i, item in enumerate(quick_actions):
+    with cols[i % 2]:
+        card_text = f"**{item['title']}**\n\n{item['desc']}"
+        if st.button(card_text, key=f"quick_card_{i}", use_container_width=True):
+            prompt = item["prompt"]
 
-            if st.button(f"Use {item['title']}", key=f"quick_{i}"):
-                prompt = item["prompt"]
+            st.session_state.messages.append({
+                "role": "user",
+                "content": prompt
+            })
 
-                st.session_state.messages.append({
-                    "role": "user",
-                    "content": prompt
-                })
+            result = st.session_state.engine.handle_message(prompt)
 
-                result = st.session_state.engine.handle_message(prompt)
+            st.session_state.stats["total_messages"] += 1
+            st.session_state.stats["last_action"] = result["action"]
 
-                st.session_state.stats["total_messages"] += 1
-                st.session_state.stats["last_action"] = result["action"]
+            if result["action"] == "escalate":
+                st.session_state.stats["escalations"] += 1
 
-                if result["action"] == "escalate":
-                    st.session_state.stats["escalations"] += 1
+            if result["action"] == "clarify":
+                st.session_state.stats["clarifications"] += 1
 
-                if result["action"] == "clarify":
-                    st.session_state.stats["clarifications"] += 1
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": result["response"],
+                "explanation": build_explanation_text(result)
+            })
 
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": result["response"],
-                    "explanation": build_explanation_text(result)
-                    })
+            st.session_state.last_result = result
+            st.rerun()
+      
 
-                st.session_state.last_result = result
-                st.rerun()
-
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            if message["role"] == "assistant":
-                st.markdown(format_assistant_response(message["content"]))
-
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        if message["role"] == "assistant":
+            st.markdown(format_assistant_response(message["content"]))
             if "explanation" in message:
                 st.caption("🧠 " + message["explanation"])
-            else:
-                st.markdown(message["content"])
+        else:
+            st.markdown(message["content"])
 
-    user_input = st.chat_input("Type your message...", key="main_chat_input")
+user_input = st.chat_input("Type your message...", key="main_chat_input")
 
 if user_input is not None and str(user_input).strip():
     user_input = str(user_input).strip()
@@ -444,12 +472,11 @@ if user_input is not None and str(user_input).strip():
 
         for step in get_thinking_steps():
             visible_steps.append("✅ " + step)
-            thinking_placeholder.markdown(
-                "\n".join(visible_steps)
-                )
+            thinking_placeholder.markdown("\n".join(visible_steps))
             time.sleep(0.6)
-            time.sleep(0.5)
-            thinking_placeholder.empty()
+
+        time.sleep(0.5)
+        thinking_placeholder.empty()
 
         typing_placeholder = st.empty()
         typing_placeholder.markdown("**AI is responding...**")
@@ -466,7 +493,6 @@ if user_input is not None and str(user_input).strip():
 
     st.session_state.last_result = result
     st.rerun()
-
 with right_col:
     st.subheader("Mini Analytics")
 
