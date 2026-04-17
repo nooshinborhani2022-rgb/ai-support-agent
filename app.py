@@ -166,10 +166,10 @@ def stream_text(text):
 
 def get_thinking_steps():
     return [
-        "Analyzing intent...",
-        "Detecting sentiment...",
-        "Applying routing rules...",
-        "Generating response...",
+        "🔍 Analyzing intent...",
+        "🙂 Detecting sentiment...",
+        "🧭 Applying routing rules...",
+        "✨ Generating response...",
     ]
 
 def format_assistant_response(text):
@@ -443,14 +443,13 @@ if user_input is not None and str(user_input).strip():
         visible_steps = []
 
         for step in get_thinking_steps():
-            visible_steps.append(step)
+            visible_steps.append("✅ " + step)
             thinking_placeholder.markdown(
-                "```text\n" + "\n".join(visible_steps) + "\n```"
-            )
-            time.sleep(0.55)
-
-        time.sleep(0.4)
-        thinking_placeholder.empty()
+                "\n".join(visible_steps)
+                )
+            time.sleep(0.6)
+            time.sleep(0.5)
+            thinking_placeholder.empty()
 
         typing_placeholder = st.empty()
         typing_placeholder.markdown("**AI is responding...**")
