@@ -184,6 +184,9 @@ if "messages" not in st.session_state:
 if "pending_prompt" not in st.session_state:
     st.session_state.pending_prompt = None
 
+if "scroll_to_bottom" not in st.session_state:
+    st.session_state.scroll_to_bottom = False
+    
 if "stats" not in st.session_state:
     st.session_state.stats = {
         "total_messages": 0,
@@ -430,6 +433,7 @@ for i, item in enumerate(quick_actions):
             })
 
             st.session_state.last_result = result
+            st.session_state.scroll_to_bottom = True
             st.rerun()
       
 
@@ -442,17 +446,19 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-            st.markdown("""
-<script>
-    const chatMessages = window.parent.document.querySelectorAll('[data-testid="stChatMessage"]');
-    if (chatMessages.length > 0) {
-        chatMessages[chatMessages.length - 1].scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
-    }
-</script>
-""", unsafe_allow_html=True)
+            if st.session_state.scroll_to_bottom:
+                st.markdown("""
+    <script>
+        const chatMessages = window.parent.document.querySelectorAll('[data-testid="stChatMessage"]');
+        if (chatMessages.length > 0) {
+            chatMessages[chatMessages.length - 1].scrollIntoView({
+                behavior: "smooth",
+                block: "end"
+            });
+        }
+    </script>
+    """, unsafe_allow_html=True)
+    st.session_state.scroll_to_bottom = False
 
 user_input = st.chat_input("Type your message...", key="main_chat_input")
 
@@ -504,7 +510,9 @@ if user_input is not None and str(user_input).strip():
     })
 
     st.session_state.last_result = result
+    st.session_state.scroll_to_bottom = True
     st.rerun()
+
 with right_col:
     st.subheader("Mini Analytics")
 
