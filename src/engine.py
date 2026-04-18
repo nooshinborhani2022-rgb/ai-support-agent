@@ -154,6 +154,13 @@ class SupportEngine:
             if refined_response is not None:
                 response = refined_response
                 skip_clarify_tail = True
+
+                updated = []
+                for intent in selected:
+                    new_intent = intent.copy()
+                    new_intent["action"] = "answer"
+                    updated.append(new_intent)
+                selected = updated
             elif routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
                 response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
             else:
@@ -163,6 +170,11 @@ class SupportEngine:
                 response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
             else:
                 response = generate_response(selected, sentiment_label=sentiment_label)
+
+        final_topics_after_rules = [intent["topic"] for intent in selected]
+
+        confidence = get_confidence(selected)
+        top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
         final_action = get_final_action(selected)
 

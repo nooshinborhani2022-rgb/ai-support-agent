@@ -994,26 +994,52 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
 
     last_topic = last_topics[0]
 
+    domain_map = {
+        "billing_clarification": "billing",
+        "billing_question": "billing",
+        "account_clarification": "account",
+        "login_issue": "account",
+        "account_locked": "account",
+        "payment_clarification": "payment",
+        "payment_failed": "payment",
+        "order_clarification": "order",
+        "order_status": "order",
+        "delivery_issue": "order",
+        "charge_clarification": "charge",
+        "double_charge": "charge",
+        "refund_request": "charge",
+        "charge_explanation": "charge",
+        "security_clarification": "security",
+        "fraud_report": "security",
+    }
 
-    if not last_topic.endswith("_clarification"):
-        return False
-
-    domain = last_topic.replace("_clarification", "")
-
-    new_domain = detect_clarification_domain(user_text)
-
-
-    if new_domain and new_domain != domain:
+    domain = domain_map.get(last_topic)
+    if not domain:
         return False
 
     normalized = normalize_phrase_text(user_text)
     token_count = len(normalized.split())
 
-    if token_count <= 6:
+    if token_count <= 12:
+        return True
+
+    new_domain = detect_clarification_domain(user_text)
+    if new_domain == domain:
+        return True
+
+    domain_keywords = {
+        "billing": ["invoice", "subscription", "subscription fee", "plan cost", "billing"],
+        "account": ["password", "login", "locked", "lockout", "error"],
+        "payment": ["declined", "card", "checkout", "payment"],
+        "order": ["delivery", "missing", "late", "tracking", "order"],
+        "charge": ["refund", "charged twice", "duplicate", "unknown charge", "yesterday"],
+        "security": ["fraud", "unauthorized", "suspicious", "not mine"],
+    }
+
+    if domain in domain_keywords and any(keyword in normalized for keyword in domain_keywords[domain]):
         return True
 
     return False
-
 
 def merge_with_clarification_context(user_text, conversation_state):
     previous_message = conversation_state.get("last_user_message") or ""
@@ -1024,6 +1050,39 @@ def get_clarification_refined_response(user_text, selected_intents):
     topics = [intent["topic"] for intent in selected_intents]
     normalized = normalize_phrase_text(user_text)
 
+    billing_topics = {"billing_question", "billing_clarification"}
+    charge_topics = {"charge_explanation", "charge_clarification", "refund_request", "double_charge"}
+    account_topics = {"login_issue", "account_clarification", "account_locked", "password_reset"}
+
+    if any(topic in billing_topics for topic in topics) and "subscription fee" in normalized:
+        return (
+            "Thanks, that helps. If your question is about a subscription fee, "
+            "please check the billing or plan section in your account where your active plan, "
+            "renewal date, and recurring charge details are listed. "
+            "If the amount looks different from what you expected, I can help you review that next."
+        )
+
+    if any(topic in billing_topics for topic in topics) and "subscription" in normalized:
+        return (
+            "Thanks, that helps. It sounds like this is about your subscription fee. "
+            "Please open the billing or subscription section in your account to review your current plan cost "
+            "and renewal details. If the charge looks different from what you expected, I can help you check that next."
+        )
+
+    if any(topic in billing_topics for topic in topics) and "invoice" in normalized:
+        return (
+            "Thanks, that helps. If this is about an invoice, "
+            "please open the billing section of your account and review the latest invoice details there. "
+            "If something on the invoice looks unclear, tell me which part and I’ll help you narrow it down."
+        )
+
+    if any(topic in billing_topics for topic in topics) and "plan cost" in normalized:
+        return (
+            "Thanks, that helps. If you're asking about plan cost, "
+            "please check your account's billing or subscription page where the current plan and price are shown. "
+            "If the price changed unexpectedly, I can help you investigate that."
+        )
+
     if "refund_request" in topics and "completed charge" in normalized:
         return (
             "Thanks, that helps. It sounds like you're asking for a refund for a completed charge. "
@@ -1031,16 +1090,52 @@ def get_clarification_refined_response(user_text, selected_intents):
             "If the charge looks incorrect or unexpected, I can help you review that too."
         )
 
-    if "refund_request" in topics and "yesterday" in normalized:
+    if any(topic in charge_topics for topic in topics) and "yesterday" in normalized:
         return (
-            "Thanks, that helps. Since this was a recent completed charge, you can start by checking the charge details "
-            "in your account and submitting a refund request from the billing or order history section."
+            "Thanks, that helps. Since this was a recent charge, "
+            "please check the charge details in your account and review whether it matches a recent purchase, "
+            "subscription renewal, or refund-related request. If it still looks wrong, I can help you narrow it down."
         )
 
-    if "login_issue" in topics and "reset" in normalized:
+    if "refund_request" in topics and "refund" in normalized:
         return (
-            "Thanks, that helps. Since this is still a login issue after trying reset-related steps, "
+            "Thanks, that helps. If you're asking for a refund, "
+            "please open your account's billing or order history section and start the refund request from the relevant charge. "
+            "If you want, I can also help you figure out which charge this should apply to."
+        )
+
+    if "double_charge" in topics and ("charged twice" in normalized or "duplicate" in normalized):
+        return (
+            "Thanks, that helps. This sounds like a possible duplicate charge. "
+            "Please review the charge dates and amounts in your billing history first. "
+            "If the same payment appears more than once, this should be investigated further."
+        )
+
+    if "charge_explanation" in topics and ("what is this charge" in normalized or "unknown charge" in normalized):
+        return (
+            "Thanks, that helps. If you're trying to identify a charge, "
+            "please review the date, amount, and any recent subscription or order activity in your account. "
+            "If it still doesn't look familiar, tell me what seems unclear and I’ll help narrow it down."
+        )
+
+    if any(topic in account_topics for topic in topics) and "reset" in normalized:
+        return (
+            "Thanks, that helps. Since this is still an account access issue after trying reset-related steps, "
             "please tell me whether you're seeing a password error, a lockout message, or a verification problem."
+        )
+
+    if any(topic in account_topics for topic in topics) and "password" in normalized:
+        return (
+            "Thanks, that helps. If this is about your password, "
+            "please try the password reset flow from the login page and then check whether you can sign in again. "
+            "If that still fails, tell me what message you see."
+        )
+
+    if any(topic in account_topics for topic in topics) and ("locked" in normalized or "lockout" in normalized):
+        return (
+            "Thanks, that helps. If your account appears locked, "
+            "please check whether you received a warning, verification request, or security message during sign-in. "
+            "Tell me what message you see and I’ll help narrow it down."
         )
 
     return None
@@ -1357,6 +1452,13 @@ def main():
             if refined_response is not None:
                 response = refined_response
                 skip_clarify_tail = True
+
+                updated = []
+                for intent in selected:
+                    new_intent = intent.copy()
+                    new_intent["action"] = "answer"
+                    updated.append(new_intent)
+                selected = updated
             elif routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
                 response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
             else:
@@ -1366,6 +1468,11 @@ def main():
                 response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
             else:
                 response = generate_response(selected, sentiment_label=sentiment_label)
+
+        final_topics_after_rules = [intent["topic"] for intent in selected]
+
+        confidence = get_confidence(selected)
+        top1_score, top2_score, score_gap = extract_confidence_details(selected)
 
         primary_intent = selected[0]["topic"] if selected else None
         final_action = get_final_action(selected)
@@ -1378,9 +1485,9 @@ def main():
         )
 
         final_response = apply_action_tone(
-        final_response,
-        final_action,
-        skip_clarify_tail=skip_clarify_tail
+            final_response,
+            final_action,
+            skip_clarify_tail=skip_clarify_tail
         )
         final_response = apply_confidence_tone(final_response, pre_rule_confidence)
 
