@@ -442,6 +442,18 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
+            st.markdown("""
+<script>
+    const chatMessages = window.parent.document.querySelectorAll('[data-testid="stChatMessage"]');
+    if (chatMessages.length > 0) {
+        chatMessages[chatMessages.length - 1].scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+</script>
+""", unsafe_allow_html=True)
+
 user_input = st.chat_input("Type your message...", key="main_chat_input")
 
 if user_input is not None and str(user_input).strip():
