@@ -912,6 +912,9 @@ def add_empathy_and_politeness(response, sentiment_label, topics, confidence=Non
     if topics and topics[0] in {"success", "no_issue"}:
         return response
 
+    if response.startswith("Thanks, that helps."):
+        return response
+
     if confidence is not None and confidence < 0.6:
         return response
 
@@ -926,18 +929,6 @@ def add_empathy_and_politeness(response, sentiment_label, topics, confidence=Non
     return f"{empathy} {response}".strip()
 
 
-def apply_action_tone(response, final_action, skip_clarify_tail=False):
-    if final_action == "escalate":
-        return response + "\n\nI'll make sure this is handled as quickly as possible."
-
-    if final_action == "clarify":
-        if skip_clarify_tail:
-            return response
-        return response + "\n\nOnce I have a bit more detail, I’ll guide you step by step."
-
-    return response
-
-
 def apply_confidence_tone(response, confidence):
     if confidence < 0.3:
         return f"I’m not fully sure I understood correctly, but {response}"
@@ -945,6 +936,13 @@ def apply_confidence_tone(response, confidence):
     if confidence < 0.6:
         return f"Based on what I understand, {response}"
 
+    return response
+
+def apply_action_tone(response, action, skip_clarify_tail=False):
+    if action == "clarify" and not skip_clarify_tail:
+        return response
+    if action == "escalate":
+        return response + " A support specialist will handle this for you."
     return response
 
 
