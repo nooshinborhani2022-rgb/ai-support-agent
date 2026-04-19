@@ -1035,6 +1035,108 @@ def create_memory_state():
         "turn_count": 0,
     }
 
+def infer_domain_from_topics(topics):
+    if not topics:
+        return None
+
+    topic_domain_map = {
+        "billing_question": "billing",
+        "billing_clarification": "billing",
+        "login_issue": "account",
+        "account_clarification": "account",
+        "account_locked": "account",
+        "password_reset": "account",
+        "payment_failed": "payment",
+        "payment_clarification": "payment",
+        "order_status": "order",
+        "order_clarification": "order",
+        "delivery_issue": "order",
+        "charge_explanation": "charge",
+        "charge_clarification": "charge",
+        "double_charge": "charge",
+        "refund_request": "charge",
+        "fraud_report": "security",
+        "security_clarification": "security",
+        "subscription_cancel": "billing",
+        "general_help": "general",
+        "success": "general",
+        "no_issue": "general",
+    }
+
+    for topic in topics:
+        if topic in topic_domain_map:
+            return topic_domain_map[topic]
+
+    return None
+
+
+def build_issue_summary(topics, user_message):
+    if not topics:
+        return None
+
+    domain = infer_domain_from_topics(topics)
+    normalized = normalize_phrase_text(user_message)
+
+    if domain == "billing":
+        if "subscription fee" in normalized:
+            return "User is asking about a subscription fee."
+        if "invoice" in normalized:
+            return "User has a billing question about an invoice."
+        return "User has a billing-related question."
+
+    if domain == "account":
+        if "reset" in normalized:
+            return "User has an account access issue and already tried reset-related steps."
+        if "locked" in normalized or "lockout" in normalized:
+            return "User may be locked out of the account."
+        return "User has an account access issue."
+
+    if domain == "payment":
+        return "User has a payment-related problem."
+
+    if domain == "order":
+        return "User has an order or delivery-related issue."
+
+    if domain == "charge":
+        if "refund" in normalized:
+            return "User wants help with a refund for a charge."
+        if "charged twice" in normalized or "duplicate" in normalized:
+            return "User may be reporting a duplicate charge."
+        if "charge" in normalized:
+            return "User wants help understanding a charge."
+        return "User has a charge-related issue."
+
+    if domain == "security":
+        return "User may be reporting an unauthorized or suspicious charge."
+
+    return "User needs help with a support issue."
+
+
+def update_conversation_memory(conversation_state, user_message, final_topics, final_action):
+    memory = conversation_state.get("memory")
+    if memory is None:
+        memory = create_memory_state()
+        conversation_state["memory"] = memory
+
+    memory["turn_count"] += 1
+    memory["active_domain"] = infer_domain_from_topics(final_topics)
+    memory["active_intents"] = list(final_topics)
+    memory["active_issue_summary"] = build_issue_summary(final_topics, user_message)
+
+    high_risk_topics = {"fraud_report", "security_clarification"}
+    medium_risk_topics = {"double_charge", "payment_failed", "account_locked"}
+
+    if any(topic in high_risk_topics for topic in final_topics):
+        memory["risk_level"] = "high"
+    elif any(topic in medium_risk_topics for topic in final_topics):
+        memory["risk_level"] = "medium"
+    else:
+        memory["risk_level"] = "low"
+
+    memory["needs_escalation"] = (
+        final_action == "escalate" or memory["risk_level"] == "high"
+    )
+
 def should_keep_followup_context(final_topics, final_action):
     if final_action == "clarify":
         return True
@@ -1749,6 +1851,13 @@ def main():
         conversation_state["last_topics"] = final_topics_after_rules
         conversation_state["last_action"] = final_action
         conversation_state["last_routing_reason"] = routing_reason
+
+        update_conversation_memory(
+            conversation_state,
+            user,
+            final_topics_after_rules,
+            final_action
+        )
 
         print(f"State: {conversation_state}")
 

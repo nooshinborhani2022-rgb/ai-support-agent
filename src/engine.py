@@ -28,6 +28,7 @@ from src.main import (
     SUCCESS_RESPONSES,
     NO_ISSUE_RESPONSES,
     should_keep_followup_context,
+    update_conversation_memory,
 )
 
 
@@ -202,6 +203,12 @@ class SupportEngine:
         self.state["last_topics"] = final_topics_after_rules
         self.state["last_action"] = final_action
         self.state["last_routing_reason"] = routing_reason
+        update_conversation_memory(
+            self.state,
+            user,
+            final_topics_after_rules,
+            final_action
+        )
 
         return {
             "response": final_response,
