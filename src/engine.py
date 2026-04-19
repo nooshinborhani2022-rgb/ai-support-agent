@@ -27,6 +27,7 @@ from src.main import (
     DEFAULT_GENERAL_HELP_INTENT,
     SUCCESS_RESPONSES,
     NO_ISSUE_RESPONSES,
+    should_keep_followup_context,
 )
 
 
@@ -193,6 +194,10 @@ class SupportEngine:
         final_response = apply_confidence_tone(final_response, pre_rule_confidence)
 
         self.state["awaiting_clarification"] = final_action == "clarify"
+        self.state["followup_context_active"] = should_keep_followup_context(
+            final_topics_after_rules,
+            final_action
+        )
         self.state["last_user_message"] = user
         self.state["last_topics"] = final_topics_after_rules
         self.state["last_action"] = final_action

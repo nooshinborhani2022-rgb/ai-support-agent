@@ -22,6 +22,7 @@ LOW_CONFIDENCE_THRESHOLD = 0.4
 
 INITIAL_CONVERSATION_STATE = {
     "awaiting_clarification": False,
+    "followup_context_active": False,
     "last_user_message": None,
     "last_topics": [],
     "last_action": None,
@@ -664,6 +665,27 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
 
     strong_cue_topics = get_strong_cue_topics(user_text)
 
+    normalized = normalize_phrase_text(user_text)
+
+    if (
+        "charge explanation" in normalized
+        or "explanation for a charge" in normalized
+        or "what is this charge" in normalized
+        or "explain this charge" in normalized
+        or "unfamiliar payment" in normalized
+        or "unknown charge" in normalized
+    ):
+        ranked_intents = [
+            intent for intent in ranked_intents
+            if intent["topic"] not in {"payment_failed", "fraud_report"}
+        ]
+        candidates = [
+            intent for intent in candidates
+            if intent["topic"] not in {"payment_failed", "fraud_report"}
+        ]
+        ranked_intents = [intent for intent in ranked_intents if intent["topic"] != "payment_failed"]
+        candidates = [intent for intent in candidates if intent["topic"] != "payment_failed"]
+
     if len(strong_cue_topics) >= 2 and len(candidates) < max_intents:
         for intent in ranked_intents:
             if intent["topic"] == "general_help":
@@ -975,15 +997,32 @@ def get_low_confidence_multi_intent_response(predicted_topics):
 def create_conversation_state():
     return {
         "awaiting_clarification": False,
+        "followup_context_active": False,
         "last_user_message": None,
         "last_topics": [],
         "last_action": None,
         "last_routing_reason": None,
     }
 
+def should_keep_followup_context(final_topics, final_action):
+    if final_action == "clarify":
+        return True
+
+    followup_topics = {
+        "billing_question",
+        "billing_clarification",
+        "charge_explanation",
+        "charge_clarification",
+        "refund_request",
+        "account_clarification",
+        "security_clarification",
+        "fraud_report",
+    }
+
+    return any(topic in followup_topics for topic in final_topics)
 
 def should_treat_as_clarification_followup(user_text, conversation_state):
-    if not conversation_state["awaiting_clarification"]:
+    if not conversation_state.get("awaiting_clarification") and not conversation_state.get("followup_context_active"):
         return False
 
     last_topics = conversation_state.get("last_topics", [])
@@ -1103,6 +1142,7 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
 
     return False
 
+
 def merge_with_clarification_context(user_text, conversation_state):
     previous_message = conversation_state.get("last_user_message") or ""
     return f"{previous_message} {user_text}".strip()
@@ -1159,13 +1199,38 @@ def get_clarification_refined_response(user_text, selected_intents):
         )
 
     # --------------------
-    # Charge / refund follow-ups
+    # Charge / explanation (MOST SPECIFIC FIRST)
     # --------------------
-    if "refund_request" in topics and "completed charge" in normalized:
+    if "charge_explanation" in topics and (
+        "explanation for a charge" in normalized
+        or "what is this charge" in normalized
+        or "unknown charge" in normalized
+        or "explain this charge" in normalized
+        or "why was i charged" in normalized
+    ):
         return (
-            "Thanks, that helps. It sounds like you're asking for a refund for a completed charge. "
-            "Please go to your account dashboard and open the order or charge details to start the refund request. "
-            "If the charge looks incorrect or unexpected, I can help you review that too."
+            "Thanks, that helps. If you're looking for an explanation for a charge, "
+            "please review the date, amount, and any recent subscription, order, or account activity in your account first. "
+            "If it still does not look familiar, tell me what seems unclear and I’ll help narrow it down."
+        )
+
+    if "charge_explanation" in topics and (
+        "unfamiliar payment" in normalized or "unfamiliar" in normalized
+    ):
+        return (
+            "Thanks, that helps. If the payment looks unfamiliar, "
+            "please review the date, amount, and any recent subscription, order, or account activity first. "
+            "If it still does not look recognizable, it may need to be treated as an unauthorized or suspicious charge."
+        )
+    if "refund_request" in topics and (
+        "charge" in normalized or "charged" in normalized
+    ) and (
+        "yesterday" in normalized or "today" in normalized or "recent" in normalized
+    ):
+        return (
+            "Thanks, that helps. It sounds like you want a refund for a recent charge. "
+            "Please open the relevant charge in your billing or order history and start the refund request there. "
+            "If you're unsure which charge it is, tell me what looks unusual and I’ll help narrow it down."
         )
 
     if any(topic in charge_topics for topic in topics) and (
@@ -1175,6 +1240,16 @@ def get_clarification_refined_response(user_text, selected_intents):
             "Thanks, that helps. Since this was a recent charge, "
             "please check the charge details in your account and review whether it matches a recent purchase, "
             "subscription renewal, or refund-related request. If it still looks wrong, I can help you narrow it down."
+        )
+
+    # --------------------
+    # Refund / charge handling
+    # --------------------
+    if "refund_request" in topics and "completed charge" in normalized:
+        return (
+            "Thanks, that helps. It sounds like you're asking for a refund for a completed charge. "
+            "Please go to your account dashboard and open the order or charge details to start the refund request. "
+            "If the charge looks incorrect or unexpected, I can help you review that too."
         )
 
     if "refund_request" in topics and ("refund" in normalized or "money back" in normalized):
@@ -1191,27 +1266,17 @@ def get_clarification_refined_response(user_text, selected_intents):
             "If you're unsure which charge it is, tell me what looks unusual and I’ll help narrow it down."
         )
 
-    if "double_charge" in topics and ("charged twice" in normalized or "duplicate" in normalized or "double charge" in normalized):
+    if "double_charge" in topics and (
+        "charged twice" in normalized or "duplicate" in normalized or "double charge" in normalized
+    ):
         return (
             "Thanks, that helps. This sounds like a possible duplicate charge. "
             "Please review the charge dates and amounts in your billing history first. "
             "If the same payment appears more than once, this should be investigated further."
         )
 
-    if "charge_explanation" in topics and (
-        "what is this charge" in normalized
-        or "unknown charge" in normalized
-        or "explain this charge" in normalized
-        or "why was i charged" in normalized
-    ):
-        return (
-            "Thanks, that helps. If you're trying to identify a charge, "
-            "please review the date, amount, and any recent subscription or order activity in your account. "
-            "If it still doesn't look familiar, tell me what seems unclear and I’ll help narrow it down."
-        )
-
     # --------------------
-    # Security / fraud follow-ups
+    # Security / fraud
     # --------------------
     if any(topic in security_topics for topic in topics) and (
         "not mine" in normalized
@@ -1645,6 +1710,10 @@ def main():
         )
 
         conversation_state["awaiting_clarification"] = final_action == "clarify"
+        conversation_state["followup_context_active"] = should_keep_followup_context(
+            final_topics_after_rules,
+            final_action
+        )
         conversation_state["last_user_message"] = user
         conversation_state["last_topics"] = final_topics_after_rules
         conversation_state["last_action"] = final_action
