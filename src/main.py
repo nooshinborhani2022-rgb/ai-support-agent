@@ -1196,6 +1196,7 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
     }
 
     domain = domain_map.get(last_topic)
+
     if not domain:
         memory = conversation_state.get("memory", {})
         domain = memory.get("active_domain")
@@ -1205,11 +1206,13 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
 
     normalized = normalize_phrase_text(user_text)
     token_count = len(normalized.split())
-
-    if token_count <= 12:
-        return True
-
     new_domain = detect_clarification_domain(user_text)
+
+    # اگر کاربر واضح وارد یک domain جدید شده، دیگر follow-up حسابش نکن
+    if new_domain and new_domain != domain:
+        return False
+
+    # اگر هنوز همان domain باشد، follow-up است
     if new_domain == domain:
         return True
 
@@ -1288,8 +1291,10 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
     if domain in domain_keywords and any(keyword in normalized for keyword in domain_keywords[domain]):
         return True
 
-    return False
+    if token_count <= 12:
+        return True
 
+    return False
 
 def merge_with_clarification_context(user_text, conversation_state):
     previous_message = conversation_state.get("last_user_message") or ""
