@@ -980,11 +980,22 @@ def apply_confidence_tone(response, confidence):
 
     return response
 
-def apply_action_tone(response, action, skip_clarify_tail=False):
+def apply_action_tone(response, action, topics, skip_clarify_tail=False):
     if action == "clarify" and not skip_clarify_tail:
         return response
     if action == "escalate":
-        return response + " A support specialist will handle this for you."
+        if any(topic in {"fraud_report", "security_clarification"} for topic in topics):
+            return (
+                "I understand this is concerning. This looks like a potentially unauthorized charge, "
+                "so I'm escalating this to our security team right away. "
+                "In the meantime, please secure your account or card if you haven’t already. "
+                "A specialist will review this and assist you as quickly as possible."
+            )
+
+        return (
+            "I'm going to escalate this to a support specialist so it can be handled properly. "
+            "They’ll review your case and follow up with you shortly."
+        )
     return response
 
 
@@ -1185,6 +1196,10 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
     }
 
     domain = domain_map.get(last_topic)
+    if not domain:
+        memory = conversation_state.get("memory", {})
+        domain = memory.get("active_domain")
+
     if not domain:
         return False
 

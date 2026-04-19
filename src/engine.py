@@ -194,9 +194,10 @@ class SupportEngine:
         )
 
         final_response = apply_action_tone(
-            final_response,
-            final_action,
-            skip_clarify_tail=skip_clarify_tail
+        final_response,
+        final_action,
+        final_topics_after_rules,
+        skip_clarify_tail=skip_clarify_tail
         )
         final_response = apply_confidence_tone(final_response, pre_rule_confidence)
 
