@@ -1,6 +1,7 @@
 import streamlit as st
 from src.engine import SupportEngine
 import time
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
@@ -446,20 +447,35 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-            if st.session_state.scroll_to_bottom:
-                st.markdown("""
-    <script>
-        const chatMessages = window.parent.document.querySelectorAll('[data-testid="stChatMessage"]');
-        if (chatMessages.length > 0) {
-            chatMessages[chatMessages.length - 1].scrollIntoView({
-                behavior: "smooth",
-                block: "end"
-            });
-        }
-    </script>
-    """, unsafe_allow_html=True)
-    st.session_state.scroll_to_bottom = False
+message_count = len(st.session_state.messages)
+anchor_id = f"chat-bottom-anchor-{message_count}"
 
+st.markdown(f'<div id="{anchor_id}"></div>', unsafe_allow_html=True)
+
+if st.session_state.scroll_to_bottom:
+    components.html(
+        f"""
+        <div id="{anchor_id}"></div>
+        <script>
+            const doScroll = () => {{
+                const anchor = window.parent.document.getElementById("{anchor_id}");
+                if (anchor) {{
+                    anchor.scrollIntoView({{
+                        behavior: "smooth",
+                        block: "end"
+                    }});
+                }}
+            }};
+
+            setTimeout(doScroll, 100);
+            setTimeout(doScroll, 300);
+            setTimeout(doScroll, 600);
+        </script>
+        """,
+        height=0,
+    )
+    st.session_state.scroll_to_bottom = False
+    
 user_input = st.chat_input("Type your message...", key="main_chat_input")
 
 if user_input is not None and str(user_input).strip():
@@ -556,6 +572,43 @@ with right_col:
             f'<div class="metric-value">{confidence_value:.3f} ({confidence_percent}%)</div>',
             unsafe_allow_html=True
         )
+        
+        if "memory" in result:
+            memory = result["memory"]
+
+            st.markdown('<div class="metric-label">Memory</div>', unsafe_allow_html=True)
+
+            st.markdown(
+                f'<div class="metric-value">Domain: {memory.get("active_domain")}</div>',
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                f'<div class="metric-value">Intents: {", ".join(memory.get("active_intents", []))}</div>',
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                f'<div class="metric-value">Risk: {memory.get("risk_level")}</div>',
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                f'<div class="metric-value">Escalation: {memory.get("needs_escalation")}</div>',
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                f'<div class="metric-value">Turns: {memory.get("turn_count")}</div>',
+                unsafe_allow_html=True
+            )
+
+            summary = memory.get("active_issue_summary")
+            if summary:
+                st.markdown(
+                    f'<div class="metric-value">Summary: {summary}</div>',
+                    unsafe_allow_html=True
+                )
 
         st.markdown('<div class="metric-label">Action</div>', unsafe_allow_html=True)
         st.markdown(action_badge(result["action"]), unsafe_allow_html=True)
