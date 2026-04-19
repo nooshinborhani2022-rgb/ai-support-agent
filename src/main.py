@@ -667,6 +667,26 @@ def select_top_intents(ranked_intents, user_text, min_score=0.2, max_intents=2):
 
     normalized = normalize_phrase_text(user_text)
 
+    fraud_keywords = [
+        "not mine",
+        "unauthorized",
+        "used my card",
+        "without permission",
+        "fraud",
+        "suspicious",
+        "someone used",
+        "stolen",
+    ]
+
+    if any(keyword in normalized for keyword in fraud_keywords):
+        ranked_intents = [
+            intent for intent in ranked_intents
+            if intent["topic"] == "fraud_report"
+        ]
+        candidates = [
+            intent for intent in candidates
+            if intent["topic"] == "fraud_report"
+        ]
     if (
         "charge explanation" in normalized
         or "explanation for a charge" in normalized
