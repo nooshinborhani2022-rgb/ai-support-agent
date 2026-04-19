@@ -998,6 +998,7 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
         "account_clarification": "account",
         "login_issue": "account",
         "account_locked": "account",
+        "password_reset": "account",
         "payment_clarification": "payment",
         "payment_failed": "payment",
         "order_clarification": "order",
@@ -1026,12 +1027,75 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
         return True
 
     domain_keywords = {
-        "billing": ["invoice", "subscription", "subscription fee", "plan cost", "billing"],
-        "account": ["password", "login", "locked", "lockout", "error"],
-        "payment": ["declined", "card", "checkout", "payment"],
-        "order": ["delivery", "missing", "late", "tracking", "order"],
-        "charge": ["refund", "charged twice", "duplicate", "unknown charge", "yesterday"],
-        "security": ["fraud", "unauthorized", "suspicious", "not mine"],
+        "billing": [
+            "invoice",
+            "subscription",
+            "subscription fee",
+            "plan cost",
+            "billing",
+            "bill",
+            "renewal",
+            "plan",
+            "price",
+            "cost",
+        ],
+        "account": [
+            "password",
+            "reset",
+            "login",
+            "log in",
+            "sign in",
+            "locked",
+            "lockout",
+            "access denied",
+            "verification",
+            "error",
+        ],
+        "payment": [
+            "declined",
+            "card",
+            "checkout",
+            "payment",
+            "transaction",
+            "failed",
+            "did not go through",
+        ],
+        "order": [
+            "delivery",
+            "missing",
+            "late",
+            "tracking",
+            "track",
+            "order",
+            "package",
+            "shipment",
+            "delayed",
+        ],
+        "charge": [
+            "refund",
+            "charged",
+            "charge",
+            "charged twice",
+            "duplicate",
+            "double charge",
+            "unknown charge",
+            "billing history",
+            "yesterday",
+            "today",
+            "recent",
+            "completed charge",
+            "money back",
+        ],
+        "security": [
+            "fraud",
+            "unauthorized",
+            "suspicious",
+            "not mine",
+            "used my card",
+            "stolen card",
+            "without permission",
+            "security",
+        ],
     }
 
     if domain in domain_keywords and any(keyword in normalized for keyword in domain_keywords[domain]):
@@ -1051,7 +1115,11 @@ def get_clarification_refined_response(user_text, selected_intents):
     billing_topics = {"billing_question", "billing_clarification"}
     charge_topics = {"charge_explanation", "charge_clarification", "refund_request", "double_charge"}
     account_topics = {"login_issue", "account_clarification", "account_locked", "password_reset"}
+    security_topics = {"security_clarification", "fraud_report"}
 
+    # --------------------
+    # Billing follow-ups
+    # --------------------
     if any(topic in billing_topics for topic in topics) and "subscription fee" in normalized:
         return (
             "Thanks, that helps. If your question is about a subscription fee, "
@@ -1081,6 +1149,18 @@ def get_clarification_refined_response(user_text, selected_intents):
             "If the price changed unexpectedly, I can help you investigate that."
         )
 
+    if any(topic in billing_topics for topic in topics) and (
+        "renewal" in normalized or "price" in normalized or "cost" in normalized
+    ):
+        return (
+            "Thanks, that helps. Please check the billing or subscription section of your account "
+            "to review your current plan, renewal timing, and the price being charged. "
+            "If one of those details looks wrong, tell me which one and I’ll help you narrow it down."
+        )
+
+    # --------------------
+    # Charge / refund follow-ups
+    # --------------------
     if "refund_request" in topics and "completed charge" in normalized:
         return (
             "Thanks, that helps. It sounds like you're asking for a refund for a completed charge. "
@@ -1088,34 +1168,75 @@ def get_clarification_refined_response(user_text, selected_intents):
             "If the charge looks incorrect or unexpected, I can help you review that too."
         )
 
-    if any(topic in charge_topics for topic in topics) and "yesterday" in normalized:
+    if any(topic in charge_topics for topic in topics) and (
+        "yesterday" in normalized or "today" in normalized or "recent" in normalized
+    ):
         return (
             "Thanks, that helps. Since this was a recent charge, "
             "please check the charge details in your account and review whether it matches a recent purchase, "
             "subscription renewal, or refund-related request. If it still looks wrong, I can help you narrow it down."
         )
 
-    if "refund_request" in topics and "refund" in normalized:
+    if "refund_request" in topics and ("refund" in normalized or "money back" in normalized):
         return (
             "Thanks, that helps. If you're asking for a refund, "
             "please open your account's billing or order history section and start the refund request from the relevant charge. "
             "If you want, I can also help you figure out which charge this should apply to."
         )
 
-    if "double_charge" in topics and ("charged twice" in normalized or "duplicate" in normalized):
+    if "refund_request" in topics and ("charge" in normalized or "charged" in normalized):
+        return (
+            "Thanks, that helps. It sounds like you want a refund for a specific charge. "
+            "Please open the relevant charge in your billing or order history and start the refund request there. "
+            "If you're unsure which charge it is, tell me what looks unusual and I’ll help narrow it down."
+        )
+
+    if "double_charge" in topics and ("charged twice" in normalized or "duplicate" in normalized or "double charge" in normalized):
         return (
             "Thanks, that helps. This sounds like a possible duplicate charge. "
             "Please review the charge dates and amounts in your billing history first. "
             "If the same payment appears more than once, this should be investigated further."
         )
 
-    if "charge_explanation" in topics and ("what is this charge" in normalized or "unknown charge" in normalized):
+    if "charge_explanation" in topics and (
+        "what is this charge" in normalized
+        or "unknown charge" in normalized
+        or "explain this charge" in normalized
+        or "why was i charged" in normalized
+    ):
         return (
             "Thanks, that helps. If you're trying to identify a charge, "
             "please review the date, amount, and any recent subscription or order activity in your account. "
             "If it still doesn't look familiar, tell me what seems unclear and I’ll help narrow it down."
         )
 
+    # --------------------
+    # Security / fraud follow-ups
+    # --------------------
+    if any(topic in security_topics for topic in topics) and (
+        "not mine" in normalized
+        or "unauthorized" in normalized
+        or "used my card" in normalized
+        or "without permission" in normalized
+        or "fraud" in normalized
+        or "suspicious" in normalized
+    ):
+        return (
+            "Thanks, that helps. This looks like a potentially unauthorized charge. "
+            "Please secure the account or card first if you have not already done so, "
+            "then review the charge details and report it for investigation as soon as possible."
+        )
+
+    if "fraud_report" in topics and "charge" in normalized:
+        return (
+            "Thanks, that helps. Since this appears to be a suspicious charge, "
+            "it should be treated as a security issue and reviewed quickly. "
+            "Please report the charge through the appropriate support or security channel and secure the affected payment method if needed."
+        )
+
+    # --------------------
+    # Account follow-ups
+    # --------------------
     if any(topic in account_topics for topic in topics) and "reset" in normalized:
         return (
             "Thanks, that helps. Since this is still an account access issue after trying reset-related steps, "
@@ -1129,11 +1250,19 @@ def get_clarification_refined_response(user_text, selected_intents):
             "If that still fails, tell me what message you see."
         )
 
-    if any(topic in account_topics for topic in topics) and ("locked" in normalized or "lockout" in normalized):
+    if any(topic in account_topics for topic in topics) and (
+        "locked" in normalized or "lockout" in normalized or "access denied" in normalized
+    ):
         return (
             "Thanks, that helps. If your account appears locked, "
             "please check whether you received a warning, verification request, or security message during sign-in. "
             "Tell me what message you see and I’ll help narrow it down."
+        )
+
+    if any(topic in account_topics for topic in topics) and "verification" in normalized:
+        return (
+            "Thanks, that helps. If the problem is related to verification, "
+            "please tell me whether you're not receiving a code, the code is failing, or the verification step is not loading properly."
         )
 
     return None
