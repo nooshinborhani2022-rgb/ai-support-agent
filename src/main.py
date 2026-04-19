@@ -1208,12 +1208,21 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
     token_count = len(normalized.split())
     new_domain = detect_clarification_domain(user_text)
 
-    # اگر کاربر واضح وارد یک domain جدید شده، دیگر follow-up حسابش نکن
-    if new_domain and new_domain != domain:
+    equivalent_domains = {
+        "charge": {"charge", "payment", "security"},
+        "payment": {"payment", "charge"},
+        "security": {"security", "charge"},
+        "billing": {"billing"},
+        "account": {"account"},
+        "order": {"order"},
+    }
+
+    allowed_domains = equivalent_domains.get(domain, {domain})
+
+    if new_domain and new_domain not in allowed_domains:
         return False
 
-    # اگر هنوز همان domain باشد، follow-up است
-    if new_domain == domain:
+    if new_domain and new_domain in allowed_domains:
         return True
 
     domain_keywords = {
@@ -1275,6 +1284,9 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
             "recent",
             "completed charge",
             "money back",
+            "unfamiliar payment",
+            "unfamiliar",
+            "not mine",
         ],
         "security": [
             "fraud",
@@ -1704,6 +1716,18 @@ def main():
                 "score": 1.0,
                 "action": "answer",
                 "responses": NO_ISSUE_RESPONSES
+            }]
+    
+        elif detect_clarification_domain(effective_user) == "security":
+            selected = [{
+                "topic": "fraud_report",
+                "score": 3.0,
+                "action": "escalate",
+                "responses": [
+                    "This may involve fraud, so I'm escalating it immediately.",
+                    "I'll send this to a specialist right away for investigation.",
+                    "This looks like a security issue, so I'm escalating it."
+                ],
             }]
         elif is_vague_query(effective_user):
             domain = detect_clarification_domain(effective_user)

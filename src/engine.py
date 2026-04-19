@@ -63,6 +63,19 @@ class SupportEngine:
                 "action": "answer",
                 "responses": NO_ISSUE_RESPONSES
             }]
+        
+        elif detect_clarification_domain(effective_user) == "security":
+            selected = [{
+                "topic": "fraud_report",
+                "score": 3.0,
+                "action": "escalate",
+                "responses": [
+                    "This may involve fraud, so I'm escalating it immediately.",
+                    "I'll send this to a specialist right away for investigation.",
+                    "This looks like a security issue, so I'm escalating it."
+                ],
+            }]
+
         elif is_vague_query(effective_user):
             domain = detect_clarification_domain(effective_user)
 
