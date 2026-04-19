@@ -160,8 +160,14 @@ class SupportEngine:
                 updated = []
                 for intent in selected:
                     new_intent = intent.copy()
-                    new_intent["action"] = "answer"
+
+                    if intent["topic"] in {"fraud_report", "security_clarification"}:
+                        new_intent["action"] = "escalate"
+                    else:
+                        new_intent["action"] = "answer"
+
                     updated.append(new_intent)
+
                 selected = updated
             elif routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
                 response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
@@ -222,4 +228,5 @@ class SupportEngine:
             "score_gap": score_gap,
             "predicted_topics_before_rules": predicted_topics_before_rules,
             "final_topics_after_rules": final_topics_after_rules,
+            "memory": self.state.get("memory", {}),
         }
