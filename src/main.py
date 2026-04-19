@@ -1022,6 +1022,17 @@ def create_conversation_state():
         "last_topics": [],
         "last_action": None,
         "last_routing_reason": None,
+        "memory": create_memory_state(),
+    }
+
+def create_memory_state():
+    return {
+        "active_domain": None,
+        "active_intents": [],
+        "active_issue_summary": None,
+        "risk_level": "low",
+        "needs_escalation": False,
+        "turn_count": 0,
     }
 
 def should_keep_followup_context(final_topics, final_action):
