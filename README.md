@@ -1,148 +1,161 @@
 # 🤖 AI Support Agent
 
-A hybrid AI-powered customer support agent that combines rule-based logic with statistical NLP to deliver accurate, explainable, and production-ready support responses.
+### Explainable AI Decision Engine for Customer Support
+
+A **production-style AI support system** that goes beyond simple intent detection and makes **explainable, confidence-aware decisions** in real-time customer interactions.
+
+Unlike typical chatbots, this system can:
+
+* Understand **multiple intents simultaneously**
+* Detect **user sentiment**
+* Decide whether to **answer, clarify, or escalate**
+* Maintain **conversation context across turns**
+* Provide **transparent reasoning behind every decision**
 
 ---
 
-## 🚀 Features
+## 🚀 Live Demo (Streamlit UI)
 
-### 🧠 NLP & Intent Detection
+Interactive chat interface with:
 
-* Hybrid intent detection (TF-IDF + keyword matching)
-* Strong multi-intent detection
-* Conflict resolution between overlapping intents
-* Vague query handling
+* Real-time responses
+* Step-by-step AI reasoning
+* Confidence visualization
+* Debug panel (intents, routing, memory)
 
----
-
-### 💬 Sentiment Awareness
-
-* Sentiment detection:
-
-  * neutral
-  * frustrated
-  * angry
-  * urgent
-* Sentiment-aware routing (affects final action)
+```bash
+streamlit run app.py
+```
 
 ---
 
-### 🎯 Decision Engine
+## 🧠 What Makes This Different?
 
-* Confidence scoring using score gap:
+Most chatbot projects:
 
-  * `confidence = top1_score - top2_score`
-* Confidence-aware routing
-* Action types:
+* classify intent → return response ❌
 
-  * answer
-  * clarify
-  * escalate
+This system:
+
+* detects multiple possible intents
+* measures uncertainty (confidence gap)
+* applies decision rules
+* adapts behavior based on sentiment
+* explains *why* it made that decision
+
+👉 This is closer to a **decision engine** than a chatbot.
 
 ---
 
-### 🧠 Advanced Decision Behavior (NEW)
+## 🎯 Core Capabilities
 
-#### ✔ Smart Low-Confidence Handling
+### 🔹 Multi-Intent Understanding
 
-* Detects when multiple intents exist but confidence is low
-* Instead of generic fallback, generates **context-aware clarification**
+* Hybrid detection (TF-IDF + keyword matching)
+* Detects overlapping intents in a single query
+* Resolves conflicts intelligently
+
+Example:
+“I can't login and my payment failed”
+
+---
+
+### 🔹 Confidence-Aware Decision Making
+
+Instead of blindly answering:
+
+```
+confidence = top1_score - top2_score
+```
+
+The system:
+
+* answers when confident
+* clarifies when uncertain
+* escalates high-risk cases
+
+---
+
+### 🔹 Sentiment-Aware Routing
+
+Detects:
+
+* neutral
+* frustrated
+* angry
+* urgent
+
+And adjusts behavior:
+
+* angry → escalate
+* frustrated → avoid over-clarifying
+* urgent → respond faster
+
+---
+
+### 🔹 Explainable AI (XAI)
+
+Every response includes reasoning:
+
+* Detected intents
+* Confidence score
+* Routing decision
+* Routing reason
 
 Example:
 
 ```
-"It looks like this may involve both your payment and refund request..."
-```
-
-#### ✔ Multi-Intent Conservative Routing
-
-* Detects multiple intents aggressively
-* Commits only when confidence is sufficient
-* Avoids incorrect answers by falling back intelligently
-
----
-
-### 🔍 Explainability (XAI)
-
-* Routing reasons:
-
-  * normal_routing
-  * low_confidence_fallback
-  * sentiment_override_angry
-  * sentiment_override_frustrated
-
-* Confidence breakdown:
-
-  * top1_score
-  * top2_score
-  * score_gap
-  * **pre_rule_confidence (NEW)**
-
----
-
-### 📊 Confidence Transparency (NEW)
-
-The system now distinguishes between:
-
-* **Pre-rule confidence** → real model uncertainty
-* **Final confidence** → after routing decisions
-
-Example:
-
-```
-Confidence: 1.0 (pre_rule=0.131, top1=1.0, top2=0.0, gap=1.0)
+Detected intents: payment_failed, refund_request
+Sentiment: frustrated
+Action: clarify
+Confidence: 0.13
+Reason: low_confidence_multi_intent
 ```
 
 ---
 
-### 🎭 Dynamic Response Tone (NEW)
+### 🔹 Multi-Turn Conversation Memory
 
-#### ✔ Empathy-aware
+The system tracks:
 
-* Adjusts tone based on user sentiment
+* Active domain (billing, account, etc.)
+* Active intents
+* Risk level
+* Conversation summary
 
-#### ✔ Action-aware
+This enables:
 
-* Escalate → reassurance
-* Clarify → guided response
+* smarter follow-ups
+* context-aware responses
+* better clarification handling
 
-#### ✔ Confidence-aware
+---
 
-* Low confidence → cautious tone:
+### 🔹 Smart Clarification System
+
+Instead of generic fallback:
+
+❌ Can you clarify?
+✅ Is this about a subscription fee, invoice, or billing issue?
+
+Even follow-ups are handled intelligently:
+“I have a billing issue” → “subscription fee”
+
+---
+
+### 🔹 Risk-Aware Escalation
+
+High-risk cases (e.g. fraud):
 
 ```
-"I’m not fully sure I understood correctly..."
+Someone used my card
 ```
 
----
-
-### 📊 Logging & Analysis
-
-* Structured logs (`chat_log.jsonl`)
-* Log analysis includes:
-
-  * intent distribution
-  * action distribution
-  * sentiment distribution
-  * routing reason distribution
-  * confidence metrics
-  * **multi-intent behavior (raw vs final vs reduced) (NEW)**
+→ Automatically escalated with proper tone and guidance.
 
 ---
 
-### 🧪 Testing
-
-* Intent tests
-* Sentiment tests
-* Routing tests
-* Regression tests:
-
-  * multi-intent behavior
-  * success / no_issue handling
-
----
-
-## 🧠 System Architecture
+## 🧱 System Architecture
 
 ```
 User Input
@@ -151,102 +164,73 @@ Preprocessing
    ↓
 Intent Detection (TF-IDF + Keywords)
    ↓
-Multi-Intent Selection + Conflict Resolution
+Multi-Intent Selection
    ↓
 Sentiment Detection
    ↓
-Confidence Calculation (score gap)
+Confidence Calculation
    ↓
-Routing Logic (confidence + sentiment)
+Decision Engine (Answer / Clarify / Escalate)
    ↓
-Response Generation (dynamic tone)
+Response Generation (Tone-aware)
    ↓
-Logging & Explainability
+Explainability + Logging
 ```
 
 ---
 
-## 🔍 Explainability
+## 🖥️ UI Features (Streamlit)
 
-The system provides transparency into its decision-making:
-
-* Detected sentiment
-* Predicted topics (before rules) ✅
-* Final topics (after rules) ✅
-* Final action (answer / clarify / escalate)
-* Confidence score (with pre-rule insight)
-* Routing reason:
-
-  * normal_routing
-  * low_confidence_fallback
-  * sentiment overrides
-
-### Example Output
-
-```
-Detected sentiment: frustrated
-Predicted topics before rules: ['payment_failed', 'refund_request']
-Final topics after rules: ['general_help']
-Final action: clarify (reason=low_confidence_fallback)
-Confidence: 1.0 (pre_rule=0.131, top1=1.0, top2=0.0, gap=1.0)
-```
+* Chat interface
+* Quick demo scenarios
+* AI thinking visualization
+* Confidence bar
+* Intent / sentiment badges
+* Debug panel with full reasoning
+* Conversation memory display
 
 ---
 
-## 📊 Log Analysis
+## 📊 Logging & Analytics
 
-Run:
+All interactions are logged:
+
+```
+chat_log.jsonl
+```
+
+Analyze with:
 
 ```bash
 python analyze_logs.py
 ```
 
-This provides:
+Includes:
 
-* Total messages
-* Intent distribution
-* Final action distribution
-* Sentiment distribution
-* Routing reason distribution
-* Average confidence
-* Score gap statistics
-
-### 🧠 Multi-Intent Analysis (NEW)
-
-* Raw multi-intent queries (before rules)
-* Final multi-intent queries (after rules)
-* Reduced multi-intent cases (fallback)
+* intent distribution
+* action distribution
+* sentiment trends
+* routing reasons
+* confidence metrics
+* multi-intent behavior
 
 ---
 
-## ▶️ How to Run
+## 🧪 Testing
 
-### 1. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Run the chatbot
-
-```bash
-python -m src.main
-```
-
----
-
-## 🧪 Run Tests
+Run full test suite:
 
 ```bash
 python test_runner.py
 ```
 
-Includes:
+Covers:
 
-* Intent validation
-* Sentiment validation
-* Routing validation
-* Regression tests
+* intent detection
+* sentiment classification
+* routing logic
+* multi-turn behavior
+* regression scenarios
 
 ---
 
@@ -254,56 +238,52 @@ Includes:
 
 ```
 src/
+ ├── engine.py
  ├── main.py
  ├── preprocessing.py
  ├── sentiment.py
- ├── logger_utils.py
  ├── confidence_utils.py
+ ├── logger_utils.py
 
+app.py
 analyze_logs.py
 test_runner.py
 faq.json
-chat_log.jsonl
-README.md
 ```
 
 ---
 
-## 🧩 Key Capabilities
+## 🧩 Key Design Ideas
 
 * Hybrid AI (rules + statistical NLP)
-* Multi-intent understanding
-* Sentiment-aware decision making
-* Confidence-based routing
-* Explainable AI (XAI)
-* Logging and analytics
-* Regression-safe testing
-* **Confidence-aware behavior (NEW)**
-* **Dynamic response tone (NEW)**
+* Confidence-driven decisions
+* Explainable routing logic
+* Multi-intent reasoning
+* Conversation memory
+* Risk-aware escalation
 
 ---
 
-## 🚀 Future Roadmap
+## 🚀 Future Work
 
-* Embeddings-based semantic search
-* ML intent classifier (LogReg / Transformer)
-* Context-aware multi-turn conversations
-* Advanced explainability (feature-level reasoning)
+* RAG (Retrieval-Augmented Generation) over real support knowledge
+* ML-based intent classifier
 * Benchmarking (BANKING77, CLINC150)
 * API deployment (FastAPI)
-* UI dashboard
+* Production-ready multi-tenant system
 
 ---
 
-## 📌 Summary
+## 💡 Why This Project Matters
 
-This project is not a simple chatbot.
-It is a **hybrid AI support system** designed with:
+Customer support AI systems in real-world products need:
 
-* Explainability
-* Reliability
-* Observability
-* Production-readiness
+* reliability under uncertainty
+* explainable decisions
+* safe escalation handling
+
+This project demonstrates how to design such a system
+without relying purely on black-box models.
 
 ---
 
