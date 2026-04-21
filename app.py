@@ -275,6 +275,38 @@ div.stButton > button[kind="secondary"] {
 .compact-quick-row {
     margin-bottom: 0.35rem;
 }
+            
+/* FIX: FAQ expander stays dark when open */
+[data-testid="stExpander"] {
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+}
+
+[data-testid="stExpander"] details {
+    background: transparent !important;
+}
+
+[data-testid="stExpander"] summary {
+    background: rgba(255,255,255,0.02) !important;
+    color: #f8fafc !important;
+    border-radius: 14px !important;
+}
+
+[data-testid="stExpander"] details[open] > summary {
+    background: rgba(255,255,255,0.04) !important;
+    color: #f8fafc !important;
+}
+
+[data-testid="stExpander"] summary:hover {
+    background: rgba(255,255,255,0.06) !important;
+}
+
+[data-testid="stExpander"] .streamlit-expanderContent {
+    background: transparent !important;
+    color: #f8fafc !important;
+}
                                
 </style>
 """, unsafe_allow_html=True)
