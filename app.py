@@ -331,6 +331,9 @@ if "stats" not in st.session_state:
         "last_action": "-"
     }
 
+if "show_ticket_form" not in st.session_state:
+    st.session_state.show_ticket_form = False
+
 st.markdown("""
 <h1 style="margin-bottom: 0;">
 🤖 AI Support Agent
@@ -566,7 +569,29 @@ for category, questions in FAQ_CATEGORIES.items():
             ):
                 process_user_prompt(question)
 
-    
+st.markdown("### 🎫 Need more help?")
+
+if st.button("Open Support Ticket"):
+    st.session_state.show_ticket_form = True 
+
+if st.session_state.show_ticket_form:
+    with st.expander("📨 Submit a Support Ticket", expanded=True):
+
+        name = st.text_input("Your Name")
+        email = st.text_input("Email")
+        issue = st.text_input("Issue Summary")
+        message = st.text_area("Describe your issue")
+
+        if st.button("Submit Ticket"):
+            import random
+
+            ticket_id = f"TICKET-{random.randint(1000,9999)}"
+
+            st.success(f"✅ Ticket submitted! ID: {ticket_id}")
+            st.info("Our support team will get back to you shortly.")
+
+            st.session_state.show_ticket_form = False
+
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "assistant":
