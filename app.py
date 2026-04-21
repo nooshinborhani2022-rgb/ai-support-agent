@@ -5,6 +5,54 @@ import streamlit.components.v1 as components
 
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
+quick_actions = [
+    {
+        "title": "🔐 Login Issue",
+        "desc": "Password reset, sign-in failure, locked account",
+        "prompt": "I can't login to my account"
+    },
+    {
+        "title": "💳 Payment Problem",
+        "desc": "Failed payment, card declined, billing issue",
+        "prompt": "My payment failed"
+    },
+    {
+        "title": "🚨 Fraud Report",
+        "desc": "Unauthorized charge or suspicious transaction",
+        "prompt": "Someone used my card"
+    },
+    {
+        "title": "📦 Order Status",
+        "desc": "Tracking, delays, package status",
+        "prompt": "Where is my order?"
+    }
+]
+
+FAQ_CATEGORIES = {
+    "🔐 Account": [
+        "I can't login to my account",
+        "I forgot my password",
+        "My account is locked",
+    ],
+    "💳 Billing & Payments": [
+        "I have a billing issue",
+        "Why was I charged?",
+        "I was charged twice",
+        "My payment failed",
+        "I want a refund",
+    ],
+    "📦 Orders": [
+        "Where is my order?",
+        "My delivery is late",
+        "Track my package",
+    ],
+    "🚨 Security": [
+        "Someone used my card",
+        "This charge is not mine",
+        "This looks like fraud",
+    ],
+}
+
 st.markdown("""
 <style>
     .stApp {
@@ -210,7 +258,24 @@ div[role="option"]:hover {
     background: #1e293b !important;
     color: #ffffff !important;
 }
-                                
+
+/* Compact quick action buttons */
+.compact-quick-actions-label {
+    color: #93c5fd !important;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+div.stButton > button[kind="secondary"] {
+    min-height: auto !important;
+}
+
+.compact-quick-row {
+    margin-bottom: 0.35rem;
+}
+                               
 </style>
 """, unsafe_allow_html=True)
 
@@ -443,63 +508,19 @@ with left_col:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("### ⚡ Quick Actions")
+st.markdown("### ⚡ Quick Actions")
+st.markdown(
+    "<div class='compact-quick-actions-label'>Try a demo scenario</div>",
+    unsafe_allow_html=True
+)
 
-quick_actions = [
-    {
-        "title": "🔐 Login Issue",
-        "desc": "Password reset, sign-in failure, locked account",
-        "prompt": "I can't login to my account",
-    },
-    {
-        "title": "💳 Payment Problem",
-        "desc": "Failed payment, card declined, billing issue",
-        "prompt": "My payment failed and I was charged",
-    },
-    {
-        "title": "🚨 Fraud Report",
-        "desc": "Unauthorized charge or suspicious transaction",
-        "prompt": "Someone used my card. This charge is not mine.",
-    },
-    {
-        "title": "📦 Order Status",
-        "desc": "Tracking, delays, package status",
-        "prompt": "Where is my order?",
-    },
-]
-
-FAQ_CATEGORIES = {
-    "🔐 Account": [
-        "I can't login to my account",
-        "I forgot my password",
-        "My account is locked",
-    ],
-    "💳 Billing & Payments": [
-        "I have a billing issue",
-        "Why was I charged?",
-        "I was charged twice",
-        "My payment failed",
-        "I want a refund",
-    ],
-    "📦 Orders": [
-        "Where is my order?",
-        "My delivery is late",
-        "Track my package",
-    ],
-    "🚨 Security": [
-        "Someone used my card",
-        "This charge is not mine",
-        "This looks like fraud",
-    ],
-}
-
-cols = st.columns(2)
+quick_cols = st.columns(4)
 
 for i, item in enumerate(quick_actions):
-    with cols[i % 2]:
-        card_text = f"**{item['title']}**\n\n{item['desc']}"
-        if st.button(card_text, key=f"quick_card_{i}", use_container_width=True):
+    with quick_cols[i]:
+        if st.button(item["title"], key=f"quick_compact_{i}", use_container_width=True):
             process_user_prompt(item["prompt"])
+
 
 st.markdown("### 📚 FAQ")
 
