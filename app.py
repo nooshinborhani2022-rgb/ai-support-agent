@@ -172,6 +172,44 @@ div.stButton > button:hover {
     box-shadow: 0 10px 24px rgba(14,165,233,0.18);
     background: rgba(255,255,255,0.06) !important;
 }      
+            
+[data-baseweb="popover"] {
+    background: #0f172a !important;
+}
+
+[data-baseweb="menu"] {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+[data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.06) !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+}
+
+[data-baseweb="select"] span {
+    color: #f8fafc !important;
+}
+
+[data-baseweb="select"] input {
+    color: #f8fafc !important;
+}
+
+div[role="listbox"] {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+div[role="option"] {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+div[role="option"]:hover {
+    background: #1e293b !important;
+    color: #ffffff !important;
+}
                                 
 </style>
 """, unsafe_allow_html=True)
@@ -337,6 +375,33 @@ def build_explanation_text(result):
         f"Confidence: {confidence:.3f}"
     )
 
+def process_user_prompt(prompt: str):
+    st.session_state.messages.append({
+        "role": "user",
+        "content": prompt
+    })
+
+    result = st.session_state.engine.handle_message(prompt)
+
+    st.session_state.stats["total_messages"] += 1
+    st.session_state.stats["last_action"] = result["action"]
+
+    if result["action"] == "escalate":
+        st.session_state.stats["escalations"] += 1
+
+    if result["action"] == "clarify":
+        st.session_state.stats["clarifications"] += 1
+
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": result["response"],
+        "explanation": build_explanation_text(result)
+    })
+
+    st.session_state.last_result = result
+    st.session_state.scroll_to_bottom = True
+    st.rerun()
+
 with left_col:
     st.subheader("Chat")
 
@@ -403,41 +468,52 @@ quick_actions = [
     },
 ]
 
+FAQ_CATEGORIES = {
+    "🔐 Account": [
+        "I can't login to my account",
+        "I forgot my password",
+        "My account is locked",
+    ],
+    "💳 Billing & Payments": [
+        "I have a billing issue",
+        "Why was I charged?",
+        "I was charged twice",
+        "My payment failed",
+        "I want a refund",
+    ],
+    "📦 Orders": [
+        "Where is my order?",
+        "My delivery is late",
+        "Track my package",
+    ],
+    "🚨 Security": [
+        "Someone used my card",
+        "This charge is not mine",
+        "This looks like fraud",
+    ],
+}
+
 cols = st.columns(2)
 
 for i, item in enumerate(quick_actions):
     with cols[i % 2]:
         card_text = f"**{item['title']}**\n\n{item['desc']}"
         if st.button(card_text, key=f"quick_card_{i}", use_container_width=True):
-            prompt = item["prompt"]
+            process_user_prompt(item["prompt"])
 
-            st.session_state.messages.append({
-                "role": "user",
-                "content": prompt
-            })
+st.markdown("### 📚 FAQ")
 
-            result = st.session_state.engine.handle_message(prompt)
+for category, questions in FAQ_CATEGORIES.items():
+    with st.expander(category, expanded=False):
+        for q_idx, question in enumerate(questions):
+            if st.button(
+                f"• {question}",
+                key=f"faq_{category}_{q_idx}",
+                use_container_width=False
+            ):
+                process_user_prompt(question)
 
-            st.session_state.stats["total_messages"] += 1
-            st.session_state.stats["last_action"] = result["action"]
-
-            if result["action"] == "escalate":
-                st.session_state.stats["escalations"] += 1
-
-            if result["action"] == "clarify":
-                st.session_state.stats["clarifications"] += 1
-
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": result["response"],
-                "explanation": build_explanation_text(result)
-            })
-
-            st.session_state.last_result = result
-            st.session_state.scroll_to_bottom = True
-            st.rerun()
-      
-
+    
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "assistant":
