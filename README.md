@@ -286,7 +286,12 @@ This project demonstrates how to design such a system
 without relying purely on black-box models.
 
 ---
-update
+---
+
+## 🔄 Update
+
+Minor UI improvements and demo enhancements (FAQ, ticket form, UX polish).
+
 
 ## 👤 Author
 
