@@ -335,17 +335,28 @@ if "stats" not in st.session_state:
 if "show_ticket_form" not in st.session_state:
     st.session_state.show_ticket_form = False
 
-st.markdown("""
-<h1 style="margin-bottom: 0;">
-🤖 AI Support Agent
-</h1>
+def load_image_base64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
 
-<p style="color:#94a3b8; margin-top:5px;">
-Explainable AI for customer support • Multi-intent • Sentiment-aware • Confidence-driven
-</p>
+avatar_base64 = load_image_base64("assets/nexa_avatar.png")
 
-<hr style="border:1px solid rgba(255,255,255,0.08); margin-top:15px; margin-bottom:25px;">
-""", unsafe_allow_html=True)
+st.markdown(
+    f"""<div style="display:flex; align-items:center; gap:18px; margin-bottom:18px;">
+<img src="data:image/png;base64,{avatar_base64}" width="82" style="border-radius:50%; box-shadow:0 0 18px rgba(59,130,246,0.25);">
+<div>
+<div style="font-size:30px; font-weight:700; line-height:1.2;">
+Welcome to <span style="color:#3b82f6;">NEXA</span>
+</div>
+<div style="color:#94a3b8; margin-top:6px; font-size:15px;">
+Your AI support assistant for explainable customer support
+</div>
+</div>
+</div>
+
+<hr style="border:1px solid rgba(255,255,255,0.08); margin-top:14px; margin-bottom:24px;">""",
+    unsafe_allow_html=True
+)
 
 def stream_text(text):
     for word in text.split():
@@ -503,53 +514,26 @@ def process_user_prompt(prompt: str):
     st.session_state.scroll_to_bottom = True
     st.rerun()
 
-with left_col:
-    st.subheader("Chat")
 
-    if st.button("🗑 Clear Chat"):
-        st.session_state.messages = []
-        st.session_state.last_result = None
-        st.session_state.stats = {
-            "total_messages": 0,
-            "escalations": 0,
-            "clarifications": 0,
-            "last_action": "-"
-        }
-        st.rerun()
 
     st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
     if not st.session_state.messages:
         st.markdown("""
-        <div style="
-            padding: 28px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            margin-bottom: 20px;
-        ">
-            <h3 style="margin-top: 0; color: #f8fafc;">👋 Welcome to AI Support Agent</h3>
-            <p style="color: #cbd5e1; margin-bottom: 10px;">
-                This demo showcases an explainable customer support AI with:
-            </p>
-            <ul style="color: #cbd5e1; line-height: 1.9;">
-                <li>Multi-intent understanding</li>
-                <li>Sentiment-aware routing</li>
-                <li>Confidence-based decisions</li>
-                <li>Step-by-step AI reasoning</li>
-            </ul>
-            <p style="color: #93c5fd; margin-top: 14px;">
-                Try one of the quick actions below or type your own message.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-def load_image_base64(path):
-    with open(path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
-
-avatar_base64 = load_image_base64("assets/nexa_avatar.png")
-
+<div style="
+    color:#cbd5e1;
+    font-size:16px;
+    margin-bottom:22px;
+    line-height:1.8;
+">
+<strong style="color:#e2e8f0;">This demo showcases:</strong><br>
+• Multi-intent understanding<br>
+• Sentiment-aware routing<br>
+• Confidence-based decisions<br>
+• Explainable AI reasoning
+</div>
+""", unsafe_allow_html=True)
+        
 st.markdown(
     f"""
     <div style="display:flex; align-items:center; gap:15px; margin-bottom:25px;">
@@ -650,8 +634,24 @@ if st.session_state.scroll_to_bottom:
     )
     st.session_state.scroll_to_bottom = False
     
-user_input = st.chat_input("Type your message...", key="main_chat_input")
+input_col, clear_col = st.columns([6, 1])
 
+with input_col:
+    user_input = st.chat_input("Type your message...")
+
+with clear_col:
+    if st.button("🗑", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.last_result = None
+        st.session_state.stats = {
+            "total_messages": 0,
+            "escalations": 0,
+            "clarifications": 0,
+            "last_action": "-"
+        }
+        st.rerun()
+
+        
 if user_input is not None and str(user_input).strip():
     user_input = str(user_input).strip()
 
