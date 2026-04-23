@@ -528,17 +528,26 @@ for i, item in enumerate(quick_actions):
             process_user_prompt(item["prompt"])
 
 
-st.markdown("### 📚 FAQ")
+st.markdown("""
+<div style="margin-top:10px; margin-bottom:14px;">
+    <div style="font-size:18px; font-weight:700; color:#f8fafc;">📚 FAQ</div>
+    <div style="font-size:18px; color:#94a3b8; margin-top:4px;">
+        Browse common support topics
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 
 for category, questions in FAQ_CATEGORIES.items():
-    with st.expander(category, expanded=False):
+    with st.expander(f"{category}", expanded=False):
         for q_idx, question in enumerate(questions):
             if st.button(
-                f"• {question}",
+                question,
                 key=f"faq_{category}_{q_idx}",
                 use_container_width=False
             ):
                 process_user_prompt(question)
+
 
 st.markdown("### 🎫 Need more help?")
 
