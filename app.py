@@ -342,6 +342,21 @@ Your AI support assistant for explainable customer support
     unsafe_allow_html=True
 )
 
+st.markdown("""
+<div style="
+    color:#cbd5e1;
+    font-size:16px;
+    margin-bottom:22px;
+    line-height:1.8;
+">
+<strong style="color:#e2e8f0;">This demo showcases:</strong><br>
+• Multi-intent understanding<br>
+• Sentiment-aware routing<br>
+• Confidence-based decisions<br>
+• Explainable AI reasoning
+</div>
+""", unsafe_allow_html=True)
+
 def stream_text(text):
     for word in text.split():
         yield word + " "
@@ -498,26 +513,6 @@ def process_user_prompt(prompt: str):
     st.session_state.scroll_to_bottom = True
     st.rerun()
 
-
-
-    st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
-
-    if not st.session_state.messages:
-        st.markdown("""
-<div style="
-    color:#cbd5e1;
-    font-size:16px;
-    margin-bottom:22px;
-    line-height:1.8;
-">
-<strong style="color:#e2e8f0;">This demo showcases:</strong><br>
-• Multi-intent understanding<br>
-• Sentiment-aware routing<br>
-• Confidence-based decisions<br>
-• Explainable AI reasoning
-</div>
-""", unsafe_allow_html=True)
-             
 
 st.markdown("### ⚡ Quick Actions")
 
