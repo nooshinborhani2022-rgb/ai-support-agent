@@ -343,8 +343,29 @@ def load_image_base64(path):
 
 avatar_base64 = load_image_base64("assets/nexa_avatar.png")
 
-st.markdown(
-    f"""<div style="display:flex; align-items:center; gap:18px; margin-top:20px; margin-bottom:18px;">
+
+sidebar_col, left_col, right_col = st.columns([0.9, 2, 1])
+
+with sidebar_col:
+    st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="margin-top:10px; margin-bottom:16px;">
+        <div style="font-size:18px; font-weight:700; color:#f8fafc;">NEXA</div>
+        <div style="font-size:13px; color:#94a3b8; margin-top:4px;">
+            Navigation
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("💬 Chat")
+    st.markdown("❓ FAQ")
+    st.markdown("🎫 Open Ticket")
+    st.markdown("🛠 Debug Panel")
+
+with left_col:
+    st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+    st.markdown(
+        f"""<div style="display:flex; align-items:center; gap:18px; margin-top:20px; margin-bottom:18px;">
 <img src="data:image/png;base64,{avatar_base64}" width="82" style="border-radius:50%; box-shadow:0 0 18px rgba(59,130,246,0.25);">
 <div>
 <div style="font-size:30px; font-weight:700; line-height:1.2;">
@@ -357,23 +378,22 @@ Your AI support assistant for explainable customer support
 </div>
 
 <hr style="border:1px solid rgba(255,255,255,0.08); margin-top:14px; margin-bottom:24px;">""",
-    unsafe_allow_html=True
-)
-
-st.markdown("""
-<div style="
+        unsafe_allow_html=True
+    )
+    st.markdown("""
+    <div style="
     color:#cbd5e1;
     font-size:16px;
     margin-bottom:22px;
     line-height:1.8;
-">
-<strong style="color:#e2e8f0;">This demo showcases:</strong><br>
-• Multi-intent understanding<br>
-• Sentiment-aware routing<br>
-• Confidence-based decisions<br>
-• Explainable AI reasoning
-</div>
-""", unsafe_allow_html=True)
+    ">
+    <strong style="color:#e2e8f0;">This demo showcases:</strong><br>
+    • Multi-intent understanding<br>
+    • Sentiment-aware routing<br>
+    • Confidence-based decisions<br>
+    • Explainable AI reasoning
+    </div>
+    """, unsafe_allow_html=True)
 
 def stream_text(text):
     for word in text.split():
@@ -401,7 +421,7 @@ def format_assistant_response(text):
 
     return formatted.strip()
 
-left_col, right_col = st.columns([2, 1])
+
 
 demo_scenarios = [
     "I was charged twice and this is ridiculous!!!",
@@ -705,6 +725,7 @@ if user_input is not None and str(user_input).strip():
     st.rerun()
 
 with right_col:
+    st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
     st.markdown("""
 <div style="margin-top:12px; margin-bottom:14px;">
     <div style="font-size:18px; font-weight:700; color:#f8fafc;">📊 Mini Analytics</div>
