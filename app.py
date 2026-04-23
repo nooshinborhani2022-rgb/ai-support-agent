@@ -533,19 +533,7 @@ def process_user_prompt(prompt: str):
 • Explainable AI reasoning
 </div>
 """, unsafe_allow_html=True)
-        
-st.markdown(
-    f"""
-    <div style="display:flex; align-items:center; gap:15px; margin-bottom:25px;">
-        <img src="data:image/png;base64,{avatar_base64}" width="80" style="border-radius:50%;">
-        <div>
-            <div style="font-size:24px; font-weight:700;">NEXA</div>
-            <div style="font-size:13px; color:#9aa4b2;">AI Support Assistant</div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)       
+             
 
 st.markdown("### ⚡ Quick Actions")
 st.markdown(
