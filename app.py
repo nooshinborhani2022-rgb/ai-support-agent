@@ -7,26 +7,10 @@ import base64
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
 quick_actions = [
-    {
-        "title": "🔐 Login Issue",
-        "desc": "Password reset, sign-in failure, locked account",
-        "prompt": "I can't login to my account"
-    },
-    {
-        "title": "💳 Payment Problem",
-        "desc": "Failed payment, card declined, billing issue",
-        "prompt": "My payment failed"
-    },
-    {
-        "title": "🚨 Fraud Report",
-        "desc": "Unauthorized charge or suspicious transaction",
-        "prompt": "Someone used my card"
-    },
-    {
-        "title": "📦 Order Status",
-        "desc": "Tracking, delays, package status",
-        "prompt": "Where is my order?"
-    }
+    {"title": "Login Issue", "prompt": "I can't login to my account", "icon": "🔐"},
+    {"title": "Payment Problem", "prompt": "My payment failed", "icon": "💳"},
+    {"title": "Fraud Report", "prompt": "Someone used my card", "icon": "🚨"},
+    {"title": "Order Status", "prompt": "Where is my order?", "icon": "📦"},
 ]
 
 FAQ_CATEGORIES = {
@@ -536,16 +520,16 @@ def process_user_prompt(prompt: str):
              
 
 st.markdown("### ⚡ Quick Actions")
-st.markdown(
-    "<div class='compact-quick-actions-label'>Try a demo scenario</div>",
-    unsafe_allow_html=True
-)
 
-quick_cols = st.columns(4)
+quick_cols = st.columns(len(quick_actions))
 
 for i, item in enumerate(quick_actions):
     with quick_cols[i]:
-        if st.button(item["title"], key=f"quick_compact_{i}", use_container_width=True):
+        if st.button(
+            f"{item['icon']}  {item['title']}",
+            key=f"quick_{i}",
+            use_container_width=True
+        ):
             process_user_prompt(item["prompt"])
 
 
