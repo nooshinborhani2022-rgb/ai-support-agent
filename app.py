@@ -342,7 +342,7 @@ def load_image_base64(path):
 avatar_base64 = load_image_base64("assets/nexa_avatar.png")
 
 st.markdown(
-    f"""<div style="display:flex; align-items:center; gap:18px; margin-bottom:18px;">
+    f"""<div style="display:flex; align-items:center; gap:18px; margin-top:20px; margin-bottom:18px;">
 <img src="data:image/png;base64,{avatar_base64}" width="82" style="border-radius:50%; box-shadow:0 0 18px rgba(59,130,246,0.25);">
 <div>
 <div style="font-size:30px; font-weight:700; line-height:1.2;">
