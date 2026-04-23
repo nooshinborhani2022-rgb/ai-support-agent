@@ -585,13 +585,20 @@ if st.session_state.show_ticket_form:
             st.session_state.show_ticket_form = False
 
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        if message["role"] == "assistant":
+    if message["role"] == "assistant":
+        with st.chat_message("assistant", avatar="assets/nexa_avatar.png"):
             st.markdown(format_assistant_response(message["content"]))
+
             if "explanation" in message:
                 st.caption("🧠 " + message["explanation"])
-        else:
+    else:
+        with st.chat_message("user"):
             st.markdown(message["content"])
+
+            if "explanation" in message:
+                st.caption("🧠 " + message["explanation"])
+            else:
+                st.markdown(message["content"])
 
 message_count = len(st.session_state.messages)
 anchor_id = f"chat-bottom-anchor-{message_count}"
