@@ -292,7 +292,25 @@ div.stButton > button[kind="secondary"] {
     background: transparent !important;
     color: #f8fafc !important;
 }
-                               
+
+
+  /* Right panel metric cards */
+[data-testid="stMetric"] {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 14px 16px;
+}
+
+[data-testid="stMetricLabel"] {
+    color: #94a3b8 !important;
+}
+
+[data-testid="stMetricValue"] {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+}
+                                        
 </style>
 """, unsafe_allow_html=True)
 
@@ -687,7 +705,14 @@ if user_input is not None and str(user_input).strip():
     st.rerun()
 
 with right_col:
-    st.subheader("Mini Analytics")
+    st.markdown("""
+<div style="margin-top:12px; margin-bottom:14px;">
+    <div style="font-size:18px; font-weight:700; color:#f8fafc;">📊 Mini Analytics</div>
+    <div style="font-size:18px; color:#94a3b8; margin-top:4px;">
+        Live conversation summary
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
     a1, a2 = st.columns(2)
     a3, a4 = st.columns(2)
@@ -705,7 +730,14 @@ with right_col:
         st.metric("Last Action", st.session_state.stats["last_action"])
 
     st.markdown("---")
-    st.subheader("Debug Panel")
+    st.markdown("""
+<div style="margin-top:12px; margin-bottom:14px;">
+    <div style="font-size:18px; font-weight:700; color:#f8fafc;">🛠 Debug Panel</div>
+    <div style="font-size:13px; color:#94a3b8; margin-top:4px;">
+        Inspect routing and reasoning details
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
     if "last_result" in st.session_state and st.session_state.last_result is not None:
         result = st.session_state.last_result
