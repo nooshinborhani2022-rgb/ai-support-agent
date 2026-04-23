@@ -2,6 +2,7 @@ import streamlit as st
 from src.engine import SupportEngine
 import time
 import streamlit.components.v1 as components
+import base64
 
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
@@ -542,6 +543,25 @@ with left_col:
             </p>
         </div>
         """, unsafe_allow_html=True)
+
+def load_image_base64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+avatar_base64 = load_image_base64("assets/nexa_avatar.png")
+
+st.markdown(
+    f"""
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:25px;">
+        <img src="data:image/png;base64,{avatar_base64}" width="80" style="border-radius:50%;">
+        <div>
+            <div style="font-size:24px; font-weight:700;">NEXA</div>
+            <div style="font-size:13px; color:#9aa4b2;">AI Support Assistant</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)       
 
 st.markdown("### ⚡ Quick Actions")
 st.markdown(
