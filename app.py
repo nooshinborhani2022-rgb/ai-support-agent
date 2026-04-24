@@ -310,7 +310,61 @@ div.stButton > button[kind="secondary"] {
     color: #f8fafc !important;
     font-weight: 700 !important;
 }
-                                        
+
+  /* Sidebar navigation buttons */
+div[data-testid="stColumn"]:first-of-type div.stButton > button {
+    height: 44px;
+    min-height: 44px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #cbd5e1;
+    text-align: left;
+    justify-content: flex-start;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+div[data-testid="stColumn"]:first-of-type div.stButton > button:hover {
+    background: rgba(59,130,246,0.14);
+    border: 1px solid rgba(59,130,246,0.25);
+    color: #bfdbfe;
+}          
+
+/* Sidebar buttons: left aligned */
+div[data-testid="stColumn"]:first-of-type div.stButton > button {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding-left: 16px !important;
+}
+
+div[data-testid="stColumn"]:first-of-type div.stButton > button p {
+    text-align: left !important;
+    width: 100% !important;
+}
+
+ /* remove left padding from sidebar column */
+div[data-testid="stColumn"]:first-of-type {
+    padding-left: 0 !important;
+}
+
+/* push content fully to the left */
+div[data-testid="stColumn"]:first-of-type > div {
+    margin-left: -12px;
+}           
+
+    section.main > div {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+.block-container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+}        
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -337,6 +391,9 @@ if "stats" not in st.session_state:
 if "show_ticket_form" not in st.session_state:
     st.session_state.show_ticket_form = False
 
+if "nav_section" not in st.session_state:
+    st.session_state.nav_section = "chat"
+
 def load_image_base64(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
@@ -344,24 +401,33 @@ def load_image_base64(path):
 avatar_base64 = load_image_base64("assets/nexa_avatar.png")
 
 
-sidebar_col, left_col, right_col = st.columns([0.9, 2, 1])
+sidebar_col, left_col, right_col = st.columns([0.75, 2.35, 1])
 
 with sidebar_col:
-    st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="margin-top:10px; margin-bottom:16px;">
-        <div style="font-size:18px; font-weight:700; color:#f8fafc;">NEXA</div>
-        <div style="font-size:13px; color:#94a3b8; margin-top:4px;">
-            Navigation
-        </div>
+   <div style="margin-top:24px; margin-bottom:22px;">
+    <div style="font-size:26px; font-weight:900; color:#38bdf8; letter-spacing:4px;">NEXA</div>
+    <div style="font-size:12px; color:#94a3b8; letter-spacing:2px; margin-top:4px;">
+        AI SUPPORT AGENT
+    </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px; font-size:15px;">
+    <div style="width:170px; padding:10px 12px; border-radius:12px; background:rgba(59,130,246,0.18); color:#bfdbfe; font-weight:700;">
+        💬 Chat
+    </div>
+    <div style="width:170px; padding:10px 12px; border-radius:12px; color:#cbd5e1;">
+        ❓ FAQ
+    </div>
+    <div style="width:170px; padding:10px 12px; border-radius:12px; color:#cbd5e1;">
+        🎫 Open Ticket
+    </div>
+    <div style="width:170px; padding:10px 12px; border-radius:12px; color:#cbd5e1;">
+        📊 Debug Panel
+    </div>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("💬 Chat")
-    st.markdown("❓ FAQ")
-    st.markdown("🎫 Open Ticket")
-    st.markdown("🛠 Debug Panel")
-
+    
 with left_col:
     st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
     st.markdown(
@@ -754,7 +820,7 @@ with right_col:
     st.markdown("""
 <div style="margin-top:12px; margin-bottom:14px;">
     <div style="font-size:18px; font-weight:700; color:#f8fafc;">🛠 Debug Panel</div>
-    <div style="font-size:13px; color:#94a3b8; margin-top:4px;">
+    <div style="font-size:18px; color:#94a3b8; margin-top:4px;">
         Inspect routing and reasoning details
     </div>
 </div>
