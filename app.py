@@ -405,7 +405,7 @@ sidebar_col, left_col, right_col = st.columns([0.75, 2.35, 1])
 
 with sidebar_col:
     st.markdown("""
-   <div style="margin-top:24px; margin-bottom:22px;">
+    <div style="margin-top:24px; margin-bottom:22px; margin-left:12px;">
     <div style="font-size:26px; font-weight:900; color:#38bdf8; letter-spacing:4px;">NEXA</div>
     <div style="font-size:12px; color:#94a3b8; letter-spacing:2px; margin-top:4px;">
         AI SUPPORT AGENT
@@ -413,7 +413,7 @@ with sidebar_col:
     </div>
 
     <div style="display:flex; flex-direction:column; gap:14px; font-size:15px;">
-    <div style="width:170px; padding:10px 12px; border-radius:12px; background:rgba(59,130,246,0.18); color:#bfdbfe; font-weight:700;">
+    <div style="width:170px; padding:10px 12px; border-radius:14px; background:rgba(59,130,246,0.18); color:#bfdbfe; font-weight:700;">
         💬 Chat
     </div>
     <div style="width:170px; padding:10px 12px; border-radius:12px; color:#cbd5e1;">
