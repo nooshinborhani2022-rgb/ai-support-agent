@@ -313,17 +313,20 @@ div.stButton > button[kind="secondary"] {
 
   /* Sidebar navigation buttons */
 div[data-testid="stColumn"]:first-of-type div.stButton > button {
-    height: 44px;
-    min-height: 44px;
-    padding: 8px 14px;
-    border-radius: 12px;
-    background: transparent;
-    border: 1px solid transparent;
-    color: #cbd5e1;
-    text-align: left;
-    justify-content: flex-start;
-    font-size: 15px;
-    font-weight: 600;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+    border-radius: 12px !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+div[data-testid="stColumn"]:first-of-type div.stButton > button p {
+    text-align: left !important;
+    width: 100% !important;
+    margin: 0 !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
 }
 
 div[data-testid="stColumn"]:first-of-type div.stButton > button:hover {
@@ -363,7 +366,44 @@ div[data-testid="stColumn"]:first-of-type > div {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     max-width: 100% !important;
-}        
+}   
+
+/* ==== SIDEBAR FIX ==== */
+div[data-testid="stColumn"]:first-of-type div.stButton > button {
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    text-align: left !important;
+
+    padding: 8px 12px !important;
+    border-radius: 12px !important;
+    height: 42px !important;
+}
+
+div[data-testid="stColumn"]:first-of-type div.stButton > button span {
+    width: 100% !important;
+    text-align: left !important;
+}
+
+div[data-testid="stColumn"]:first-of-type div.stButton {
+    display: flex !important;
+    justify-content: flex-start !important;
+}     
+
+ /* Sidebar compact buttons */
+div[data-testid="stColumn"]:first-of-type div.stButton {
+    width: 170px !important;
+}
+
+div[data-testid="stColumn"]:first-of-type div.stButton > button {
+    width: 170px !important;
+    height: 42px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    border-radius: 12px !important;
+    display: block !important;
+    text-align: left !important;
+}           
 
 </style>
 """, unsafe_allow_html=True)
@@ -391,8 +431,17 @@ if "stats" not in st.session_state:
 if "show_ticket_form" not in st.session_state:
     st.session_state.show_ticket_form = False
 
+if "active_page" not in st.session_state:
+    st.session_state.active_page = "chat"
+
+if "show_ticket" not in st.session_state:
+    st.session_state.show_ticket = False
+
 if "nav_section" not in st.session_state:
     st.session_state.nav_section = "chat"
+
+if "show_ticket" not in st.session_state:
+    st.session_state.show_ticket = False
 
 def load_image_base64(path):
     with open(path, "rb") as f:
@@ -405,29 +454,27 @@ sidebar_col, left_col, right_col = st.columns([0.75, 2.35, 1])
 
 with sidebar_col:
     st.markdown("""
-    <div style="margin-top:24px; margin-bottom:22px; margin-left:12px;">
+    <div style="margin-top:24px; margin-bottom:22px; margin-left:10px;">
     <div style="font-size:26px; font-weight:900; color:#38bdf8; letter-spacing:4px;">NEXA</div>
     <div style="font-size:12px; color:#94a3b8; letter-spacing:2px; margin-top:4px;">
         AI SUPPORT AGENT
     </div>
     </div>
-
-    <div style="display:flex; flex-direction:column; gap:14px; font-size:15px;">
-    <div style="width:170px; padding:10px 12px; border-radius:14px; background:rgba(59,130,246,0.18); color:#bfdbfe; font-weight:700;">
-        💬 Chat
-    </div>
-    <div style="width:170px; padding:10px 12px; border-radius:12px; color:#cbd5e1;">
-        ❓ FAQ
-    </div>
-    <div style="width:170px; padding:10px 12px; border-radius:12px; color:#cbd5e1;">
-        🎫 Open Ticket
-    </div>
-    <div style="width:170px; padding:10px 12px; border-radius:12px; color:#cbd5e1;">
-        📊 Debug Panel
-    </div>
-    </div>
     """, unsafe_allow_html=True)
-    
+
+    if st.button("💬 Chat", key="nav_chat"):
+       st.session_state.active_page = "chat"
+
+    if st.button("❓ FAQ", key="nav_faq"):
+       st.session_state.active_page = "faq"
+
+    if st.button("🎫 Open Ticket", key="nav_ticket"):
+       st.session_state.active_page = "ticket"
+       st.session_state.show_ticket = True
+
+    if st.button("📊 Debug Panel", key="nav_debug"):
+       st.session_state.active_page = "debug"
+        
 with left_col:
     st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
     st.markdown(
@@ -630,6 +677,16 @@ for i, item in enumerate(quick_actions):
             use_container_width=True
         ):
             process_user_prompt(item["prompt"])
+
+if st.session_state.show_ticket:
+    st.markdown("### 🎫 Open Support Ticket")
+
+    name = st.text_input("Your Name")
+    issue = st.text_area("Describe your issue")
+
+    if st.button("Submit Ticket"):
+        st.success("Your ticket has been submitted!")
+        st.session_state.show_ticket = False
 
 
 st.markdown("""
