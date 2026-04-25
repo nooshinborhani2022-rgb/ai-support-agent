@@ -6,11 +6,11 @@ import base64
 
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
-quick_actions = [
-    {"title": "Login Issue", "prompt": "I can't login to my account", "icon": "🔐"},
-    {"title": "Payment Problem", "prompt": "My payment failed", "icon": "💳"},
-    {"title": "Fraud Report", "prompt": "Someone used my card", "icon": "🚨"},
-    {"title": "Order Status", "prompt": "Where is my order?", "icon": "📦"},
+quick_buttons = [
+    ("🔐", "Login Issue", "I can't login to my account"),
+    ("💳", "Payment Problem", "My payment failed"),
+    ("🚨", "Fraud Report", "Someone used my card"),
+    ("📦", "Order Status", "Where is my order?"),
 ]
 
 FAQ_CATEGORIES = {
@@ -664,6 +664,12 @@ def process_user_prompt(prompt: str):
     st.session_state.scroll_to_bottom = True
     st.rerun()
 
+quick_actions = [
+    {"icon": "🔐", "title": "Login Issue", "prompt": "I can't login to my account"},
+    {"icon": "💳", "title": "Payment Problem", "prompt": "My payment failed"},
+    {"icon": "🚨", "title": "Fraud Report", "prompt": "Someone used my card"},
+    {"icon": "📦", "title": "Order Status", "prompt": "Where is my order?"},
+]
 
 st.markdown("### ⚡ Quick Actions")
 
@@ -804,8 +810,7 @@ if user_input is not None and str(user_input).strip():
         "content": user_input
     })
 
-    with st.chat_message("user"):
-        st.markdown(user_input)
+    
 
     result = st.session_state.engine.handle_message(user_input)
 

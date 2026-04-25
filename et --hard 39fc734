@@ -1,0 +1,41 @@
+[33m392573f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to HEAD~1
+[33m39fc734[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{1}: commit: feat: improve Quick Actions UI with custom SVG icons and clean layout
+[33m392573f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{2}: commit: ui: refine clickable sidebar navigation layout
+[33md3d7e03[m HEAD@{3}: commit: ui: fine-tune sidebar header spacing (NEXA alignment)
+[33m933b6e5[m HEAD@{4}: commit: ui: refine sidebar layout and page spacing
+[33m8fcb4d7[m HEAD@{5}: commit: ui: move sidebar to top layout beside header
+[33mc6ea944[m HEAD@{6}: commit: ui: improve right panel (mini analytics + debug panel styling)
+[33m6b5c952[m HEAD@{7}: commit: ui: clean FAQ spacing and remove empty container
+[33m6c1a9a5[m HEAD@{8}: commit: ui: reposition demo intro below header
+[33m5edc1c7[m HEAD@{9}: commit: ui: fix quick action icon rendering
+[33me85f911[m HEAD@{10}: commit: ui: replace default assistant icon with NEXA avatar
+[33m8a95978[m HEAD@{11}: commit: ui: improve header spacing for better visual balance
+[33m6b0f92b[m HEAD@{12}: commit: ui: remove duplicate avatar and refine demo intro section
+[33md3d3858[m HEAD@{13}: commit: ui: move clear chat next to input for better UX
+[33m9352986[m HEAD@{14}: commit: feat: add NEXA branding header with avatar
+[33m28a5cfe[m HEAD@{15}: commit: chore: update README with latest demo improvements
+[33mc4d050d[m HEAD@{16}: commit: feat: add demo support ticket form
+[33m9a1e365[m HEAD@{17}: commit: chore: fix author config
+[33m18bacfe[m HEAD@{18}: commit: fix: keep FAQ expander styling consistent in dark mode
+[33m96f266a[m HEAD@{19}: commit: fix: add missing FAQ_CATEGORIES definition
+[33md306f8e[m HEAD@{20}: commit: feat: add compact FAQ section with expandable categories
+[33m3d618e0[m HEAD@{21}: commit: feat: add compact FAQ section with expandable categories
+[33m9e94ff3[m HEAD@{22}: commit: feat: rewrite README with product-level positioning and demo focus
+[33m06cb712[m HEAD@{23}: commit: restore explicit security escalation for fraud-like user messages
+[33m1831964[m HEAD@{24}: reset: moving to HEAD
+[33m1831964[m HEAD@{25}: commit: fix repeated quick action auto-scroll with anchor-based rerendered scroll script
+[33m47ede67[m HEAD@{26}: commit: prevent follow-up context from overriding explicit new domains
+[33md603367[m HEAD@{27}: commit: improve escalation tone with security-aware messaging
+[33mf5dbf80[m HEAD@{28}: commit: keep fraud follow-up responses in escalation mode
+[33mcdf9e7d[m HEAD@{29}: commit: update structured conversation memory after each turn
+[33m1dbb587[m HEAD@{30}: commit: add structured conversation memory state scaffold
+[33m4e488f3[m HEAD@{31}: commit: prioritize fraud detection over refund in multi-intent scenarios
+[33m7bc92af[m HEAD@{32}: commit: improve follow-up refinement for charge and refund flows
+[33mcc2f0b2[m HEAD@{33}: commit: expand multi-turn follow-up refinement across billing charge security and account flows
+[33m396b6b5[m HEAD@{34}: commit: fix chat input flow and improve quick action auto-scroll behavior
+[33m8426e18[m HEAD@{35}: commit: fix multi-turn clarification follow-up with refined responses and clean UX tone
+[33m85d5a0a[m HEAD@{36}: commit: fix clarification follow-up routing and refined billing responses
+[33me1cccce[m HEAD@{37}: commit: add auto-scroll to latest chat message for better conversation UX
+[33m31c8941[m HEAD@{38}: commit: refactor quick actions into fully clickable cards and fix interaction flow
+[33m197c3d8[m HEAD@{39}: commit: enhance thinking animation with icons and improved step visualization
+[33m7fb7e50[m HEAD@{40}: commit: add typing indicator and guard against empty chat input
