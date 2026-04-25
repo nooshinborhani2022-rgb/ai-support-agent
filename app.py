@@ -752,9 +752,7 @@ for message in st.session_state.messages:
 
             if "explanation" in message:
                 st.caption("🧠 " + message["explanation"])
-            else:
-                st.markdown(message["content"])
-
+            
 message_count = len(st.session_state.messages)
 anchor_id = f"chat-bottom-anchor-{message_count}"
 
