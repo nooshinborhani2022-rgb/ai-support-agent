@@ -440,8 +440,6 @@ if "show_ticket" not in st.session_state:
 if "nav_section" not in st.session_state:
     st.session_state.nav_section = "chat"
 
-if "show_ticket" not in st.session_state:
-    st.session_state.show_ticket = False
 
 def load_image_base64(path):
     with open(path, "rb") as f:
@@ -673,7 +671,7 @@ quick_actions = [
 
 st.markdown("### ⚡ Quick Actions")
 
-quick_cols = st.columns(len(quick_actions))
+quick_cols = st.columns(4)
 
 for i, item in enumerate(quick_actions):
     with quick_cols[i]:
@@ -694,6 +692,50 @@ if st.session_state.show_ticket:
         st.success("Your ticket has been submitted!")
         st.session_state.show_ticket = False
 
+
+for message in st.session_state.messages:
+    if message["role"] == "assistant":
+        with st.chat_message("assistant", avatar="assets/nexa_avatar.png"):
+            st.markdown(format_assistant_response(message["content"]))
+
+            if "explanation" in message:
+                st.caption("🧠 " + message["explanation"])
+    else:
+        with st.chat_message("user"):
+            st.markdown(message["content"])
+
+            if "explanation" in message:
+                st.caption("🧠 " + message["explanation"])
+            
+message_count = len(st.session_state.messages)
+anchor_id = f"chat-bottom-anchor-{message_count}"
+
+st.markdown(f'<div id="{anchor_id}"></div>', unsafe_allow_html=True)
+
+if st.session_state.scroll_to_bottom:
+    components.html(
+        f"""
+        <div id="{anchor_id}"></div>
+        <script>
+            const doScroll = () => {{
+                const anchor = window.parent.document.getElementById("{anchor_id}");
+                if (anchor) {{
+                    anchor.scrollIntoView({{
+                        behavior: "smooth",
+                        block: "end"
+                    }});
+                }}
+            }};
+
+            setTimeout(doScroll, 100);
+            setTimeout(doScroll, 300);
+            setTimeout(doScroll, 600);
+        </script>
+        """,
+        height=0,
+    )
+    st.session_state.scroll_to_bottom = False
+    
 
 st.markdown("""
 <div style="margin-top:10px; margin-bottom:14px;">
@@ -739,49 +781,7 @@ if st.session_state.show_ticket_form:
 
             st.session_state.show_ticket_form = False
 
-for message in st.session_state.messages:
-    if message["role"] == "assistant":
-        with st.chat_message("assistant", avatar="assets/nexa_avatar.png"):
-            st.markdown(format_assistant_response(message["content"]))
 
-            if "explanation" in message:
-                st.caption("🧠 " + message["explanation"])
-    else:
-        with st.chat_message("user"):
-            st.markdown(message["content"])
-
-            if "explanation" in message:
-                st.caption("🧠 " + message["explanation"])
-            
-message_count = len(st.session_state.messages)
-anchor_id = f"chat-bottom-anchor-{message_count}"
-
-st.markdown(f'<div id="{anchor_id}"></div>', unsafe_allow_html=True)
-
-if st.session_state.scroll_to_bottom:
-    components.html(
-        f"""
-        <div id="{anchor_id}"></div>
-        <script>
-            const doScroll = () => {{
-                const anchor = window.parent.document.getElementById("{anchor_id}");
-                if (anchor) {{
-                    anchor.scrollIntoView({{
-                        behavior: "smooth",
-                        block: "end"
-                    }});
-                }}
-            }};
-
-            setTimeout(doScroll, 100);
-            setTimeout(doScroll, 300);
-            setTimeout(doScroll, 600);
-        </script>
-        """,
-        height=0,
-    )
-    st.session_state.scroll_to_bottom = False
-    
 input_col, clear_col = st.columns([6, 1])
 
 with input_col:
