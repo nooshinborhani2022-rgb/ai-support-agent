@@ -429,7 +429,7 @@ if "stats" not in st.session_state:
     }
 
 if "show_ticket_form" not in st.session_state:
-    st.session_state.show_ticket_form = False
+    st.session_state.show_ticket = False
 
 if "active_page" not in st.session_state:
     st.session_state.active_page = "chat"
