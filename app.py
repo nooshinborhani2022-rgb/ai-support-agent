@@ -437,8 +437,6 @@ if "active_page" not in st.session_state:
 if "show_ticket" not in st.session_state:
     st.session_state.show_ticket = False
 
-if "nav_section" not in st.session_state:
-    st.session_state.nav_section = "chat"
 
 
 def load_image_base64(path):
