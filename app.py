@@ -468,11 +468,11 @@ with sidebar_col:
 
     if st.button("📊 Debug Panel", key="nav_debug"):
        st.session_state.active_page = "debug"
+
         
 with left_col:
-    st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
     st.markdown(
-        f"""<div style="display:flex; align-items:center; gap:18px; margin-top:20px; margin-bottom:18px;">
+        f"""<div style="display:flex; align-items:center; gap:18px; margin-top:10px; margin-bottom:10px;">
 <img src="data:image/png;base64,{avatar_base64}" width="82" style="border-radius:50%; box-shadow:0 0 18px rgba(59,130,246,0.25);">
 <div>
 <div style="font-size:30px; font-weight:700; line-height:1.2;">
@@ -491,7 +491,7 @@ Your AI support assistant for explainable customer support
     <div style="
     color:#cbd5e1;
     font-size:16px;
-    margin-bottom:22px;
+    margin-bottom:12px;
     line-height:1.8;
     ">
     <strong style="color:#e2e8f0;">This demo showcases:</strong><br>
@@ -502,10 +502,62 @@ Your AI support assistant for explainable customer support
     </div>
     """, unsafe_allow_html=True)
 
+
+
 def stream_text(text):
     for word in text.split():
         yield word + " "
         time.sleep(0.03)
+
+def process_user_prompt(prompt: str):
+    st.session_state.messages.append({
+        "role": "user",
+        "content": prompt
+    })
+
+    result = st.session_state.engine.handle_message(prompt)
+
+    st.session_state.stats["total_messages"] += 1
+    st.session_state.stats["last_action"] = result["action"]
+
+    if result["action"] == "escalate":
+        st.session_state.stats["escalations"] += 1
+
+    if result["action"] == "clarify":
+        st.session_state.stats["clarifications"] += 1
+
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": result["response"],
+        "explanation": build_explanation_text(result)
+    })
+
+    st.session_state.last_result = result
+    st.session_state.scroll_to_bottom = True
+    st.rerun()
+    
+quick_actions = [
+    {"icon": "🔐", "title": "Login Issue", "prompt": "I can't login to my account"},
+    {"icon": "💳", "title": "Payment Problem", "prompt": "My payment failed"},
+    {"icon": "🚨", "title": "Fraud Report", "prompt": "Someone used my card"},
+    {"icon": "📦", "title": "Order Status", "prompt": "Where is my order?"},
+]
+
+with left_col:
+
+    st.markdown("### ⚡ Quick Actions")
+
+    quick_cols = st.columns(4)
+
+    for i, item in enumerate(quick_actions):
+        with quick_cols[i]:
+            if st.button(
+                f"{item['icon']}  {item['title']}",
+                key=f"quick_{i}",
+                use_container_width=True
+            ):
+                process_user_prompt(item["prompt"])
+
 
 def get_thinking_steps():
     return [
@@ -631,52 +683,6 @@ def build_explanation_text(result):
         f"Confidence: {confidence:.3f}"
     )
 
-def process_user_prompt(prompt: str):
-    st.session_state.messages.append({
-        "role": "user",
-        "content": prompt
-    })
-
-    result = st.session_state.engine.handle_message(prompt)
-
-    st.session_state.stats["total_messages"] += 1
-    st.session_state.stats["last_action"] = result["action"]
-
-    if result["action"] == "escalate":
-        st.session_state.stats["escalations"] += 1
-
-    if result["action"] == "clarify":
-        st.session_state.stats["clarifications"] += 1
-
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": result["response"],
-        "explanation": build_explanation_text(result)
-    })
-
-    st.session_state.last_result = result
-    st.session_state.scroll_to_bottom = True
-    st.rerun()
-
-quick_actions = [
-    {"icon": "🔐", "title": "Login Issue", "prompt": "I can't login to my account"},
-    {"icon": "💳", "title": "Payment Problem", "prompt": "My payment failed"},
-    {"icon": "🚨", "title": "Fraud Report", "prompt": "Someone used my card"},
-    {"icon": "📦", "title": "Order Status", "prompt": "Where is my order?"},
-]
-
-st.markdown("### ⚡ Quick Actions")
-
-quick_cols = st.columns(4)
-
-for i, item in enumerate(quick_actions):
-    with quick_cols[i]:
-        if st.button(
-            f"{item['icon']}  {item['title']}",
-            key=f"quick_{i}",
-            use_container_width=True
-        ):
-            process_user_prompt(item["prompt"])
 
 if st.session_state.show_ticket:
     st.markdown("### 🎫 Open Support Ticket")
