@@ -555,8 +555,10 @@ Your AI support assistant for explainable customer support
                     use_container_width=True
                 ):
                     process_user_prompt(item["prompt"])
-
-
+    
+    input_col, clear_col = st.columns([6, 1])
+    with input_col:
+        user_input = st.chat_input("Type your message...")
 
 def get_thinking_steps():
     return [
@@ -769,11 +771,6 @@ if st.session_state.show_ticket:
 
             st.session_state.show_ticket = False
 
-
-input_col, clear_col = st.columns([6, 1])
-
-with input_col:
-    user_input = st.chat_input("Type your message...")
 
 with clear_col:
     if st.button("🗑", use_container_width=True):
