@@ -732,6 +732,7 @@ if st.session_state.scroll_to_bottom:
     )
     st.session_state.scroll_to_bottom = False
     
+st.markdown("<hr style='border:1px solid rgba(255,255,255,0.08); margin:28px 0 18px;'>", unsafe_allow_html=True)
 
 st.markdown("""
 <div style="margin-top:10px; margin-bottom:14px;">
