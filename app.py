@@ -185,7 +185,7 @@ div.stButton > button {
 
 div.stButton > button {
     width: 100%;
-    min-height: 110px;
+    min-height: 82px !important;
     border-radius: 16px !important;
     background: rgba(255,255,255,0.04) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
