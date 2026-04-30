@@ -796,55 +796,8 @@ with clear_col:
         st.rerun()
 
         
-if user_input is not None and str(user_input).strip():
-    user_input = str(user_input).strip()
-
-    st.session_state.messages.append({
-        "role": "user",
-        "content": user_input
-    })
-
-    
-
-    result = st.session_state.engine.handle_message(user_input)
-
-    st.session_state.stats["total_messages"] += 1
-    st.session_state.stats["last_action"] = result["action"]
-
-    if result["action"] == "escalate":
-        st.session_state.stats["escalations"] += 1
-
-    if result["action"] == "clarify":
-        st.session_state.stats["clarifications"] += 1
-
-    with st.chat_message("assistant"):
-        thinking_placeholder = st.empty()
-        visible_steps = []
-
-        for step in get_thinking_steps():
-            visible_steps.append("✅ " + step)
-            thinking_placeholder.markdown("\n".join(visible_steps))
-            time.sleep(0.6)
-
-        time.sleep(0.5)
-        thinking_placeholder.empty()
-
-        typing_placeholder = st.empty()
-        typing_placeholder.markdown("**AI is responding...**")
-        time.sleep(0.6)
-        typing_placeholder.empty()
-
-        streamed_response = st.write_stream(stream_text(result["response"]))
-
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": streamed_response,
-        "explanation": build_explanation_text(result)
-    })
-
-    st.session_state.last_result = result
-    st.session_state.scroll_to_bottom = True
-    st.rerun()
+if user_input and str(user_input).strip():
+    process_user_prompt(str(user_input).strip())
 
 with right_col:
     st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
