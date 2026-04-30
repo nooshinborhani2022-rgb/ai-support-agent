@@ -428,8 +428,6 @@ if "stats" not in st.session_state:
         "last_action": "-"
     }
 
-if "show_ticket_form" not in st.session_state:
-    st.session_state.show_ticket = False
 
 if "active_page" not in st.session_state:
     st.session_state.active_page = "chat"
@@ -759,9 +757,9 @@ for category, questions in FAQ_CATEGORIES.items():
 st.markdown("### 🎫 Need more help?")
 
 if st.button("Open Support Ticket"):
-    st.session_state.show_ticket_form = True 
+    st.session_state.show_ticket = True 
 
-if st.session_state.show_ticket_form:
+if st.session_state.show_ticket:
     with st.expander("📨 Submit a Support Ticket", expanded=True):
 
         name = st.text_input("Your Name")
@@ -777,7 +775,7 @@ if st.session_state.show_ticket_form:
             st.success(f"✅ Ticket submitted! ID: {ticket_id}")
             st.info("Our support team will get back to you shortly.")
 
-            st.session_state.show_ticket_form = False
+            st.session_state.show_ticket = False
 
 
 input_col, clear_col = st.columns([6, 1])
