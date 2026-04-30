@@ -503,11 +503,25 @@ Your AI support assistant for explainable customer support
     """, unsafe_allow_html=True)
 
 
-
 def stream_text(text):
     for word in text.split():
         yield word + " "
         time.sleep(0.03)
+
+def build_explanation_text(result):
+    intents = result.get("intents", [])
+    action = result.get("action", "-")
+    confidence = float(result.get("confidence", 0.0))
+    sentiment = result.get("sentiment", "neutral")
+
+    intent_text = ", ".join(intents) if intents else "unknown"
+
+    return (
+        f"Detected intents: {intent_text} • "
+        f"Sentiment: {sentiment} • "
+        f"Action: {action} • "
+        f"Confidence: {confidence:.3f}"
+    )
 
 def process_user_prompt(prompt: str):
     st.session_state.messages.append({
@@ -667,21 +681,6 @@ def action_badge(action):
         {action.upper()}
     </div>
     """
-
-def build_explanation_text(result):
-    intents = result.get("intents", [])
-    action = result.get("action", "-")
-    confidence = float(result.get("confidence", 0.0))
-    sentiment = result.get("sentiment", "neutral")
-
-    intent_text = ", ".join(intents) if intents else "unknown"
-
-    return (
-        f"Detected intents: {intent_text} • "
-        f"Sentiment: {sentiment} • "
-        f"Action: {action} • "
-        f"Confidence: {confidence:.3f}"
-    )
 
 
 if st.session_state.show_ticket:
