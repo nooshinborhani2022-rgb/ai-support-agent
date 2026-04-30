@@ -1207,6 +1207,29 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
     normalized = normalize_phrase_text(user_text)
     token_count = len(normalized.split())
     new_domain = detect_clarification_domain(user_text)
+    domain = conversation_state.get("active_domain")
+
+    if token_count <= 3:
+        return True
+    strong_new_topic_domains = {
+        "refund_request": "charge",
+        "payment_failed": "payment",
+        "double_charge": "charge",
+        "fraud_report": "security",
+        "order_status": "order",
+        "delivery_issue": "order",
+        "password_reset": "account",
+        "account_locked": "account",
+    }
+
+    strong_new_topics = get_strong_cue_topics(user_text)
+
+    if strong_new_topics:
+        strong_new_domain = strong_new_topic_domains.get(next(iter(strong_new_topics)))
+
+        if strong_new_domain and strong_new_domain != domain:
+            return False
+
 
     equivalent_domains = {
         "charge": {"charge", "payment", "security"},
