@@ -184,20 +184,27 @@ div.stButton > button {
 }
 
 div.stButton > button {
-    width: 100%;
-    min-height: 82px !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 2px !important;
+    margin-right: 2px !important;
+    min-height: 64px !important;
     border-radius: 16px !important;
     background: rgba(255,255,255,0.04) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
     color: #f8fafc !important;
-    text-align: left !important;
+    text-align: center !important;
     white-space: pre-wrap !important;
     font-size: 16px !important;
     font-weight: 600 !important;
     line-height: 1.5 !important;
-    padding: 18px !important;
+    padding: 10px 12px !important;
     transition: all 0.25s ease !important;
-}
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    }
 
 div.stButton > button:hover {
     transform: translateY(-4px);
@@ -311,23 +318,7 @@ div.stButton > button[kind="secondary"] {
     font-weight: 700 !important;
 }
 
-  /* Sidebar navigation buttons */
-div[data-testid="stColumn"]:first-of-type div.stButton > button {
-    height: 44px !important;
-    min-height: 44px !important;
-    padding: 8px 12px !important;
-    border-radius: 12px !important;
-    justify-content: flex-start !important;
-    text-align: left !important;
-}
 
-div[data-testid="stColumn"]:first-of-type div.stButton > button p {
-    text-align: left !important;
-    width: 100% !important;
-    margin: 0 !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-}
 
 div[data-testid="stColumn"]:first-of-type div.stButton > button:hover {
     background: rgba(59,130,246,0.14);
@@ -385,26 +376,16 @@ div[data-testid="stColumn"]:first-of-type div.stButton > button span {
     text-align: left !important;
 }
 
-div[data-testid="stColumn"]:first-of-type div.stButton {
-    display: flex !important;
-    justify-content: flex-start !important;
-}     
+/* Quick Actions button alignment fallback */
+button[key^="quick_"] {
+    margin-left: -8px !important;
+}          
 
- /* Sidebar compact buttons */
-div[data-testid="stColumn"]:first-of-type div.stButton {
-    width: 170px !important;
-}
-
-div[data-testid="stColumn"]:first-of-type div.stButton > button {
-    width: 170px !important;
-    height: 42px !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    border-radius: 12px !important;
-    display: block !important;
-    text-align: left !important;
-}           
-
+[data-testid="column"] {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+}س
+            
 </style>
 """, unsafe_allow_html=True)
 
@@ -469,45 +450,6 @@ with sidebar_col:
     if st.button("📊 Debug Panel", key="nav_debug"):
        st.session_state.active_page = "debug"
 
-        
-with left_col:
-    st.markdown(
-        f"""<div style="display:flex; align-items:center; gap:18px; margin-top:10px; margin-bottom:10px;">
-<img src="data:image/png;base64,{avatar_base64}" width="82" style="border-radius:50%; box-shadow:0 0 18px rgba(59,130,246,0.25);">
-<div>
-<div style="font-size:30px; font-weight:700; line-height:1.2;">
-Welcome to <span style="color:#3b82f6;">NEXA</span>
-</div>
-<div style="color:#94a3b8; margin-top:6px; font-size:15px;">
-Your AI support assistant for explainable customer support
-</div>
-</div>
-</div>
-
-<hr style="border:1px solid rgba(255,255,255,0.08); margin-top:14px; margin-bottom:24px;">""",
-        unsafe_allow_html=True
-    )
-    st.markdown("""
-    <div style="
-    color:#cbd5e1;
-    font-size:16px;
-    margin-bottom:12px;
-    line-height:1.8;
-    ">
-    <strong style="color:#e2e8f0;">This demo showcases:</strong><br>
-    • Multi-intent understanding<br>
-    • Sentiment-aware routing<br>
-    • Confidence-based decisions<br>
-    • Explainable AI reasoning
-    </div>
-    """, unsafe_allow_html=True)
-
-
-def stream_text(text):
-    for word in text.split():
-        yield word + " "
-        time.sleep(0.03)
-
 def build_explanation_text(result):
     intents = result.get("intents", [])
     action = result.get("action", "-")
@@ -549,7 +491,7 @@ def process_user_prompt(prompt: str):
     st.session_state.last_result = result
     st.session_state.scroll_to_bottom = True
     st.rerun()
-    
+
 quick_actions = [
     {"icon": "🔐", "title": "Login Issue", "prompt": "I can't login to my account"},
     {"icon": "💳", "title": "Payment Problem", "prompt": "My payment failed"},
@@ -557,20 +499,63 @@ quick_actions = [
     {"icon": "📦", "title": "Order Status", "prompt": "Where is my order?"},
 ]
 
+
+def stream_text(text):
+    for word in text.split():
+        yield word + " "
+        time.sleep(0.03)
+
+        
 with left_col:
+    st.markdown(
+        f"""<div style="display:flex; align-items:center; gap:18px; margin-top:10px; margin-bottom:10px;">
+<img src="data:image/png;base64,{avatar_base64}" width="82" style="border-radius:50%; box-shadow:0 0 18px rgba(59,130,246,0.25);">
+<div>
+<div style="font-size:30px; font-weight:700; line-height:1.2;">
+Welcome to <span style="color:#3b82f6;">NEXA</span>
+</div>
+<div style="color:#94a3b8; margin-top:6px; font-size:15px;">
+Your AI support assistant for explainable customer support
+</div>
+</div>
+</div>
+
+<hr style="border:1px solid rgba(255,255,255,0.08); margin-top:14px; margin-bottom:24px;">""",
+        unsafe_allow_html=True
+    )
+    st.markdown("""
+    <div style="
+    color:#cbd5e1;
+    font-size:16px;
+    margin-bottom:12px;
+    line-height:1.8;
+    ">
+    <strong style="color:#e2e8f0;">This demo showcases:</strong><br>
+    • Multi-intent understanding<br>
+    • Sentiment-aware routing<br>
+    • Confidence-based decisions<br>
+    • Explainable AI reasoning
+    </div>
+    """, unsafe_allow_html=True)
+
 
     st.markdown("### ⚡ Quick Actions")
 
-    quick_cols = st.columns(4)
+    left_spacer, c1, c2, c3, c4, right_spacer = st.columns(
+    [0.12, 1, 1, 1, 1, 0.12],
+    gap="small"
+    )
+    quick_cols = [c1, c2, c3, c4]
 
     for i, item in enumerate(quick_actions):
-        with quick_cols[i]:
-            if st.button(
-                f"{item['icon']}  {item['title']}",
-                key=f"quick_{i}",
-                use_container_width=True
-            ):
-                process_user_prompt(item["prompt"])
+            with quick_cols[i]:
+                if st.button(
+                    f"{item['icon']}  {item['title']}",
+                    key=f"quick_{i}",
+                    use_container_width=True
+                ):
+                    process_user_prompt(item["prompt"])
+
 
 
 def get_thinking_steps():
