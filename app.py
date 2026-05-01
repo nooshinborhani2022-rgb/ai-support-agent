@@ -384,7 +384,16 @@ button[key^="quick_"] {
 [data-testid="column"] {
     padding-left: 6px !important;
     padding-right: 6px !important;
-}س
+}
+            
+/* Sidebar buttons fixed width */
+div[data-testid="stColumn"]:first-of-type div.stButton > button {
+    width: 170px !important;
+    min-width: 170px !important;
+    max-width: 170px !important;
+    height: 52px !important;
+    justify-content: center !important;
+}
             
 </style>
 """, unsafe_allow_html=True)
