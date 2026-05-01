@@ -4,6 +4,17 @@ import time
 import streamlit.components.v1 as components
 import base64
 
+import streamlit as st
+
+st.markdown("""
+<style>
+[data-testid="column"] {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
 quick_buttons = [
@@ -185,17 +196,16 @@ div.stButton > button {
 
 div.stButton > button {
     width: 100% !important;
-    max-width: none !important;
     min-width: 0 !important;
-    margin-left: 2px !important;
-    margin-right: 2px !important;
+    max-width: none !important;
+    white-space: nowrap !important;
     min-height: 64px !important;
     border-radius: 16px !important;
     background: rgba(255,255,255,0.04) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
     color: #f8fafc !important;
     text-align: center !important;
-    white-space: pre-wrap !important;
+    white-space: nowrap !important;
     font-size: 16px !important;
     font-weight: 600 !important;
     line-height: 1.5 !important;
@@ -204,6 +214,9 @@ div.stButton > button {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    div.stButton {
+    margin: 0 6px !important;
+    }
     }
 
 div.stButton > button:hover {
@@ -394,7 +407,16 @@ div[data-testid="stColumn"]:first-of-type div.stButton > button {
     height: 52px !important;
     justify-content: center !important;
 }
-            
+
+.main-content {
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.quick-actions-wrapper {
+    transform: translateX(-24px);
+}
+                                        
 </style>
 """, unsafe_allow_html=True)
 
@@ -502,7 +524,7 @@ def process_user_prompt(prompt: str):
     st.rerun()
 
 quick_actions = [
-    {"icon": "🔐", "title": "Login Issue", "prompt": "I can't login to my account"},
+    {"icon": "🔐", "title": "Account Login", "prompt": "I can't login to my account"},
     {"icon": "💳", "title": "Payment Problem", "prompt": "My payment failed"},
     {"icon": "🚨", "title": "Fraud Report", "prompt": "Someone used my card"},
     {"icon": "📦", "title": "Order Status", "prompt": "Where is my order?"},
@@ -516,6 +538,9 @@ def stream_text(text):
 
         
 with left_col:
+
+    st.markdown('<div class="main-content">', unsafe_allow_html=True)
+
     st.markdown(
         f"""<div style="display:flex; align-items:center; gap:18px; margin-top:28px; margin-bottom:16px;">
 <img src="data:image/png;base64,{avatar_base64}" width="82" style="border-radius:50%; box-shadow:0 0 18px rgba(59,130,246,0.25);">
@@ -547,23 +572,29 @@ Your AI support assistant for explainable customer support
     </div>
     """, unsafe_allow_html=True)
 
+    st.markdown('<div class="quick-actions-wrapper">', unsafe_allow_html=True)
+    quick_area, quick_empty = st.columns([6, 1], gap="small")
 
+with quick_area:
     st.markdown("### ⚡ Quick Actions")
 
-    left_spacer, c1, c2, c3, c4, right_spacer = st.columns(
-    [0.12, 1, 1, 1, 1, 0.12],
+    q1, gap1, q2, gap2, q3, gap3, q4 = st.columns(
+    [1, 0.10, 1, 0.10, 1, 0.10, 1],
     gap="small"
-    )
-    quick_cols = [c1, c2, c3, c4]
+)
+
+    quick_cols = [q1, q2, q3, q4]
 
     for i, item in enumerate(quick_actions):
-            with quick_cols[i]:
-                if st.button(
-                    f"{item['icon']}  {item['title']}",
-                    key=f"quick_{i}",
-                    use_container_width=True
-                ):
-                    process_user_prompt(item["prompt"])
+        with quick_cols[i]:
+            if st.button(
+                f"{item['icon']} {item['title']}",
+                key=f"quick_{i}",
+                use_container_width=True
+            ):
+                process_user_prompt(item["prompt"])
+
+    st.markdown('</div>', unsafe_allow_html=True)
     
     input_col, clear_col = st.columns([6, 1])
     with input_col:
@@ -796,6 +827,8 @@ with clear_col:
         
 if user_input and str(user_input).strip():
     process_user_prompt(str(user_input).strip())
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 with right_col:
     st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
