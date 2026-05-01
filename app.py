@@ -6,16 +6,36 @@ import base64
 
 import streamlit as st
 
+st.set_page_config(page_title="AI Support Agent", layout="wide")
+
 st.markdown("""
 <style>
-[data-testid="column"] {
-    padding-left: 0px !important;
-    padding-right: 0px !important;
+.quick-container {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    margin-top: 10px;
 }
+
+.quick-btn {
+    padding: 14px 20px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    text-decoration: none !important;
+    display: block;
+    flex: 1;
+    min-width: 0;
+
+}
+            
 </style>
 """, unsafe_allow_html=True)
-
-st.set_page_config(page_title="AI Support Agent", layout="wide")
 
 quick_buttons = [
     ("🔐", "Login Issue", "I can't login to my account"),
@@ -416,7 +436,26 @@ div[data-testid="stColumn"]:first-of-type div.stButton > button {
 .quick-actions-wrapper {
     transform: translateX(-24px);
 }
-                                        
+
+.quick-form-area [data-testid="stForm"] {
+    border: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.quick-form-area div.stButton > button {
+    width: 100% !important;
+    min-height: 64px !important;
+    border-radius: 16px !important;
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    color: #f8fafc !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+}
+                                 
 </style>
 """, unsafe_allow_html=True)
 
@@ -523,13 +562,25 @@ def process_user_prompt(prompt: str):
     st.session_state.scroll_to_bottom = True
     st.rerun()
 
+quick_action_prompts = {
+    "login": "I can't login to my account",
+    "payment": "My payment failed",
+    "fraud": "Someone used my card",
+    "order": "Where is my order?",
+}
+
+quick_action_key = st.query_params.get("quick_action")
+
+if quick_action_key in quick_action_prompts:
+    st.query_params.clear()
+    process_user_prompt(quick_action_prompts[quick_action_key])
+
 quick_actions = [
     {"icon": "🔐", "title": "Account Login", "prompt": "I can't login to my account"},
     {"icon": "💳", "title": "Payment Problem", "prompt": "My payment failed"},
     {"icon": "🚨", "title": "Fraud Report", "prompt": "Someone used my card"},
     {"icon": "📦", "title": "Order Status", "prompt": "Where is my order?"},
 ]
-
 
 def stream_text(text):
     for word in text.split():
@@ -577,23 +628,15 @@ Your AI support assistant for explainable customer support
 
 with quick_area:
     st.markdown("### ⚡ Quick Actions")
-
-    q1, gap1, q2, gap2, q3, gap3, q4 = st.columns(
-    [1, 0.10, 1, 0.10, 1, 0.10, 1],
-    gap="small"
-)
-
-    quick_cols = [q1, q2, q3, q4]
-
-    for i, item in enumerate(quick_actions):
-        with quick_cols[i]:
-            if st.button(
-                f"{item['icon']} {item['title']}",
-                key=f"quick_{i}",
-                use_container_width=True
-            ):
-                process_user_prompt(item["prompt"])
-
+    st.markdown("""
+<div class="quick-container">
+    <a class="quick-btn" href="?quick_action=login" target="_self">🔐 Account Login</a>
+    <a class="quick-btn" href="?quick_action=payment" target="_self">💳 Payment Problem</a>
+    <a class="quick-btn" href="?quick_action=fraud" target="_self">🚨 Fraud Report</a>
+    <a class="quick-btn" href="?quick_action=order" target="_self">📦 Order Status</a>
+</div>
+""", unsafe_allow_html=True)
+    
     st.markdown('</div>', unsafe_allow_html=True)
     
     input_col, clear_col = st.columns([6, 1])
