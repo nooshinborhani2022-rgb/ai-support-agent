@@ -523,6 +523,16 @@ with sidebar_col:
 
     if st.button("📊 Debug Panel", key="nav_debug"):
        st.session_state.active_page = "debug"
+    if st.button("🗑 Clear chat", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.last_result = None
+        st.session_state.stats = {
+        "total_messages": 0,
+        "escalations": 0,
+        "clarifications": 0,
+        "last_action": "-"
+        }
+        st.rerun()
 
 def build_explanation_text(result):
     intents = result.get("intents", [])
