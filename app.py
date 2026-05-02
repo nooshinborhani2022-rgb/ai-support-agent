@@ -34,6 +34,10 @@ st.markdown("""
 
 }
             
+[data-testid="stChatInput"] {
+    margin-top: -20px;
+}
+            
 </style>
 """, unsafe_allow_html=True)
 
@@ -639,9 +643,13 @@ with quick_area:
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    input_col, clear_col = st.columns([6, 1])
+    input_col = st.container()
+
+    st.markdown("<div style='margin-top:-28px;'></div>", unsafe_allow_html=True)
+
     with input_col:
         user_input = st.chat_input("Type your message...")
+    
 
 def get_thinking_steps():
     return [
@@ -853,19 +861,6 @@ if st.session_state.show_ticket:
             st.info("Our support team will get back to you shortly.")
 
             st.session_state.show_ticket = False
-
-
-with clear_col:
-    if st.button("🗑", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.last_result = None
-        st.session_state.stats = {
-            "total_messages": 0,
-            "escalations": 0,
-            "clarifications": 0,
-            "last_action": "-"
-        }
-        st.rerun()
 
         
 if user_input and str(user_input).strip():
