@@ -666,6 +666,25 @@ Your AI support assistant for explainable customer support
                     st.session_state.active_page = "chat"
                     st.rerun()
 
+    if st.session_state.active_page == "faq":
+        st.markdown("### 📚 FAQ & Common Questions")
+
+        with st.expander("Browse common support topics", expanded=True):
+            for category, questions in FAQ_CATEGORIES.items():
+                with st.expander(category, expanded=False):
+                    for q_idx, question in enumerate(questions):
+                        if st.button(
+                            question,
+                            key=f"faq_top_{category}_{q_idx}",
+                            use_container_width=True
+                        ):
+                            st.session_state.active_page = "chat"
+                            process_user_prompt(question)
+
+            if st.button("Close FAQ", key="faq_close", use_container_width=True):
+                st.session_state.active_page = "chat"
+                st.rerun()
+
     st.markdown('<div class="quick-actions-wrapper">', unsafe_allow_html=True)
     quick_area, quick_empty = st.columns([6, 1], gap="small")
 
@@ -841,31 +860,7 @@ if st.session_state.scroll_to_bottom:
         """,
         height=0,
     )
-    st.session_state.scroll_to_bottom = False
-    
-st.markdown("<hr style='border:1px solid rgba(255,255,255,0.08); margin:28px 0 18px;'>", unsafe_allow_html=True)
-
-with st.expander("📚 FAQ & Common Questions", expanded=False):
-    st.markdown("""
-    <div style="margin-top:10px; margin-bottom:14px;">
-    <div style="font-size:18px; font-weight:700; color:#f8fafc;">📚 FAQ</div>
-    <div style="font-size:18px; color:#94a3b8; margin-top:4px;">
-        Browse common support topics
-    </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-for category, questions in FAQ_CATEGORIES.items():
-    with st.expander(f"{category}", expanded=False):
-        for q_idx, question in enumerate(questions):
-            if st.button(
-                question,
-                key=f"faq_{category}_{q_idx}",
-                use_container_width=False
-            ):
-                process_user_prompt(question)
-
+    st.session_state.scroll_to_bottom = False  
         
 if user_input and str(user_input).strip():
     process_user_prompt(str(user_input).strip())
