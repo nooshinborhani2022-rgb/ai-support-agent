@@ -459,7 +459,7 @@ div[data-testid="stColumn"]:first-of-type div.stButton > button {
     white-space: nowrap !important;
     text-align: center !important;
 }
-                                 
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -637,6 +637,35 @@ Your AI support assistant for explainable customer support
     </div>
     """, unsafe_allow_html=True)
 
+    if st.session_state.active_page == "ticket":
+        st.markdown("### 🎫 Open Support Ticket")
+
+        with st.expander("📨 Submit a Support Ticket", expanded=True):
+            name = st.text_input("Your Name", key="ticket_name")
+            email = st.text_input("Email", key="ticket_email")
+            issue = st.text_input("Issue Summary", key="ticket_issue")
+            message = st.text_area("Describe your issue", key="ticket_message")
+
+            ticket_submit_col, ticket_cancel_col = st.columns([1, 1])
+
+            with ticket_submit_col:
+                if st.button("Submit Ticket", key="ticket_submit", use_container_width=True):
+                    import random
+
+                    ticket_id = f"TICKET-{random.randint(1000,9999)}"
+
+                    st.success(f"✅ Ticket submitted! ID: {ticket_id}")
+                    st.info("Our support team will get back to you shortly.")
+
+                    st.session_state.show_ticket = False
+                    st.session_state.active_page = "chat"
+
+            with ticket_cancel_col:
+                if st.button("Cancel", key="ticket_cancel", use_container_width=True):
+                    st.session_state.show_ticket = False
+                    st.session_state.active_page = "chat"
+                    st.rerun()
+
     st.markdown('<div class="quick-actions-wrapper">', unsafe_allow_html=True)
     quick_area, quick_empty = st.columns([6, 1], gap="small")
 
@@ -771,17 +800,6 @@ def action_badge(action):
     """
 
 
-if st.session_state.show_ticket:
-    st.markdown("### 🎫 Open Support Ticket")
-
-    name = st.text_input("Your Name")
-    issue = st.text_area("Describe your issue")
-
-    if st.button("Submit Ticket"):
-        st.success("Your ticket has been submitted!")
-        st.session_state.show_ticket = False
-
-
 for message in st.session_state.messages:
     if message["role"] == "assistant":
         with st.chat_message("assistant", avatar="assets/nexa_avatar.png"):
@@ -847,30 +865,6 @@ for category, questions in FAQ_CATEGORIES.items():
                 use_container_width=False
             ):
                 process_user_prompt(question)
-
-
-st.markdown("### 🎫 Need more help?")
-
-if st.button("Open Support Ticket"):
-    st.session_state.show_ticket = True 
-
-if st.session_state.show_ticket:
-    with st.expander("📨 Submit a Support Ticket", expanded=True):
-
-        name = st.text_input("Your Name")
-        email = st.text_input("Email")
-        issue = st.text_input("Issue Summary")
-        message = st.text_area("Describe your issue")
-
-        if st.button("Submit Ticket"):
-            import random
-
-            ticket_id = f"TICKET-{random.randint(1000,9999)}"
-
-            st.success(f"✅ Ticket submitted! ID: {ticket_id}")
-            st.info("Our support team will get back to you shortly.")
-
-            st.session_state.show_ticket = False
 
         
 if user_input and str(user_input).strip():
