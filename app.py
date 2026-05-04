@@ -706,6 +706,40 @@ with quick_area:
 
     st.markdown("<div style='margin-top:-28px;'></div>", unsafe_allow_html=True)
 
+
+    def format_assistant_response(text):
+        formatted = text
+
+        formatted = formatted.replace("For your login issue:", "\n\n**🔐 Login issue**\n")
+        formatted = formatted.replace("For your payment failed:", "\n\n**💳 Payment issue**\n")
+        formatted = formatted.replace("For your refund request:", "\n\n**💸 Refund request**\n")
+        formatted = formatted.replace("For your account access part,", "\n\n**🔒 Account access**\n")
+        formatted = formatted.replace("For your billing part,", "\n\n**🧾 Billing**\n")
+        formatted = formatted.replace("For your order part,", "\n\n**📦 Order**\n")
+        formatted = formatted.replace("For your security part,", "\n\n**🚨 Security**\n")
+
+        return formatted.strip()
+
+    for message in st.session_state.messages:
+        if message["role"] == "assistant":
+            with st.chat_message("assistant", avatar="assets/nexa_avatar.png"):
+                 st.markdown(format_assistant_response(message["content"]))
+
+                 if "explanation" in message:
+                    st.caption("🧠 " + message["explanation"])
+        else:
+            with st.chat_message("user"):
+                st.markdown(message["content"])
+
+                if "explanation" in message:
+                    st.caption("🧠 " + message["explanation"])
+            
+    message_count = len(st.session_state.messages)
+    anchor_id = f"chat-bottom-anchor-{message_count}"
+
+    st.markdown(f'<div id="{anchor_id}"></div>', unsafe_allow_html=True)
+
+
     with input_col:
         user_input = st.chat_input("Type your message...")
     
@@ -717,19 +751,6 @@ def get_thinking_steps():
         "🧭 Applying routing rules...",
         "✨ Generating response...",
     ]
-
-def format_assistant_response(text):
-    formatted = text
-
-    formatted = formatted.replace("For your login issue:", "\n\n**🔐 Login issue**\n")
-    formatted = formatted.replace("For your payment failed:", "\n\n**💳 Payment issue**\n")
-    formatted = formatted.replace("For your refund request:", "\n\n**💸 Refund request**\n")
-    formatted = formatted.replace("For your account access part,", "\n\n**🔒 Account access**\n")
-    formatted = formatted.replace("For your billing part,", "\n\n**🧾 Billing**\n")
-    formatted = formatted.replace("For your order part,", "\n\n**📦 Order**\n")
-    formatted = formatted.replace("For your security part,", "\n\n**🚨 Security**\n")
-
-    return formatted.strip()
 
 
 
@@ -818,26 +839,6 @@ def action_badge(action):
         {action.upper()}
     </div>
     """
-
-
-for message in st.session_state.messages:
-    if message["role"] == "assistant":
-        with st.chat_message("assistant", avatar="assets/nexa_avatar.png"):
-            st.markdown(format_assistant_response(message["content"]))
-
-            if "explanation" in message:
-                st.caption("🧠 " + message["explanation"])
-    else:
-        with st.chat_message("user"):
-            st.markdown(message["content"])
-
-            if "explanation" in message:
-                st.caption("🧠 " + message["explanation"])
-            
-message_count = len(st.session_state.messages)
-anchor_id = f"chat-bottom-anchor-{message_count}"
-
-st.markdown(f'<div id="{anchor_id}"></div>', unsafe_allow_html=True)
 
 if st.session_state.scroll_to_bottom:
     components.html(
