@@ -522,7 +522,29 @@ with sidebar_col:
        st.session_state.show_ticket = True
 
     if st.button("📊 Debug Panel", key="nav_debug"):
-       st.session_state.active_page = "debug"
+        if st.session_state.active_page == "debug":
+            st.session_state.active_page = "chat"
+        else:
+            st.session_state.active_page = "debug"
+    
+    if st.session_state.active_page == "debug":
+        st.markdown("---")
+        st.markdown("#### 🛠 Debug Panel")
+
+        if "last_result" in st.session_state and st.session_state.last_result is not None:
+            result = st.session_state.last_result
+
+            st.markdown(f"**Sentiment:** {result.get('sentiment', '-')}")
+            st.markdown(
+                f"**Intents:** {', '.join(result.get('intents', [])) if result.get('intents') else '-'}"
+            )
+            st.markdown(f"**Action:** {result.get('action', '-')}")
+            st.markdown(f"**Confidence:** {float(result.get('confidence', 0.0)):.3f}")
+            st.markdown(f"**Routing:** {result.get('routing_reason', '-')}")
+        else:
+            st.info("Send a message to see reasoning details.")
+
+
     if st.button("🗑 Clear chat", use_container_width=True):
         st.session_state.messages = []
         st.session_state.last_result = None
@@ -894,104 +916,4 @@ with right_col:
         st.metric("Last Action", st.session_state.stats["last_action"])
 
     st.markdown("---")
-    st.markdown("""
-<div style="margin-top:12px; margin-bottom:14px;">
-    <div style="font-size:18px; font-weight:700; color:#f8fafc;">🛠 Debug Panel</div>
-    <div style="font-size:18px; color:#94a3b8; margin-top:4px;">
-        Inspect routing and reasoning details
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-    if "last_result" in st.session_state and st.session_state.last_result is not None:
-        result = st.session_state.last_result
-
-        st.markdown('<div class="debug-box">', unsafe_allow_html=True)
-
-        st.markdown('<div class="metric-label">Sentiment</div>', unsafe_allow_html=True)
-        st.markdown(sentiment_badge(result["sentiment"]), unsafe_allow_html=True)
-
-        st.markdown('<div class="metric-label">Intents</div>', unsafe_allow_html=True)
-        if result["intents"]:
-            st.markdown(intent_badges(result["intents"]), unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="metric-value">None</div>', unsafe_allow_html=True)
-
-        st.markdown('<div class="metric-label">Confidence</div>', unsafe_allow_html=True)
-        confidence_value = float(result["confidence"])
-        confidence_percent = max(0, min(int(confidence_value * 100), 100))
-        st.progress(confidence_percent)
-        st.markdown(
-            f'<div class="metric-value">{confidence_value:.3f} ({confidence_percent}%)</div>',
-            unsafe_allow_html=True
-        )
-        
-        if "memory" in result:
-            memory = result["memory"]
-
-            st.markdown('<div class="metric-label">Memory</div>', unsafe_allow_html=True)
-
-            st.markdown(
-                f'<div class="metric-value">Domain: {memory.get("active_domain")}</div>',
-                unsafe_allow_html=True
-            )
-
-            st.markdown(
-                f'<div class="metric-value">Intents: {", ".join(memory.get("active_intents", []))}</div>',
-                unsafe_allow_html=True
-            )
-
-            st.markdown(
-                f'<div class="metric-value">Risk: {memory.get("risk_level")}</div>',
-                unsafe_allow_html=True
-            )
-
-            st.markdown(
-                f'<div class="metric-value">Escalation: {memory.get("needs_escalation")}</div>',
-                unsafe_allow_html=True
-            )
-
-            st.markdown(
-                f'<div class="metric-value">Turns: {memory.get("turn_count")}</div>',
-                unsafe_allow_html=True
-            )
-
-            summary = memory.get("active_issue_summary")
-            if summary:
-                st.markdown(
-                    f'<div class="metric-value">Summary: {summary}</div>',
-                    unsafe_allow_html=True
-                )
-
-        st.markdown('<div class="metric-label">Action</div>', unsafe_allow_html=True)
-        st.markdown(action_badge(result["action"]), unsafe_allow_html=True)
-
-        st.markdown('<div class="metric-label">Routing Reason</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{result["routing_reason"]}</div>', unsafe_allow_html=True)
-
-        st.markdown('<div class="metric-label">Top1 Score</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{result["top1_score"]}</div>', unsafe_allow_html=True)
-
-        st.markdown('<div class="metric-label">Top2 Score</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{result["top2_score"]}</div>', unsafe_allow_html=True)
-
-        st.markdown('<div class="metric-label">Score Gap</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{result["score_gap"]}</div>', unsafe_allow_html=True)
-
-        st.markdown('<div class="metric-label">Predicted Topics Before Rules</div>', unsafe_allow_html=True)
-        st.code(
-            "\n".join(result["predicted_topics_before_rules"])
-            if result["predicted_topics_before_rules"] else "None",
-            language=None
-        )
-
-        st.markdown('<div class="metric-label">Final Topics After Rules</div>', unsafe_allow_html=True)
-        st.code(
-            "\n".join(result["final_topics_after_rules"])
-            if result["final_topics_after_rules"] else "None",
-            language=None
-        )
-
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.info("Send a message to see reasoning details here.")
+    
