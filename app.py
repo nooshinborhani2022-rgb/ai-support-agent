@@ -490,6 +490,9 @@ if "active_page" not in st.session_state:
 if "show_ticket" not in st.session_state:
     st.session_state.show_ticket = False
 
+if "show_debug" not in st.session_state:
+    st.session_state.show_debug = False
+
 
 
 def load_image_base64(path):
@@ -520,31 +523,7 @@ with sidebar_col:
     if st.button("🎫 Open Ticket", key="nav_ticket"):
        st.session_state.active_page = "ticket"
        st.session_state.show_ticket = True
-
-    if st.button("📊 Debug Panel", key="nav_debug"):
-        if st.session_state.active_page == "debug":
-            st.session_state.active_page = "chat"
-        else:
-            st.session_state.active_page = "debug"
     
-    if st.session_state.active_page == "debug":
-        st.markdown("---")
-        st.markdown("#### 🛠 Debug Panel")
-
-        if "last_result" in st.session_state and st.session_state.last_result is not None:
-            result = st.session_state.last_result
-
-            st.markdown(f"**Sentiment:** {result.get('sentiment', '-')}")
-            st.markdown(
-                f"**Intents:** {', '.join(result.get('intents', [])) if result.get('intents') else '-'}"
-            )
-            st.markdown(f"**Action:** {result.get('action', '-')}")
-            st.markdown(f"**Confidence:** {float(result.get('confidence', 0.0)):.3f}")
-            st.markdown(f"**Routing:** {result.get('routing_reason', '-')}")
-        else:
-            st.info("Send a message to see reasoning details.")
-
-
     if st.button("🗑 Clear chat", use_container_width=True):
         st.session_state.messages = []
         st.session_state.last_result = None
@@ -915,5 +894,74 @@ with right_col:
     with a4:
         st.metric("Last Action", st.session_state.stats["last_action"])
 
-    st.markdown("---")
+    st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+
+    # Debug toggle button
+    if st.session_state.show_debug:
+        if st.button("🛠 Hide Debug Panel", use_container_width=True):
+            st.session_state.show_debug = False
+            st.rerun()
+    else:
+        if st.button("🛠 Show Debug Panel", use_container_width=True):
+            st.session_state.show_debug = True
+            st.rerun()
+
+    if st.session_state.show_debug:
+        st.markdown("### 🛠 Debug Panel")
+        st.markdown("Inspect routing and reasoning details")
+
+        if "last_result" in st.session_state and st.session_state.last_result is not None:
+            result = st.session_state.last_result
+
+            st.markdown('<div class="metric-label">Sentiment</div>', unsafe_allow_html=True)
+            st.markdown(sentiment_badge(result.get("sentiment", "neutral")), unsafe_allow_html=True)
+
+            st.markdown('<div class="metric-label">Intents</div>', unsafe_allow_html=True)
+            if result.get("intents"):
+                st.markdown(intent_badges(result.get("intents", [])), unsafe_allow_html=True)
+            else:
+                st.markdown('<div class="metric-value">None</div>', unsafe_allow_html=True)
+
+            st.markdown('<div class="metric-label">Action</div>', unsafe_allow_html=True)
+            st.markdown(action_badge(result.get("action", "-")), unsafe_allow_html=True)
+            st.markdown(f"**Confidence:** {float(result.get('confidence', 0.0)):.3f}")
+            st.markdown(f"**Routing:** {result.get('routing_reason', '-')}")
+
+            memory = result.get("memory", {})
+            st.markdown("#### 🧠 Memory")
+            if memory:
+                st.markdown(f"**Domain:** {memory.get('active_domain', '-')}")
+                st.markdown(f"**Memory Intents:** {', '.join(memory.get('active_intents', [])) if memory.get('active_intents') else '-'}")
+                st.markdown(f"**Risk:** {memory.get('risk_level', '-')}")
+                st.markdown(f"**Escalation:** {memory.get('needs_escalation', '-')}")
+                st.markdown(f"**Turns:** {memory.get('turn_count', '-')}")
+                if memory.get("active_issue_summary"):
+                    st.markdown(f"**Summary:** {memory.get('active_issue_summary')}")
+                else:
+                    st.markdown("No memory data yet.")
+
+                st.markdown("#### 📈 Scores")
+                st.markdown(f"**Top1 Score:** {result.get('top1_score', '-')}")
+                st.markdown(f"**Top2 Score:** {result.get('top2_score', '-')}")
+                st.markdown(f"**Score Gap:** {result.get('score_gap', '-')}")
+
+                st.markdown("#### 🔎 Topics Before Rules")
+                st.code(
+                    "\n".join(result.get("predicted_topics_before_rules", []))
+                    if result.get("predicted_topics_before_rules")
+                    else "None",
+                    language=None
+                )
+
+                st.markdown("#### ✅ Topics After Rules")
+                st.code(
+                    "\n".join(result.get("final_topics_after_rules", []))
+                    if result.get("final_topics_after_rules")
+                    else "None",
+                    language=None
+                )
+
+
+            else:
+                st.info("Send a message to see reasoning details here.")
     
