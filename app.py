@@ -3,8 +3,7 @@ from src.engine import SupportEngine
 import time
 import streamlit.components.v1 as components
 import base64
-
-import streamlit as st
+import html
 
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
@@ -719,27 +718,82 @@ with quick_area:
         formatted = formatted.replace("For your security part,", "\n\n**🚨 Security**\n")
 
         return formatted.strip()
+    
 
     for message in st.session_state.messages:
+        content = message.get("content", "")
+
         if message["role"] == "assistant":
-            with st.chat_message("assistant", avatar="assets/nexa_avatar.png"):
-                 st.markdown(format_assistant_response(message["content"]))
-
-                 if "explanation" in message:
-                    st.caption("🧠 " + message["explanation"])
-        else:
-            with st.chat_message("user"):
-                st.markdown(message["content"])
-
-                if "explanation" in message:
-                    st.caption("🧠 " + message["explanation"])
             
-    message_count = len(st.session_state.messages)
-    anchor_id = f"chat-bottom-anchor-{message_count}"
+            safe_content = html.escape(format_assistant_response(content)).replace("\n", "<br>")
+            explanation = message.get("explanation")
 
-    st.markdown(f'<div id="{anchor_id}"></div>', unsafe_allow_html=True)
+            if explanation:
+                explanation_html = (
+            "<div style='margin-top:10px; color:#94a3b8; font-size:13px; line-height:1.5;'>"
+            f"🧠 {html.escape(explanation)}"
+            "</div>"
+            )
+            else:
+                explanation_html = ""
 
+            st.markdown(
+                f"""
+                <div style="display:flex; align-items:flex-start; gap:12px; margin:18px 0;">
+                <img src="data:image/png;base64,{avatar_base64}"
+                     style="width:42px; height:42px; border-radius:50%; object-fit:cover;">
+                <div style="
+                    max-width:72%;
+                    background:rgba(255,255,255,0.06);
+                    border:1px solid rgba(255,255,255,0.08);
+                    border-radius:18px;
+                    padding:16px 18px;
+                    color:#f8fafc;
+                    line-height:1.7;
+                ">
+                    <div style="font-weight:800; color:#38bdf8; margin-bottom:6px;">NEXA</div>
+                    <div>{safe_content}</div>
+                    {explanation_html}
+                </div>
+            </div>
+            """,
+                unsafe_allow_html=True
+            )
 
+        else:
+            safe_content = html.escape(content).replace("\n", "<br>")
+
+            st.markdown(
+                f"""
+                <div style="display:flex; justify-content:flex-end; align-items:flex-start; gap:12px; margin:18px 0;">
+                <div style="
+                    max-width:62%;
+                    background:rgba(37,99,235,0.18);
+                    border:1px solid rgba(59,130,246,0.35);
+                    border-radius:18px;
+                    padding:16px 18px;
+                    color:#f8fafc;
+                    line-height:1.7;
+                ">
+                    {safe_content}
+                </div>
+                <div style="
+                    width:42px;
+                    height:42px;
+                    border-radius:50%;
+                    background:#2563eb;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:22px;
+                ">
+                    👤
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+            )
+            
     with input_col:
         user_input = st.chat_input("Type your message...")
     
@@ -839,30 +893,7 @@ def action_badge(action):
         {action.upper()}
     </div>
     """
-
-if st.session_state.scroll_to_bottom:
-    components.html(
-        f"""
-        <div id="{anchor_id}"></div>
-        <script>
-            const doScroll = () => {{
-                const anchor = window.parent.document.getElementById("{anchor_id}");
-                if (anchor) {{
-                    anchor.scrollIntoView({{
-                        behavior: "smooth",
-                        block: "end"
-                    }});
-                }}
-            }};
-
-            setTimeout(doScroll, 100);
-            setTimeout(doScroll, 300);
-            setTimeout(doScroll, 600);
-        </script>
-        """,
-        height=0,
-    )
-    st.session_state.scroll_to_bottom = False  
+ 
         
 if user_input and str(user_input).strip():
     process_user_prompt(str(user_input).strip())
