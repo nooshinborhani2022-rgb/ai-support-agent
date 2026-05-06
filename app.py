@@ -848,9 +848,40 @@ with quick_area:
             """,
             unsafe_allow_html=True
             )
+
+message_count = len(st.session_state.messages)
+anchor_id = f"chat-bottom-anchor-{message_count}"
+
+st.markdown(f'<div id="{anchor_id}"></div>', unsafe_allow_html=True)
+
+if st.session_state.get("scroll_to_bottom", False):
+    components.html(
+        f"""
+        <script>
+            const scrollToChat = () => {{
+                const anchor = window.parent.document.getElementById("{anchor_id}");
+                if (anchor) {{
+                    anchor.scrollIntoView({{
+                        behavior: "smooth",
+                        block: "center"
+                    }});
+                }}
+            }};
+
+            setTimeout(scrollToChat, 100);
+            setTimeout(scrollToChat, 350);
+            setTimeout(scrollToChat, 700);
+        </script>
+        """,
+        height=0,
+    )
+    st.session_state.scroll_to_bottom = False
             
-    with input_col:
+with input_col:
         user_input = st.chat_input("Type your message...")
+if user_input and str(user_input).strip():
+    process_user_prompt(str(user_input).strip())
+
     
 
 demo_scenarios = [
@@ -939,10 +970,6 @@ def action_badge(action):
     </div>
     """
  
-        
-if user_input and str(user_input).strip():
-    process_user_prompt(str(user_input).strip())
-
 st.markdown('</div>', unsafe_allow_html=True)
 
 with right_col:
