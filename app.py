@@ -808,7 +808,6 @@ with quick_area:
                 ">
                     <div style="font-weight:800; color:#38bdf8; margin-bottom:6px;">NEXA</div>
                     <div>{safe_content}</div>
-                    {explanation_html}
                 </div>
             </div>
             """,
