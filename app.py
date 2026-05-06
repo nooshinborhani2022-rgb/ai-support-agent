@@ -549,13 +549,68 @@ def build_explanation_text(result):
         f"Confidence: {confidence:.3f}"
     )
 
+def get_thinking_steps():
+    return [
+        "🔍 Analyzing intent...",
+        "🙂 Detecting sentiment...",
+        "🧭 Applying routing rules...",
+        "✨ Generating response...",
+    ]
+
 def process_user_prompt(prompt: str):
     st.session_state.messages.append({
         "role": "user",
         "content": prompt
     })
 
-    result = st.session_state.engine.handle_message(prompt)
+    thinking_placeholder = st.empty()
+
+    for step in get_thinking_steps():
+        thinking_placeholder.markdown(
+            f"""
+            <div style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                background:rgba(255,255,255,0.06);
+                border:1px solid rgba(255,255,255,0.08);
+                border-radius:16px;
+                padding:14px 16px;
+                color:#cbd5e1;
+                margin:12px 0;
+            ">
+                <span>🤖</span>
+                <span>{step}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        time.sleep(0.65)
+
+        result = st.session_state.engine.handle_message(prompt)
+
+        thinking_placeholder.markdown(
+        """
+        <div style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+            background:rgba(59,130,246,0.12);
+            border:1px solid rgba(59,130,246,0.22);
+            border-radius:16px;
+            padding:14px 16px;
+            color:#bfdbfe;
+            margin:12px 0;
+        ">
+            <span>✍️</span>
+            <span>NEXA is typing...</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    time.sleep(0.9)
+    thinking_placeholder.empty()
 
     st.session_state.stats["total_messages"] += 1
     st.session_state.stats["last_action"] = result["action"]
@@ -797,16 +852,6 @@ with quick_area:
     with input_col:
         user_input = st.chat_input("Type your message...")
     
-
-def get_thinking_steps():
-    return [
-        "🔍 Analyzing intent...",
-        "🙂 Detecting sentiment...",
-        "🧭 Applying routing rules...",
-        "✨ Generating response...",
-    ]
-
-
 
 demo_scenarios = [
     "I was charged twice and this is ridiculous!!!",
