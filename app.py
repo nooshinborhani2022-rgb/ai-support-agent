@@ -514,8 +514,10 @@ with sidebar_col:
     """, unsafe_allow_html=True)
 
     if st.button("💬 Chat", key="nav_chat"):
-       st.session_state.active_page = "chat"
-
+        st.session_state.active_page = "chat"
+        st.session_state.show_ticket = False
+        st.rerun()
+        
     if st.button("❓ FAQ", key="nav_faq"):
        st.session_state.active_page = "faq"
 
