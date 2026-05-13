@@ -1,27 +1,37 @@
-# 🤖 AI Support Agent
+# 🤖 NEXA — Explainable AI Support Agent
 
-### Explainable AI Decision Engine for Customer Support
+### Production-Style AI Decision Engine for Customer Support
 
-A **production-style AI support system** that goes beyond simple intent detection and makes **explainable, confidence-aware decisions** in real-time customer interactions.
+NEXA is an intelligent customer support assistant designed to simulate how modern AI support systems operate in real-world products.
 
-Unlike typical chatbots, this system can:
+Unlike basic intent-classification chatbots, NEXA combines:
 
-* Understand **multiple intents simultaneously**
-* Detect **user sentiment**
-* Decide whether to **answer, clarify, or escalate**
-* Maintain **conversation context across turns**
-* Provide **transparent reasoning behind every decision**
+- multi-intent reasoning
+- sentiment-aware routing
+- confidence-based decision making
+- conversation memory
+- explainable AI reasoning
+- real-time interactive UI
+
+to create a more reliable and transparent support experience.
 
 ---
 
-## 🚀 Live Demo (Streamlit UI)
+# 🚀 Demo Features
 
-Interactive chat interface with:
+Interactive Streamlit interface with:
 
-* Real-time responses
-* Step-by-step AI reasoning
-* Confidence visualization
-* Debug panel (intents, routing, memory)
+- 💬 Real-time conversational chat UI
+- 🧠 AI thinking & typing indicators
+- ⚡ Quick support actions
+- 📚 FAQ workflow
+- 🎫 Ticket submission flow
+- 📊 Explainable debug dashboard
+- 🧭 Confidence-aware routing
+- 🧠 Conversation memory tracking
+- 🔄 Smooth auto-scroll chat experience
+
+Run locally:
 
 ```bash
 streamlit run app.py
@@ -29,196 +39,257 @@ streamlit run app.py
 
 ---
 
-## 🧠 What Makes This Different?
+# 🧠 Why This Project Is Different
 
 Most chatbot projects:
 
-* classify intent → return response ❌
+```text
+intent → response
+```
 
-This system:
+NEXA behaves more like a decision engine:
 
-* detects multiple possible intents
-* measures uncertainty (confidence gap)
-* applies decision rules
-* adapts behavior based on sentiment
-* explains *why* it made that decision
+```text
+User Message
+    ↓
+Intent Detection
+    ↓
+Sentiment Analysis
+    ↓
+Confidence Evaluation
+    ↓
+Decision Routing
+    ↓
+Answer / Clarify / Escalate
+    ↓
+Explainable Reasoning
+```
 
-👉 This is closer to a **decision engine** than a chatbot.
+The system actively decides:
+
+- whether it understands the user
+- whether clarification is needed
+- whether escalation is safer
+- how tone should change based on sentiment
 
 ---
 
-## 🎯 Core Capabilities
+# 🎯 Core AI Capabilities
 
-### 🔹 Multi-Intent Understanding
+## 🔹 Multi-Intent Understanding
 
-* Hybrid detection (TF-IDF + keyword matching)
-* Detects overlapping intents in a single query
-* Resolves conflicts intelligently
+NEXA can detect multiple simultaneous intents in a single message.
 
 Example:
-“I can't login and my payment failed”
+
+```text
+"I can't login and my payment failed"
+```
+
+Detected intents:
+
+- login_issue
+- payment_failed
+
+Uses:
+
+- TF-IDF similarity
+- keyword matching
+- conflict-aware intent selection
 
 ---
 
-### 🔹 Confidence-Aware Decision Making
+## 🔹 Confidence-Aware Decision Engine
 
-Instead of blindly answering:
+Instead of blindly responding, the system evaluates certainty:
 
-```
+```python
 confidence = top1_score - top2_score
 ```
 
-The system:
+Routing behavior:
 
-* answers when confident
-* clarifies when uncertain
-* escalates high-risk cases
-
----
-
-### 🔹 Sentiment-Aware Routing
-
-Detects:
-
-* neutral
-* frustrated
-* angry
-* urgent
-
-And adjusts behavior:
-
-* angry → escalate
-* frustrated → avoid over-clarifying
-* urgent → respond faster
+- High confidence → answer
+- Medium confidence → clarify
+- High-risk uncertainty → escalate
 
 ---
 
-### 🔹 Explainable AI (XAI)
+## 🔹 Sentiment-Aware Routing
 
-Every response includes reasoning:
+Detects emotional state:
 
-* Detected intents
-* Confidence score
-* Routing decision
-* Routing reason
+- neutral
+- frustrated
+- angry
+- urgent
 
-Example:
+Behavior adapts dynamically:
 
-```
-Detected intents: payment_failed, refund_request
-Sentiment: frustrated
-Action: clarify
-Confidence: 0.13
-Reason: low_confidence_multi_intent
-```
+- angry → faster escalation
+- frustrated → reduced clarification loops
+- urgent → high-priority tone
 
 ---
 
-### 🔹 Multi-Turn Conversation Memory
+## 🔹 Explainable AI (XAI)
+
+NEXA exposes its reasoning process through a dedicated debug dashboard.
+
+Visible reasoning includes:
+
+- detected intents
+- confidence score
+- routing action
+- routing reason
+- topic transitions
+- memory state
+- risk assessment
+
+This makes the system transparent and easier to debug or evaluate.
+
+---
+
+## 🔹 Multi-Turn Conversation Memory
 
 The system tracks:
 
-* Active domain (billing, account, etc.)
-* Active intents
-* Risk level
-* Conversation summary
+- active domain
+- active intents
+- conversation turns
+- escalation state
+- issue summary
+- risk level
 
 This enables:
 
-* smarter follow-ups
-* context-aware responses
-* better clarification handling
+- context-aware replies
+- smarter follow-ups
+- better clarification handling
 
 ---
 
-### 🔹 Smart Clarification System
+## 🔹 Smart Clarification System
 
-Instead of generic fallback:
+Instead of generic fallback responses:
 
-❌ Can you clarify?
-✅ Is this about a subscription fee, invoice, or billing issue?
+❌ “Can you clarify?”
 
-Even follow-ups are handled intelligently:
-“I have a billing issue” → “subscription fee”
+NEXA generates targeted follow-up questions:
 
----
-
-### 🔹 Risk-Aware Escalation
-
-High-risk cases (e.g. fraud):
-
-```
-Someone used my card
-```
-
-→ Automatically escalated with proper tone and guidance.
+✅ “Is this about a subscription fee, invoice, or billing issue?”
 
 ---
 
-## 🧱 System Architecture
+## 🔹 Risk-Aware Escalation
 
-```
-User Input
-   ↓
-Preprocessing
-   ↓
-Intent Detection (TF-IDF + Keywords)
-   ↓
-Multi-Intent Selection
-   ↓
-Sentiment Detection
-   ↓
-Confidence Calculation
-   ↓
-Decision Engine (Answer / Clarify / Escalate)
-   ↓
-Response Generation (Tone-aware)
-   ↓
-Explainability + Logging
+High-risk support cases are automatically escalated.
+
+Example:
+
+```text
+"Someone used my card"
 ```
 
----
+Triggers:
 
-## 🖥️ UI Features (Streamlit)
-
-* Chat interface
-* Quick demo scenarios
-* AI thinking visualization
-* Confidence bar
-* Intent / sentiment badges
-* Debug panel with full reasoning
-* Conversation memory display
+- escalation workflow
+- urgency-aware tone
+- safety-oriented guidance
 
 ---
 
-## 📊 Logging & Analytics
+# 🖥️ Streamlit UI Features
+
+## 💬 Conversational Chat Experience
+
+- Left/right message bubbles
+- AI avatar
+- Smooth scrolling behavior
+- Thinking simulation
+- Typing indicator
+- Real-time updates
+
+---
+
+## ⚡ Quick Actions
+
+Prebuilt demo scenarios:
+
+- Account Login
+- Payment Problem
+- Fraud Report
+- Order Status
+
+Useful for showcasing system behavior quickly.
+
+---
+
+## 📚 FAQ Workflow
+
+Interactive FAQ exploration with:
+
+- categorized support topics
+- one-click question injection
+- contextual chat continuation
+
+---
+
+## 🎫 Ticket Submission Flow
+
+Mock support ticket system with:
+
+- name/email form
+- issue summary
+- generated ticket IDs
+- UI-based support escalation demo
+
+---
+
+## 📊 Debug Dashboard
+
+Dedicated reasoning panel showing:
+
+- sentiment
+- intents
+- routing decisions
+- confidence metrics
+- memory state
+- retrieved topics
+- score comparisons
+
+Designed for explainability and debugging.
+
+---
+
+# 📊 Logging & Analytics
 
 All interactions are logged:
 
-```
+```text
 chat_log.jsonl
 ```
 
-Analyze with:
+Analyze logs with:
 
 ```bash
 python analyze_logs.py
 ```
 
-Includes:
+Tracks:
 
-* intent distribution
-* action distribution
-* sentiment trends
-* routing reasons
-* confidence metrics
-* multi-intent behavior
+- intent distribution
+- routing decisions
+- escalation frequency
+- confidence patterns
+- sentiment trends
+- multi-intent behavior
 
 ---
 
-## 🧪 Testing
+# 🧪 Testing
 
-Run full test suite:
+Run test suite:
 
 ```bash
 python test_runner.py
@@ -226,17 +297,47 @@ python test_runner.py
 
 Covers:
 
-* intent detection
-* sentiment classification
-* routing logic
-* multi-turn behavior
-* regression scenarios
+- intent detection
+- routing logic
+- sentiment analysis
+- multi-turn conversations
+- regression testing
 
 ---
 
-## 📁 Project Structure
+# 🧱 Project Architecture
 
+```text
+User Input
+   ↓
+Preprocessing
+   ↓
+Intent Detection
+(TF-IDF + Keywords)
+   ↓
+Multi-Intent Selection
+   ↓
+Sentiment Analysis
+   ↓
+Confidence Scoring
+   ↓
+Decision Engine
+(answer / clarify / escalate)
+   ↓
+Response Generation
+   ↓
+Conversation Memory
+   ↓
+Explainability Layer
+   ↓
+UI + Logging
 ```
+
+---
+
+# 📁 Project Structure
+
+```text
 src/
  ├── engine.py
  ├── main.py
@@ -253,46 +354,45 @@ faq.json
 
 ---
 
-## 🧩 Key Design Ideas
+# 🧩 Design Principles
 
-* Hybrid AI (rules + statistical NLP)
-* Confidence-driven decisions
-* Explainable routing logic
-* Multi-intent reasoning
-* Conversation memory
-* Risk-aware escalation
-
----
-
-## 🚀 Future Work
-
-* RAG (Retrieval-Augmented Generation) over real support knowledge
-* ML-based intent classifier
-* Benchmarking (BANKING77, CLINC150)
-* API deployment (FastAPI)
-* Production-ready multi-tenant system
+- Hybrid AI (rules + statistical NLP)
+- Confidence-driven decisions
+- Explainable routing logic
+- Risk-aware escalation
+- Memory-aware interactions
+- Human-centered support UX
 
 ---
 
-## 💡 Why This Project Matters
+# 🚀 Future Improvements
 
-Customer support AI systems in real-world products need:
-
-* reliability under uncertainty
-* explainable decisions
-* safe escalation handling
-
-This project demonstrates how to design such a system
-without relying purely on black-box models.
+- Retrieval-Augmented Generation (RAG)
+- Vector search over support documents
+- LLM-based response generation
+- FastAPI deployment
+- Benchmark evaluation
+- Production observability
+- Multi-tenant architecture
 
 ---
+
+# 💡 Why This Project Matters
+
+Modern customer support systems require more than intent classification.
+
+Real-world AI assistants must handle:
+
+- uncertainty
+- escalation risk
+- emotional context
+- explainability
+- multi-step interactions
+
+NEXA demonstrates how such systems can be designed using hybrid AI techniques without relying entirely on black-box models.
+
 ---
 
-## 🔄 Update
-
-Minor UI improvements and demo enhancements (FAQ, ticket form, UX polish).
-
-
-## 👤 Author
+# 👤 Author
 
 Developed by Nooshin Borhani Rayeni
