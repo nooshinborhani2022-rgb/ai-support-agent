@@ -1007,6 +1007,20 @@ def apply_action_tone(response, action, topics, skip_clarify_tail=False):
                 "A specialist will review this and assist you as quickly as possible."
             )
 
+        if "double_charge" in topics:
+            return (
+                "I understand how frustrating a duplicate charge can be. "
+                "I'm escalating this billing issue so a support specialist can review the transaction "
+                "and assist you further."
+            )
+
+        if "payment_failed" in topics:
+            return (
+                "I'm sorry your payment did not go through. "
+                "This may require payment or billing review, so I'm escalating it to a support specialist "
+                "for further investigation."
+            )
+
         return (
             "I'm going to escalate this to a support specialist so it can be handled properly. "
             "They’ll review your case and follow up with you shortly."
