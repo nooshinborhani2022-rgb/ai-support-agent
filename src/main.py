@@ -983,6 +983,21 @@ def apply_confidence_tone(response, confidence):
 def apply_action_tone(response, action, topics, skip_clarify_tail=False):
     if action == "clarify" and not skip_clarify_tail:
         return response
+
+    if action == "escalate" and len(topics) > 1:
+        if any(topic in {"fraud_report", "security_clarification"} for topic in topics):
+            return (
+                response
+                + "\n\nBecause this also includes a potential security risk, "
+                "I'm escalating the security-related part to our support team right away."
+            )
+
+        return (
+            response
+            + "\n\nSince part of this issue may need specialist review, "
+            "I'm also escalating the case to a support specialist."
+        )
+
     if action == "escalate":
         if any(topic in {"fraud_report", "security_clarification"} for topic in topics):
             return (
@@ -996,6 +1011,7 @@ def apply_action_tone(response, action, topics, skip_clarify_tail=False):
             "I'm going to escalate this to a support specialist so it can be handled properly. "
             "They’ll review your case and follow up with you shortly."
         )
+
     return response
 
 
