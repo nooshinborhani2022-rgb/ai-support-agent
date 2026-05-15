@@ -458,7 +458,37 @@ div[data-testid="stColumn"]:first-of-type div.stButton > button {
     white-space: nowrap !important;
     text-align: center !important;
 }
+            
+/* ==== Chat input aligned with Quick Actions row ==== */
 
+[data-testid="stTextInput"] {
+    max-width: 880px !important;
+    margin: 0 auto !important;
+}
+
+[data-testid="stTextInput"] input {
+    height: 46px !important;
+    min-height: 46px !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 0 18px !important;
+    font-size: 15px !important;
+    line-height: normal !important;
+    box-shadow: none !important;
+}
+
+[data-testid="stTextInput"] input:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+div[data-testid="InputInstructions"] {
+    display: none !important;
+}
+            
 </style>
 """, unsafe_allow_html=True)
 
@@ -758,10 +788,7 @@ with quick_area:
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    input_col = st.container()
-
-    st.markdown("<div style='margin-top:-28px;'></div>", unsafe_allow_html=True)
-
+    
 
     def format_assistant_response(text):
         formatted = text
@@ -850,6 +877,27 @@ with quick_area:
             unsafe_allow_html=True
             )
 
+    st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+
+    def submit_chat_input():
+        prompt = st.session_state.get("custom_chat_input", "").strip()
+        if prompt:
+            st.session_state.pending_prompt = prompt
+            st.session_state.custom_chat_input = ""
+
+    st.text_input(
+        "Message",
+        placeholder="Type your message...",
+        label_visibility="collapsed",
+        key="custom_chat_input",
+        on_change=submit_chat_input
+    )
+
+    if st.session_state.get("pending_prompt"):
+        prompt_to_process = st.session_state.pending_prompt
+        st.session_state.pending_prompt = None
+        process_user_prompt(prompt_to_process)
+
 message_count = len(st.session_state.messages)
 anchor_id = f"chat-bottom-anchor-{message_count}"
 
@@ -877,13 +925,7 @@ if st.session_state.get("scroll_to_bottom", False):
         height=0,
     )
     st.session_state.scroll_to_bottom = False
-            
-with input_col:
-        user_input = st.chat_input("Type your message...")
-if user_input and str(user_input).strip():
-    process_user_prompt(str(user_input).strip())
-
-    
+               
 
 demo_scenarios = [
     "I was charged twice and this is ridiculous!!!",
