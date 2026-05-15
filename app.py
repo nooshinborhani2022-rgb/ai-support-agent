@@ -513,7 +513,20 @@ div[data-testid="column"]:has(.right-panel-marker)::-webkit-scrollbar-thumb {
 div[data-testid="column"]:has(.right-panel-marker) {
     border: 3px solid red !important;
 }       
-                                 
+
+/* Safe fix for clipped metric corners */
+div[data-testid="stMetric"] {
+    border-radius: 18px !important;
+}
+
+div[data-testid="stHorizontalBlock"] {
+    padding: 6px !important;
+}
+div[data-testid="stHorizontalBlock"] {
+    padding: 10px !important;
+}
+                   
+
 </style>
 """, unsafe_allow_html=True)
 
