@@ -70,6 +70,14 @@ ANSWER_STYLE_RESPONSES = {
     "login_issue": "Try resetting your password first. If that doesn’t work, let me know if you see an error message or a lockout notice.",
     "billing_question": "Please tell me whether this is about an invoice, a plan charge, or a subscription fee.",
     "order_status": "Share your order details or tracking info, and I’ll help you check the status.",
+    "charge_explanation": (
+    "I can help explain that. This could be a subscription fee, a recent purchase, "
+        "or another account-related charge. If it looks unfamiliar, tell me and I’ll help you narrow it down."
+    ),
+    "refund_request": (
+        "You can request a refund from your account dashboard or support section. "
+        "If this is related to a recent charge, I can help you review that first."
+    ),
 }
 
 CLARIFICATION_OPTIONS = {
@@ -1198,6 +1206,9 @@ def should_keep_followup_context(final_topics, final_action):
 def should_treat_as_clarification_followup(user_text, conversation_state):
     if not conversation_state.get("awaiting_clarification") and not conversation_state.get("followup_context_active"):
         return False
+    
+    if not conversation_state.get("last_user_message"):
+        return False
 
     last_topics = conversation_state.get("last_topics", [])
     if not last_topics:
@@ -1238,6 +1249,15 @@ def should_treat_as_clarification_followup(user_text, conversation_state):
     token_count = len(normalized.split())
     new_domain = detect_clarification_domain(user_text)
     domain = conversation_state.get("active_domain")
+
+    standalone_charge_queries = [
+        "i was charged yesterday",
+        "i was charged today",
+        "i was charged recently",
+    ]
+
+    if normalized in standalone_charge_queries:
+        return False
 
     if token_count <= 3:
         return True

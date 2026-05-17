@@ -489,6 +489,44 @@ div[data-testid="InputInstructions"] {
     display: none !important;
 }
             
+/* ==== Sticky right debug panel using marker ==== */
+
+div[data-testid="column"]:has(.right-panel-marker) {
+    position: sticky !important;
+    top: 16px !important;
+    align-self: flex-start !important;
+    height: calc(100vh - 32px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 8px !important;
+}
+
+div[data-testid="column"]:has(.right-panel-marker)::-webkit-scrollbar {
+    width: 6px;
+}
+
+div[data-testid="column"]:has(.right-panel-marker)::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 999px;
+}
+
+div[data-testid="column"]:has(.right-panel-marker) {
+    border: 3px solid red !important;
+}       
+
+/* Safe fix for clipped metric corners */
+div[data-testid="stMetric"] {
+    border-radius: 18px !important;
+}
+
+div[data-testid="stHorizontalBlock"] {
+    padding: 6px !important;
+}
+div[data-testid="stHorizontalBlock"] {
+    padding: 10px !important;
+}
+                   
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -558,11 +596,13 @@ with sidebar_col:
     if st.button("🗑 Clear chat", use_container_width=True):
         st.session_state.messages = []
         st.session_state.last_result = None
+        st.session_state.engine = SupportEngine()
+        st.session_state.pending_prompt = None
         st.session_state.stats = {
-        "total_messages": 0,
-        "escalations": 0,
-        "clarifications": 0,
-        "last_action": "-"
+            "total_messages": 0,
+            "escalations": 0,
+            "clarifications": 0,
+            "last_action": "-"
         }
         st.rerun()
 
@@ -890,7 +930,8 @@ with quick_area:
         placeholder="Type your message...",
         label_visibility="collapsed",
         key="custom_chat_input",
-        on_change=submit_chat_input
+        on_change=submit_chat_input,
+        autocomplete="off"
     )
 
     if st.session_state.get("pending_prompt"):
@@ -1015,100 +1056,147 @@ def action_badge(action):
  
 st.markdown('</div>', unsafe_allow_html=True)
 
+
 with right_col:
-    st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
-    st.markdown("""
-<div style="margin-top:12px; margin-bottom:14px;">
-    <div style="font-size:18px; font-weight:700; color:#f8fafc;">📊 Mini Analytics</div>
-    <div style="font-size:18px; color:#94a3b8; margin-top:4px;">
-        Live conversation summary
-    </div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown('<div class="right-panel-marker"></div>', unsafe_allow_html=True)
 
-    a1, a2 = st.columns(2)
-    a3, a4 = st.columns(2)
+            components.html(
+            """
+            <script>
+            function makeRightPanelSticky() {
+                const doc = window.parent.document;
+                const marker = doc.querySelector(".right-panel-marker");
+                if (!marker) return;
 
-    with a1:
-        st.metric("Total Messages", st.session_state.stats["total_messages"])
+                let el = marker;
+                while (
+                    el &&
+                    el.getAttribute("data-testid") !== "stColumn" &&
+                    el.getAttribute("data-testid") !== "column"
+                ) {
+                    el = el.parentElement;
+                }
 
-    with a2:
-        st.metric("Escalations", st.session_state.stats["escalations"])
+                if (!el) return;
 
-    with a3:
-        st.metric("Clarifications", st.session_state.stats["clarifications"])
+                el.style.position = "sticky";
+                el.style.top = "16px";
+                el.style.height = "calc(100vh - 32px)";
+                el.style.overflowY = "auto";
+                el.style.overflowX = "hidden";
+                el.style.alignSelf = "flex-start";
 
-    with a4:
-        st.metric("Last Action", st.session_state.stats["last_action"])
+            }
 
-    st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+            setTimeout(makeRightPanelSticky, 300);
+            setTimeout(makeRightPanelSticky, 800);
+            setTimeout(makeRightPanelSticky, 1500);
+            </script>
+            """,
+            height=0,
+        )
 
-    # Debug toggle button
-    if st.session_state.show_debug:
-        if st.button("🛠 Hide Debug Panel", use_container_width=True):
-            st.session_state.show_debug = False
-            st.rerun()
-    else:
-        if st.button("🛠 Show Debug Panel", use_container_width=True):
-            st.session_state.show_debug = True
-            st.rerun()
+            st.markdown('<div class="right-panel-marker"></div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="right-panel-scroll">
+            """, unsafe_allow_html=True)
+            st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+            st.markdown("""
+        <div style="margin-top:12px; margin-bottom:14px;">
+            <div style="font-size:18px; font-weight:700; color:#f8fafc;">📊 Mini Analytics</div>
+            <div style="font-size:18px; color:#94a3b8; margin-top:4px;">
+                Live conversation summary
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.session_state.show_debug:
-        st.markdown("### 🛠 Debug Panel")
-        st.markdown("Inspect routing and reasoning details")
+            a1, a2 = st.columns(2)
+            a3, a4 = st.columns(2)
 
-        if "last_result" in st.session_state and st.session_state.last_result is not None:
-            result = st.session_state.last_result
+            with a1:
+                st.metric("Total Messages", st.session_state.stats["total_messages"])
 
-            st.markdown('<div class="metric-label">Sentiment</div>', unsafe_allow_html=True)
-            st.markdown(sentiment_badge(result.get("sentiment", "neutral")), unsafe_allow_html=True)
+            with a2:
+                st.metric("Escalations", st.session_state.stats["escalations"])
 
-            st.markdown('<div class="metric-label">Intents</div>', unsafe_allow_html=True)
-            if result.get("intents"):
-                st.markdown(intent_badges(result.get("intents", [])), unsafe_allow_html=True)
+            with a3:
+                st.metric("Clarifications", st.session_state.stats["clarifications"])
+
+            with a4:
+                st.metric("Last Action", st.session_state.stats["last_action"])
+
+            st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+
+            # Debug toggle button
+            if st.session_state.show_debug:
+                if st.button("🛠 Hide Debug Panel", use_container_width=True):
+                    st.session_state.show_debug = False
+                    st.rerun()
             else:
-                st.markdown('<div class="metric-value">None</div>', unsafe_allow_html=True)
+                if st.button("🛠 Show Debug Panel", use_container_width=True):
+                    st.session_state.show_debug = True
+                    st.rerun()
 
-            st.markdown('<div class="metric-label">Action</div>', unsafe_allow_html=True)
-            st.markdown(action_badge(result.get("action", "-")), unsafe_allow_html=True)
-            st.markdown(f"**Confidence:** {float(result.get('confidence', 0.0)):.3f}")
-            st.markdown(f"**Routing:** {result.get('routing_reason', '-')}")
+            if st.session_state.show_debug:
+                st.markdown("### 🛠 Debug Panel")
+                st.markdown("Inspect routing and reasoning details")
 
-            memory = result.get("memory", {})
-            st.markdown("#### 🧠 Memory")
-            if memory:
-                st.markdown(f"**Domain:** {memory.get('active_domain', '-')}")
-                st.markdown(f"**Memory Intents:** {', '.join(memory.get('active_intents', [])) if memory.get('active_intents') else '-'}")
-                st.markdown(f"**Risk:** {memory.get('risk_level', '-')}")
-                st.markdown(f"**Escalation:** {memory.get('needs_escalation', '-')}")
-                st.markdown(f"**Turns:** {memory.get('turn_count', '-')}")
-                if memory.get("active_issue_summary"):
-                    st.markdown(f"**Summary:** {memory.get('active_issue_summary')}")
-                else:
-                    st.markdown("No memory data yet.")
+                if "last_result" in st.session_state and st.session_state.last_result is not None:
+                    result = st.session_state.last_result
 
-                st.markdown("#### 📈 Scores")
-                st.markdown(f"**Top1 Score:** {result.get('top1_score', '-')}")
-                st.markdown(f"**Top2 Score:** {result.get('top2_score', '-')}")
-                st.markdown(f"**Score Gap:** {result.get('score_gap', '-')}")
+                    st.markdown('<div class="metric-label">Sentiment</div>', unsafe_allow_html=True)
+                    st.markdown(sentiment_badge(result.get("sentiment", "neutral")), unsafe_allow_html=True)
 
-                st.markdown("#### 🔎 Topics Before Rules")
-                st.code(
-                    "\n".join(result.get("predicted_topics_before_rules", []))
-                    if result.get("predicted_topics_before_rules")
-                    else "None",
-                    language=None
-                )
+                    st.markdown('<div class="metric-label">Intents</div>', unsafe_allow_html=True)
+                    if result.get("intents"):
+                        st.markdown(intent_badges(result.get("intents", [])), unsafe_allow_html=True)
+                    else:
+                        st.markdown('<div class="metric-value">None</div>', unsafe_allow_html=True)
 
-                st.markdown("#### ✅ Topics After Rules")
-                st.code(
-                    "\n".join(result.get("final_topics_after_rules", []))
-                    if result.get("final_topics_after_rules")
-                    else "None",
-                    language=None
-                )
+                    st.markdown('<div class="metric-label">Action</div>', unsafe_allow_html=True)
+                    st.markdown(action_badge(result.get("action", "-")), unsafe_allow_html=True)
+                    st.markdown(f"**Confidence:** {float(result.get('confidence', 0.0)):.3f}")
+                    st.markdown(f"**Routing:** {result.get('routing_reason', '-')}")
+
+                    memory = result.get("memory", {})
+                    st.markdown("#### 🧠 Memory")
+                    if memory:
+                        st.markdown(f"**Domain:** {memory.get('active_domain', '-')}")
+                        st.markdown(f"**Memory Intents:** {', '.join(memory.get('active_intents', [])) if memory.get('active_intents') else '-'}")
+                        st.markdown(f"**Risk:** {memory.get('risk_level', '-')}")
+                        st.markdown(f"**Escalation:** {memory.get('needs_escalation', '-')}")
+                        st.markdown(f"**Turns:** {memory.get('turn_count', '-')}")
+                        if memory.get("active_issue_summary"):
+                            st.markdown(f"**Summary:** {memory.get('active_issue_summary')}")
+                        else:
+                            st.markdown("No memory data yet.")
+
+                        st.markdown("#### 📈 Scores")
+                        st.markdown(f"**Top1 Score:** {result.get('top1_score', '-')}")
+                        st.markdown(f"**Top2 Score:** {result.get('top2_score', '-')}")
+                        st.markdown(f"**Score Gap:** {result.get('score_gap', '-')}")
+
+                        st.markdown("#### 🔎 Topics Before Rules")
+                        st.code(
+                            "\n".join(result.get("predicted_topics_before_rules", []))
+                            if result.get("predicted_topics_before_rules")
+                            else "None",
+                            language=None
+                        )
+
+                        st.markdown("#### ✅ Topics After Rules")
+                        st.code(
+                            "\n".join(result.get("final_topics_after_rules", []))
+                            if result.get("final_topics_after_rules")
+                            else "None",
+                            language=None
+                        )
 
 
-            else:
-                st.info("Send a message to see reasoning details here.")
-    
+                    else:
+                        st.info("Send a message to see reasoning details here.")
+                        st.markdown("""
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+            

@@ -229,6 +229,7 @@ class SupportEngine:
             final_topics_after_rules,
             final_action
         )
+        self.state["active_domain"] = self.state.get("memory", {}).get("active_domain")
 
         return {
             "response": final_response,
