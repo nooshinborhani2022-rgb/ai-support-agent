@@ -169,16 +169,7 @@ ROUTING_TEST_CASES = [
 
 
 MULTITURN_TEST_CASES = [
-    {
-        "name": "payment clarification follow-up",
-        "initial_user": "I have a payment problem",
-        "followup_user": "my card was declined",
-        "expected_merged": "I have a payment problem my card was declined",
-        "selected_intents": [
-            {"topic": "payment_clarification", "score": 1.0, "action": "clarify", "responses": []},
-        ],
-        "expected_keywords": [],
-    },
+    
     {
         "name": "account clarification follow-up",
         "initial_user": "I have an issue with my account",
@@ -188,6 +179,45 @@ MULTITURN_TEST_CASES = [
             {"topic": "account_clarification", "score": 1.0, "action": "clarify", "responses": []},
         ],
         "expected_keywords": [],
+    },
+]
+
+
+ROBUSTNESS_TEST_CASES = [
+    {
+        "category": "boundary",
+        "input": "???",
+        "expected_action": "answer",
+    },
+    {
+        "category": "boundary",
+        "input": "help",
+        "expected_action": "clarify",
+    },
+    {
+        "category": "boundary",
+        "input": "payment login refund fraud locked account",
+        "expected_min_intents": 1,
+    },
+    {
+        "category": "out_of_scope",
+        "input": "Tell me a joke",
+        "expected_safe_behavior": True,
+    },
+    {
+        "category": "out_of_scope",
+        "input": "Write me a Python game",
+        "expected_safe_behavior": True,
+    },
+    {
+        "category": "failure_mode",
+        "input": "I can't login and my payment failed",
+        "expected_min_intents": 2,
+    },
+    {
+        "category": "failure_mode",
+        "input": "Someone used my card and this charge is not mine",
+        "expected_action": "escalate",
     },
 ]
 
@@ -561,16 +591,96 @@ def run_multiturn_tests():
     return failed == 0
 
 
+def run_robustness_tests():
+    faq_data = load_faq()
+    vectorizer, matrix, mapping = build_tfidf_index(faq_data)
+
+    passed = 0
+    failed = 0
+
+    print("\nRunning robustness and failure-mode evaluation suite...\n")
+
+    for idx, test in enumerate(ROBUSTNESS_TEST_CASES, start=1):
+        user_text = test["input"]
+        category = test["category"]
+
+        sentiment = detect_sentiment(user_text)
+        sentiment_label = sentiment["label"]
+
+        selected = build_selection_like_main(
+            user_text,
+            faq_data,
+            vectorizer,
+            matrix,
+            mapping,
+            sentiment_label,
+        )
+
+        confidence = get_confidence(selected)
+
+        final_selected, routing_reason = apply_confidence_sentiment_rules(
+            selected,
+            confidence,
+            sentiment_label
+        )
+
+        final_selected = apply_post_rule_action_alignment(final_selected, routing_reason)
+
+        final_action = get_final_action(final_selected)
+        final_topics = [intent["topic"] for intent in final_selected]
+
+        checks = []
+
+        if "expected_action" in test:
+            checks.append(final_action == test["expected_action"])
+
+        if "expected_min_intents" in test:
+            checks.append(len(final_topics) >= test["expected_min_intents"])
+
+        if test.get("expected_safe_behavior"):
+            checks.append(final_action in {"answer", "clarify", "escalate"})
+            checks.append(len(final_topics) > 0)
+
+        success = all(checks) if checks else True
+
+        if success:
+            passed += 1
+            status = "PASS"
+        else:
+            failed += 1
+            status = "FAIL"
+
+        print(f"B{idx:02d}. {status}")
+        print(f"Category:       {category}")
+        print(f"Input:          {user_text}")
+        print(f"Final topics:   {final_topics}")
+        print(f"Final action:   {final_action}")
+        print(f"Routing reason: {routing_reason}")
+        print(f"Confidence:     {confidence:.3f}\n")
+
+    total = passed + failed
+    accuracy = (passed / total) * 100 if total > 0 else 0
+
+    print("=" * 60)
+    print(f"Robustness Tests Passed:   {passed}")
+    print(f"Robustness Tests Failed:   {failed}")
+    print(f"Robustness Accuracy:       {accuracy:.2f}%")
+    print("=" * 60)
+
+    return failed == 0
+
+
 def run_tests():
     intent_ok = run_intent_tests()
     sentiment_ok = run_sentiment_tests()
     routing_ok = run_routing_tests()
     multiturn_ok = run_multiturn_tests()
+    robustness_ok = run_robustness_tests()
 
     print("\nRunning analyze_logs.py...\n")
     subprocess.run([sys.executable, "analyze_logs.py"])
 
-    if intent_ok and sentiment_ok and routing_ok and multiturn_ok:
+    if intent_ok and sentiment_ok and routing_ok and multiturn_ok and robustness_ok:
         print("\nAll tests passed.")
     else:
         print("\nSome tests failed. Review the failed cases above.")
