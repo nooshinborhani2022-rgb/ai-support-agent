@@ -1,0 +1,7 @@
+Refund and charge-related issues may include refund requests, duplicate charges, completed charges, recent payments, or money-back requests.
+
+If a user wants a refund, they should open the relevant order or billing record and submit a refund request from the account dashboard or support section.
+
+If a user was charged twice, they should compare the dates and amounts in their billing history to confirm whether the same payment appears more than once.
+
+Duplicate charges and refund requests may require support review if the billing history shows repeated or unexpected transactions.

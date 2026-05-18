@@ -1,0 +1,7 @@
+Order and delivery issues may include order status questions, tracking requests, late delivery, delayed shipment, missing packages, or packages marked as delivered.
+
+If a user asks where their order is, they should check the order section of their account dashboard or tracking page.
+
+If delivery is late or the package has not arrived, the user should review tracking updates and confirm whether the package is delayed, missing, or marked as delivered.
+
+Delivery and missing package issues may require support review if tracking information is unclear or the package appears lost.

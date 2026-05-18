@@ -1,0 +1,7 @@
+Billing issues may include invoice questions, subscription fees, plan charges, payment failures, declined cards, or checkout problems.
+
+If a user asks about a charge, they should review the charge date, amount, invoice, subscription status, and recent account activity.
+
+If a payment fails, the user should check whether the card was declined, the transaction failed, or the checkout process did not complete.
+
+Some billing issues may require support review if the amount is unexpected, the charge cannot be identified, or the payment failure continues.

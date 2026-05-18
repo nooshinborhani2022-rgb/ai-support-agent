@@ -1,0 +1,7 @@
+Login and account access issues may include forgotten passwords, failed sign-in attempts, account lockouts, verification problems, or access denied messages.
+
+If a user cannot log in, they should first try resetting their password from the login page using the Forgot Password option.
+
+If password reset does not solve the issue, the user should check whether they see an error message, verification request, account locked notice, or access denied warning.
+
+If an account appears locked or blocked, the issue may require support review, especially if there are repeated failed login attempts or suspicious access activity.
