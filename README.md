@@ -2,7 +2,7 @@
 
 ### Production-Style AI Decision Engine for Customer Support
 
-NEXA is an intelligent customer support assistant designed to simulate how modern AI support systems operate in real-world products.
+NEXA is an intelligent, explainable customer support assistant designed to simulate how modern AI support systems operate in real-world products.
 
 Unlike basic intent-classification chatbots, NEXA combines:
 
@@ -10,10 +10,13 @@ Unlike basic intent-classification chatbots, NEXA combines:
 - sentiment-aware routing
 - confidence-based decision making
 - conversation memory
+- risk-aware escalation
+- domain-aware local RAG retrieval
 - explainable AI reasoning
-- real-time interactive UI
+- structured robustness and failure-mode evaluation
+- real-time interactive Streamlit UI
 
-to create a more reliable and transparent support experience.
+to create a more reliable, transparent, and research-oriented AI support experience.
 
 ---
 
@@ -29,7 +32,10 @@ Interactive Streamlit interface with:
 - 📊 Explainable debug dashboard
 - 🧭 Confidence-aware routing
 - 🧠 Conversation memory tracking
+- 🔎 Retrieved support context from local knowledge base
+- 📘 Source-aware RAG evidence display
 - 🔄 Smooth auto-scroll chat experience
+- 🧪 Robustness and failure-mode evaluation suite
 
 Run locally:
 
@@ -41,13 +47,13 @@ streamlit run app.py
 
 # 🧠 Why This Project Is Different
 
-Most chatbot projects:
+Most chatbot projects follow a simple pattern:
 
 ```text
 intent → response
 ```
 
-NEXA behaves more like a decision engine:
+NEXA behaves more like an explainable AI decision engine:
 
 ```text
 User Message
@@ -62,7 +68,11 @@ Decision Routing
     ↓
 Answer / Clarify / Escalate
     ↓
+Domain-Aware Retrieval
+    ↓
 Explainable Reasoning
+    ↓
+Response + Debug Evidence
 ```
 
 The system actively decides:
@@ -70,7 +80,10 @@ The system actively decides:
 - whether it understands the user
 - whether clarification is needed
 - whether escalation is safer
+- what support domain is active
+- what retrieved knowledge is relevant
 - how tone should change based on sentiment
+- what reasoning evidence should be exposed in the debug panel
 
 ---
 
@@ -83,19 +96,20 @@ NEXA can detect multiple simultaneous intents in a single message.
 Example:
 
 ```text
-"I can't login and my payment failed"
+"I can't login and I was charged twice"
 ```
 
 Detected intents:
 
 - login_issue
-- payment_failed
+- double_charge
 
 Uses:
 
 - TF-IDF similarity
 - keyword matching
 - conflict-aware intent selection
+- confidence gap analysis
 
 ---
 
@@ -110,8 +124,9 @@ confidence = top1_score - top2_score
 Routing behavior:
 
 - High confidence → answer
-- Medium confidence → clarify
-- High-risk uncertainty → escalate
+- Ambiguous confidence → clarify
+- High-risk issue → escalate
+- Multi-intent uncertainty → structured multi-topic response or clarification
 
 ---
 
@@ -127,26 +142,34 @@ Detects emotional state:
 Behavior adapts dynamically:
 
 - angry → faster escalation
-- frustrated → reduced clarification loops
-- urgent → high-priority tone
+- frustrated → more empathetic support tone
+- urgent → priority-aware response
+- neutral → standard support flow
 
 ---
 
-## 🔹 Explainable AI (XAI)
+## 🔹 Explainable AI Reasoning
 
-NEXA exposes its reasoning process through a dedicated debug dashboard.
+NEXA exposes its internal reasoning process through a dedicated debug dashboard.
 
 Visible reasoning includes:
 
 - detected intents
+- sentiment
+- final action
 - confidence score
-- routing action
 - routing reason
-- topic transitions
+- top intent scores
+- score gap
+- predicted topics before rules
+- final topics after rules
 - memory state
-- risk assessment
+- active domain
+- risk level
+- retrieved support context
+- retrieved source file
 
-This makes the system transparent and easier to debug or evaluate.
+This makes the system transparent, inspectable, and easier to debug or evaluate.
 
 ---
 
@@ -160,12 +183,15 @@ The system tracks:
 - escalation state
 - issue summary
 - risk level
+- previous user message
+- follow-up context
 
 This enables:
 
 - context-aware replies
 - smarter follow-ups
 - better clarification handling
+- safer escalation behavior
 
 ---
 
@@ -173,11 +199,17 @@ This enables:
 
 Instead of generic fallback responses:
 
-❌ “Can you clarify?”
+```text
+Can you clarify?
+```
 
 NEXA generates targeted follow-up questions:
 
-✅ “Is this about a subscription fee, invoice, or billing issue?”
+```text
+Just to clarify, is this about a failed payment, a declined card, or a refund request?
+```
+
+Clarification is domain-aware and based on detected ambiguity.
 
 ---
 
@@ -188,14 +220,84 @@ High-risk support cases are automatically escalated.
 Example:
 
 ```text
-"Someone used my card"
+Someone used my card
 ```
 
 Triggers:
 
-- escalation workflow
-- urgency-aware tone
-- safety-oriented guidance
+- fraud/security intent detection
+- security escalation workflow
+- urgent and safety-oriented response
+- retrieved fraud-related support context
+- high-risk memory state
+
+---
+
+# 📘 Local RAG System
+
+NEXA now includes a lightweight local Retrieval-Augmented Generation foundation.
+
+The RAG layer uses:
+
+- local support documents
+- sentence-transformer embeddings
+- ChromaDB vector retrieval
+- domain-aware retrieval routing
+- source-aware explainability
+
+The knowledge base is stored locally in:
+
+```text
+knowledge_base/
+ ├── login.txt
+ ├── billing.txt
+ ├── refund.txt
+ ├── fraud.txt
+ └── orders.txt
+```
+
+---
+
+## 🔹 Domain-Aware Retrieval
+
+Retrieval is not purely semantic.
+
+NEXA combines intent routing with retrieval.
+
+Example:
+
+```text
+Someone used my card
+```
+
+Flow:
+
+```text
+fraud_report intent
+    ↓
+security domain
+    ↓
+fraud.txt retrieval
+    ↓
+retrieved context shown in Debug Panel
+```
+
+This prevents unsafe retrieval mismatches where a fraud issue might otherwise retrieve a generic billing document.
+
+---
+
+## 🔹 Retrieved Context in Debug Panel
+
+Retrieved knowledge is shown separately from the chat response to keep the user-facing conversation clean.
+
+Debug panel displays:
+
+```text
+Retrieved Source: fraud.txt
+Retrieved Context: Fraud and security issues may include unauthorized charges...
+```
+
+This makes the RAG layer explainable and auditable.
 
 ---
 
@@ -203,8 +305,10 @@ Triggers:
 
 ## 💬 Conversational Chat Experience
 
-- Left/right message bubbles
+- Custom left/right message bubbles
 - AI avatar
+- User avatar
+- Floating chat input
 - Smooth scrolling behavior
 - Thinking simulation
 - Typing indicator
@@ -255,10 +359,13 @@ Dedicated reasoning panel showing:
 - routing decisions
 - confidence metrics
 - memory state
-- retrieved topics
+- risk level
 - score comparisons
+- topics before and after rules
+- retrieved RAG context
+- retrieved source document
 
-Designed for explainability and debugging.
+Designed for explainability, debugging, and evaluation.
 
 ---
 
@@ -281,13 +388,16 @@ Tracks:
 - intent distribution
 - routing decisions
 - escalation frequency
+- clarification frequency
 - confidence patterns
 - sentiment trends
 - multi-intent behavior
+- fallback behavior
+- score gap patterns
 
 ---
 
-# 🧪 Testing
+# 🧪 Testing & Evaluation
 
 Run test suite:
 
@@ -298,10 +408,39 @@ python test_runner.py
 Covers:
 
 - intent detection
+- sentiment detection
 - routing logic
-- sentiment analysis
-- multi-turn conversations
+- multi-turn clarification behavior
 - regression testing
+- robustness scenarios
+- failure-mode evaluation
+
+---
+
+## 🔹 Robustness & Failure-Mode Testing
+
+NEXA includes structured evaluation scenarios for:
+
+- ambiguous inputs
+- multi-intent queries
+- out-of-scope requests
+- emotionally intense messages
+- high-risk fraud/security cases
+- boundary-condition prompts
+- low-confidence routing behavior
+
+Examples:
+
+```text
+???
+help
+Tell me a joke
+Write me a Python game
+I can't login and my payment failed
+Someone used my card and this charge is not mine
+```
+
+The goal is not to claim the system is perfect, but to systematically probe where it succeeds, where it fails, and how routing decisions can be improved.
 
 ---
 
@@ -324,13 +463,15 @@ Confidence Scoring
 Decision Engine
 (answer / clarify / escalate)
    ↓
-Response Generation
-   ↓
 Conversation Memory
+   ↓
+Domain-Aware Retrieval
+   ↓
+Response Generation
    ↓
 Explainability Layer
    ↓
-UI + Logging
+UI + Logging + Evaluation
 ```
 
 ---
@@ -338,58 +479,107 @@ UI + Logging
 # 📁 Project Structure
 
 ```text
+assets/
+ └── nexa_avatar.png
+
+knowledge_base/
+ ├── login.txt
+ ├── billing.txt
+ ├── refund.txt
+ ├── fraud.txt
+ └── orders.txt
+
 src/
  ├── engine.py
  ├── main.py
+ ├── retrieval.py
  ├── preprocessing.py
  ├── sentiment.py
  ├── confidence_utils.py
  ├── logger_utils.py
+ └── config.py
 
 app.py
 analyze_logs.py
 test_runner.py
 faq.json
+requirements.txt
+README.md
 ```
 
 ---
 
 # 🧩 Design Principles
 
-- Hybrid AI (rules + statistical NLP)
+- Hybrid AI: rule-based logic + lightweight NLP + local retrieval
+- Explainable routing instead of black-box responses
 - Confidence-driven decisions
-- Explainable routing logic
+- Domain-aware RAG retrieval
 - Risk-aware escalation
-- Memory-aware interactions
+- Memory-aware interaction design
 - Human-centered support UX
+- Structured robustness testing
+- Research-oriented failure analysis
+
+---
+
+# 🛠️ Tech Stack
+
+- Python
+- Streamlit
+- scikit-learn
+- TF-IDF similarity
+- sentence-transformers
+- ChromaDB
+- lightweight NLP
+- local knowledge base retrieval
+- custom HTML/CSS UI components
 
 ---
 
 # 🚀 Future Improvements
 
-- Retrieval-Augmented Generation (RAG)
-- Vector search over support documents
-- LLM-based response generation
-- FastAPI deployment
-- Benchmark evaluation
-- Production observability
-- Multi-tenant architecture
+Planned improvements include:
+
+- multi-document retrieval
+- chunk-level retrieval
+- retrieval similarity scores
+- source metadata and citation-style evidence
+- stronger hallucination guards
+- prompt-injection and jailbreak evaluation
+- larger adversarial testing suite
+- FastAPI backend
+- persistent database
+- analytics dashboard
+- production deployment
+- optional LLM-based response generation
 
 ---
 
 # 💡 Why This Project Matters
 
-Modern customer support systems require more than intent classification.
+Modern customer support systems require more than simple intent classification.
 
 Real-world AI assistants must handle:
 
 - uncertainty
+- ambiguity
 - escalation risk
 - emotional context
-- explainability
 - multi-step interactions
+- explainability
+- retrieved evidence
+- failure analysis
 
 NEXA demonstrates how such systems can be designed using hybrid AI techniques without relying entirely on black-box models.
+
+It is built as a research-oriented conversational AI prototype focused on:
+
+- reliability
+- transparency
+- robust decision behavior
+- explainable support automation
+- safe escalation workflows
 
 ---
 
