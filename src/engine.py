@@ -30,6 +30,37 @@ from src.main import (
     should_keep_followup_context,
     update_conversation_memory,
 )
+from src.retrieval import retrieve_support_context
+
+def get_retrieval_domain(final_topics):
+    topic_domain_map = {
+        "login_issue": "account",
+        "password_reset": "account",
+        "account_locked": "account",
+        "account_clarification": "account",
+
+        "billing_question": "billing",
+        "billing_clarification": "billing",
+        "payment_failed": "billing",
+        "payment_clarification": "billing",
+
+        "charge_explanation": "charge",
+        "double_charge": "charge",
+        "refund_request": "charge",
+        "charge_clarification": "charge",
+
+        "fraud_report": "security",
+        "security_clarification": "security",
+
+        "order_status": "order",
+        "delivery_issue": "order",
+        "order_clarification": "order",
+    }
+
+    if not final_topics:
+        return None
+
+    return topic_domain_map.get(final_topics[0])
 
 
 class SupportEngine:
@@ -212,7 +243,19 @@ class SupportEngine:
         final_topics_after_rules,
         skip_clarify_tail=skip_clarify_tail
         )
-        final_response = apply_confidence_tone(final_response, pre_rule_confidence)
+
+        retrieval_domain = get_retrieval_domain(final_topics_after_rules)
+
+        retrieved_context = retrieve_support_context(
+        user,
+        domain=retrieval_domain
+        )
+
+        if retrieved_context:
+            final_response += (
+                "\n\n📘 Related support information:\n"
+                + retrieved_context.split("\n")[0]
+        )
 
         self.state["awaiting_clarification"] = final_action == "clarify"
         self.state["followup_context_active"] = should_keep_followup_context(

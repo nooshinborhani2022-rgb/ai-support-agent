@@ -9,6 +9,13 @@ client = chromadb.Client()
 collection = client.get_or_create_collection(name="nexa_knowledge")
 
 knowledge_path = Path("knowledge_base")
+DOMAIN_FILE_MAP = {
+    "account": "login",
+    "billing": "billing",
+    "charge": "refund",
+    "security": "fraud",
+    "order": "orders"
+}
 
 documents = []
 ids = []
@@ -32,7 +39,13 @@ if documents:
         )
 
 
-def retrieve_support_context(user_query, top_k=1):
+def retrieve_support_context(user_query, domain=None, top_k=1):
+    if domain and domain in DOMAIN_FILE_MAP:
+        preferred_file = knowledge_path / f"{DOMAIN_FILE_MAP[domain]}.txt"
+
+        if preferred_file.exists():
+            return preferred_file.read_text(encoding="utf-8")
+
     query_embedding = model.encode([user_query]).tolist()[0]
 
     results = collection.query(
