@@ -41,10 +41,14 @@ if documents:
 
 def retrieve_support_context(user_query, domain=None, top_k=1):
     if domain and domain in DOMAIN_FILE_MAP:
-        preferred_file = knowledge_path / f"{DOMAIN_FILE_MAP[domain]}.txt"
+        source_id = DOMAIN_FILE_MAP[domain]
+        preferred_file = knowledge_path / f"{source_id}.txt"
 
         if preferred_file.exists():
-            return preferred_file.read_text(encoding="utf-8")
+            return {
+                "context": preferred_file.read_text(encoding="utf-8"),
+                "source": f"{source_id}.txt",
+            }
 
     query_embedding = model.encode([user_query]).tolist()[0]
 
@@ -54,8 +58,13 @@ def retrieve_support_context(user_query, domain=None, top_k=1):
     )
 
     documents = results.get("documents", [[]])
+    ids = results.get("ids", [[]])
 
     if documents and documents[0]:
-        return documents[0][0]
+        source = ids[0][0] + ".txt" if ids and ids[0] else "unknown"
+        return {
+            "context": documents[0][0],
+            "source": source,
+        }
 
     return None

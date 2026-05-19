@@ -1172,9 +1172,14 @@ with right_col:
                             st.markdown("No memory data yet.")
 
                         retrieved_context = result.get("retrieved_context")
+                        retrieved_source = result.get("retrieved_source")
 
                         if retrieved_context:
                             st.markdown("### 📘 Retrieved Context")
+
+                        if retrieved_source:
+                            st.caption(f"Source: {retrieved_source}")
+
                             st.code(
                             retrieved_context.split("\n")[0],
                             language=None

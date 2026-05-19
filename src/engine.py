@@ -20,7 +20,6 @@ from src.main import (
     get_final_action,
     add_empathy_and_politeness,
     apply_action_tone,
-    apply_confidence_tone,
     get_clarification_refined_response,
     should_treat_as_clarification_followup,
     merge_with_clarification_context,
@@ -251,6 +250,13 @@ class SupportEngine:
         domain=retrieval_domain
         )
 
+        retrieved_context_text = None
+        retrieved_source = None
+
+        if retrieved_context:
+            retrieved_context_text = retrieved_context.get("context")
+            retrieved_source = retrieved_context.get("source")
+
 
         self.state["awaiting_clarification"] = final_action == "clarify"
         self.state["followup_context_active"] = should_keep_followup_context(
@@ -282,6 +288,7 @@ class SupportEngine:
             "predicted_topics_before_rules": predicted_topics_before_rules,
             "final_topics_after_rules": final_topics_after_rules,
             "memory": self.state.get("memory", {}),
-            "retrieved_context": retrieved_context,
+            "retrieved_context": retrieved_context_text,
+            "retrieved_source": retrieved_source,
         }
     
