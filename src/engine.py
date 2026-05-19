@@ -251,11 +251,6 @@ class SupportEngine:
         domain=retrieval_domain
         )
 
-        if retrieved_context:
-            final_response += (
-                "\n\n📘 Related support information:\n"
-                + retrieved_context.split("\n")[0]
-        )
 
         self.state["awaiting_clarification"] = final_action == "clarify"
         self.state["followup_context_active"] = should_keep_followup_context(
@@ -287,4 +282,6 @@ class SupportEngine:
             "predicted_topics_before_rules": predicted_topics_before_rules,
             "final_topics_after_rules": final_topics_after_rules,
             "memory": self.state.get("memory", {}),
+            "retrieved_context": retrieved_context,
         }
+    

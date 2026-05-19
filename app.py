@@ -1171,6 +1171,15 @@ with right_col:
                         else:
                             st.markdown("No memory data yet.")
 
+                        retrieved_context = result.get("retrieved_context")
+
+                        if retrieved_context:
+                            st.markdown("### 📘 Retrieved Context")
+                            st.code(
+                            retrieved_context.split("\n")[0],
+                            language=None
+                        )
+
                         st.markdown("#### 📈 Scores")
                         st.markdown(f"**Top1 Score:** {result.get('top1_score', '-')}")
                         st.markdown(f"**Top2 Score:** {result.get('top2_score', '-')}")
