@@ -62,6 +62,44 @@ def get_retrieval_domain(final_topics):
     return topic_domain_map.get(final_topics[0])
 
 
+def get_clear_multi_intent_response(topics):
+    parts = []
+
+    if "login_issue" in topics:
+        parts.append(
+            "🔐 For your login issue, try resetting your password first. "
+            "If that doesn’t work, let me know if you see an error message or a lockout notice."
+        )
+
+    if "refund_request" in topics:
+        parts.append(
+            "💸 For your refund request, please open your account dashboard or billing/order history section "
+            "and start a refund request from the relevant charge."
+        )
+
+    if "payment_failed" in topics:
+        parts.append(
+            "💳 For your payment issue, check whether your card was declined, the transaction failed, "
+            "or the checkout process did not complete."
+        )
+
+    if "double_charge" in topics:
+        parts.append(
+            "🔁 For the duplicate charge, compare the dates and amounts in your billing history. "
+            "If the same payment appears more than once, this should be reviewed by support."
+        )
+
+    if "fraud_report" in topics:
+        parts.append(
+            "🚨 For the security concern, this may involve unauthorized activity, "
+            "so it should be escalated to a support or security specialist."
+        )
+
+    if len(parts) < 2:
+        return None
+
+    return "I can help with both issues.\n\n" + "\n\n".join(parts)
+
 class SupportEngine:
     def __init__(self):
         self.faq_data = load_faq()
@@ -217,15 +255,23 @@ class SupportEngine:
             else:
                 response = generate_response(selected, sentiment_label=sentiment_label)
         else:
-            if routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
+            if len(selected) > 1:
+                response = get_low_confidence_multi_intent_response(
+                [intent["topic"] for intent in selected]
+        )
+            elif routing_reason in {"low_confidence_fallback", "low_confidence_multi_intent"} and len(predicted_topics_before_rules) > 1:
                 response = get_low_confidence_multi_intent_response(predicted_topics_before_rules)
             else:
                 response = generate_response(selected, sentiment_label=sentiment_label)
-
-        final_topics_after_rules = [intent["topic"] for intent in selected]
+                final_topics_after_rules = [intent["topic"] for intent in selected]
 
         confidence = get_confidence(selected)
         top1_score, top2_score, score_gap = extract_confidence_details(selected)
+
+        clear_multi_response = get_clear_multi_intent_response(final_topics_after_rules)
+
+        if clear_multi_response and not is_followup_clarification:
+            response = clear_multi_response
 
         final_action = get_final_action(selected)
 
