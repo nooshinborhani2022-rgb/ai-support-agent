@@ -40,16 +40,30 @@ if documents:
 
 
 def retrieve_support_context(user_query, domain=None, top_k=1):
-    if domain and domain in DOMAIN_FILE_MAP:
-        source_id = DOMAIN_FILE_MAP[domain]
-        preferred_file = knowledge_path / f"{source_id}.txt"
+    if domain:
+        domains = domain if isinstance(domain, list) else [domain]
 
-        if preferred_file.exists():
-            return {
-                "context": preferred_file.read_text(encoding="utf-8"),
-                "source": f"{source_id}.txt",
-                "score": 1.0,
-            }
+    combined_contexts = []
+    combined_sources = []
+
+    for single_domain in domains:
+        source_id = DOMAIN_FILE_MAP.get(single_domain)
+
+        if source_id:
+            preferred_file = knowledge_path / f"{source_id}.txt"
+
+            if preferred_file.exists():
+                combined_contexts.append(
+                    preferred_file.read_text(encoding="utf-8")
+                )
+                combined_sources.append(f"{source_id}.txt")
+
+    if combined_contexts:
+        return {
+            "context": "\n\n".join(combined_contexts),
+            "source": combined_sources,
+            "score": 1.0,
+        }
 
     query_embedding = model.encode([user_query]).tolist()[0]
 

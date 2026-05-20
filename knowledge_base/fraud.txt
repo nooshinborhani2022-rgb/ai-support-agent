@@ -1,7 +1,7 @@
-Refund and charge-related issues may include refund requests, duplicate charges, completed charges, recent payments, or money-back requests.
+Fraud and security issues may include unauthorized charges, suspicious payments, stolen card reports, account compromise, or activity the user says was not theirs.
 
-If a user wants a refund, they should open the relevant order or billing record and submit a refund request from the account dashboard or support section.
+If a user says someone used their card or a charge is not theirs, the issue should be treated as high risk and escalated to a security or support specialist.
 
-If a user was charged twice, they should compare the dates and amounts in their billing history to confirm whether the same payment appears more than once.
+The user should secure their account or payment method if they suspect unauthorized access.
 
-Duplicate charges and refund requests may require support review if the billing history shows repeated or unexpected transactions.
+Security-related issues should not be handled as ordinary billing questions because they may involve fraud or account compromise.

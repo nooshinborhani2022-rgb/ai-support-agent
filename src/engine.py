@@ -289,7 +289,12 @@ class SupportEngine:
         skip_clarify_tail=skip_clarify_tail
         )
 
-        retrieval_domain = get_retrieval_domain(final_topics_after_rules)
+        retrieval_domain = [
+        get_retrieval_domain([topic])
+        for topic in final_topics_after_rules
+        ]
+
+        retrieval_domain = [domain for domain in retrieval_domain if domain]
 
         retrieved_context = retrieve_support_context(
         user,

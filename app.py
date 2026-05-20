@@ -1179,7 +1179,10 @@ with right_col:
                             st.markdown("### 📘 Retrieved Context")
 
                         if retrieved_source:
-                            st.caption(f"Source: {retrieved_source}")
+                            if isinstance(retrieved_source, list):
+                                 st.caption("Sources: " + ", ".join(retrieved_source))
+                            else:
+                                st.caption(f"Source: {retrieved_source}")
                         
                         if retrieved_score is not None:
                             st.caption(f"Similarity Score: {retrieved_score}")
