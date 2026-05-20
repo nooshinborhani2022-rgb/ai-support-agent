@@ -252,10 +252,12 @@ class SupportEngine:
 
         retrieved_context_text = None
         retrieved_source = None
+        retrieved_score = None
 
         if retrieved_context:
             retrieved_context_text = retrieved_context.get("context")
             retrieved_source = retrieved_context.get("source")
+            retrieved_score = retrieved_context.get("score")
 
 
         self.state["awaiting_clarification"] = final_action == "clarify"
@@ -290,5 +292,6 @@ class SupportEngine:
             "memory": self.state.get("memory", {}),
             "retrieved_context": retrieved_context_text,
             "retrieved_source": retrieved_source,
+            "retrieved_score": retrieved_score,
         }
     

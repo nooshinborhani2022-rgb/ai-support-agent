@@ -1173,12 +1173,16 @@ with right_col:
 
                         retrieved_context = result.get("retrieved_context")
                         retrieved_source = result.get("retrieved_source")
+                        retrieved_score = result.get("retrieved_score")
 
                         if retrieved_context:
                             st.markdown("### 📘 Retrieved Context")
 
                         if retrieved_source:
                             st.caption(f"Source: {retrieved_source}")
+                        
+                        if retrieved_score is not None:
+                            st.caption(f"Similarity Score: {retrieved_score}")
 
                             st.code(
                             retrieved_context.split("\n")[0],
