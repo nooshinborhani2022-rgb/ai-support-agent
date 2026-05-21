@@ -1187,8 +1187,13 @@ with right_col:
                         if retrieved_score is not None:
                             st.caption(f"Similarity Score: {retrieved_score}")
 
+                            preview = retrieved_context[:300]
+
+                        if len(retrieved_context) > 300:
+                            preview += "..."
+
                             st.code(
-                            retrieved_context.split("\n")[0],
+                            preview,
                             language=None
                         )
 
