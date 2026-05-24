@@ -5,6 +5,7 @@ import streamlit.components.v1 as components
 import base64
 import html
 
+
 st.set_page_config(page_title="AI Support Agent", layout="wide")
 
 st.markdown("""
@@ -1174,6 +1175,7 @@ with right_col:
                         retrieved_context = result.get("retrieved_context")
                         retrieved_source = result.get("retrieved_source")
                         retrieved_score = result.get("retrieved_score")
+                        retrieved_at = result.get("retrieved_at")
 
                         if retrieved_context:
                             st.markdown("### 📘 Retrieved Context")
@@ -1188,6 +1190,8 @@ with right_col:
                         
                         if retrieved_score is not None:
                             st.caption(f"Similarity Score: {retrieved_score}")
+                        if retrieved_at:
+                            st.caption(f"Retrieved At: {retrieved_at}")
                             st.caption(f"Context Length: {len(retrieved_context)} chars")
                             st.caption(
                                 f"Context Words: {len(retrieved_context.split())}"

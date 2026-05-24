@@ -1,3 +1,5 @@
+from src.retrieval import retrieve_support_context
+from datetime import datetime
 from src.main import (
     load_faq,
     build_tfidf_index,
@@ -29,7 +31,8 @@ from src.main import (
     should_keep_followup_context,
     update_conversation_memory,
 )
-from src.retrieval import retrieve_support_context
+
+
 
 def get_retrieval_domain(final_topics):
     topic_domain_map = {
@@ -344,5 +347,6 @@ class SupportEngine:
             "retrieved_context": retrieved_context_text,
             "retrieved_source": retrieved_source,
             "retrieved_score": retrieved_score,
+            "retrieved_at": datetime.now().strftime("%H:%M:%S"),
         }
     
