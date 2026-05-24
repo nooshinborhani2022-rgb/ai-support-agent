@@ -1192,6 +1192,9 @@ with right_col:
                             st.caption(
                                 f"Context Words: {len(retrieved_context.split())}"
                             )
+                            st.caption(
+                                f"Context Lines: {len(retrieved_context.splitlines())}"
+                            )
 
                             preview = retrieved_context[:300]
 
