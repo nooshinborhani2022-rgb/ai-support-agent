@@ -9,6 +9,23 @@ client = chromadb.Client()
 collection = client.get_or_create_collection(name="nexa_knowledge")
 
 knowledge_path = Path("knowledge_base")
+
+def split_into_chunks(text, chunk_size=2):
+    """
+    Split a support document into paragraph-based chunks.
+
+    This is a lightweight foundation for future chunk-level RAG retrieval.
+    For now, retrieval behavior remains unchanged.
+    """
+    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+    chunks = []
+
+    for i in range(0, len(paragraphs), chunk_size):
+        chunk = "\n\n".join(paragraphs[i:i + chunk_size])
+        chunks.append(chunk)
+
+    return chunks
+
 DOMAIN_FILE_MAP = {
     "account": "login",
     "billing": "billing",
