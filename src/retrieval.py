@@ -26,6 +26,22 @@ def split_into_chunks(text, chunk_size=2):
 
     return chunks
 
+def preview_chunks(text, chunk_size=2):
+    """
+    Return lightweight chunk previews for debugging and evaluation.
+    """
+    chunks = split_into_chunks(text, chunk_size)
+
+    previews = []
+
+    for index, chunk in enumerate(chunks):
+        previews.append({
+            "chunk_id": index,
+            "preview": chunk[:80]
+        })
+
+    return previews
+
 DOMAIN_FILE_MAP = {
     "account": "login",
     "billing": "billing",
