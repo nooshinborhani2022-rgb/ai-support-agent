@@ -10,6 +10,11 @@ collection = client.get_or_create_collection(name="nexa_knowledge")
 
 knowledge_path = Path("knowledge_base")
 
+# NOTE:
+# This helper prepares the retrieval layer for future chunk-level RAG.
+# It is intentionally not wired into the live retrieval flow yet,
+# so current chatbot behavior remains stable.
+
 def split_into_chunks(text, chunk_size=2):
     """
     Split a support document into paragraph-based chunks.
