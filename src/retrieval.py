@@ -25,6 +25,10 @@ def split_into_chunks(text, chunk_size=2):
     paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
     chunks = []
 
+    
+# Chunks are paragraph-grouped units used for future
+# chunk-level semantic retrieval experiments.
+
     for i in range(0, len(paragraphs), chunk_size):
         chunk = "\n\n".join(paragraphs[i:i + chunk_size])
         chunks.append(chunk)
