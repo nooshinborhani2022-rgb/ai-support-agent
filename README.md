@@ -244,6 +244,8 @@ The RAG layer uses:
 - ChromaDB vector retrieval
 - domain-aware retrieval routing
 - source-aware explainability
+- multi-context retrieval for multi-intent queries
+- early-stage chunking foundation for future chunk-level retrieval
 
 The knowledge base is stored locally in:
 
@@ -295,6 +297,7 @@ Debug panel displays:
 ```text
 Retrieved Source: fraud.txt
 Retrieved Context: Fraud and security issues may include unauthorized charges...
+The debug panel also exposes retrieval metadata such as similarity score, source count, context size, and retrieval timing for explainability and evaluation purposes.
 ```
 
 This makes the RAG layer explainable and auditable.
