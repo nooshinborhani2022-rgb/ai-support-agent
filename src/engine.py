@@ -1,5 +1,6 @@
 from src.retrieval import retrieve_support_context
 from datetime import datetime
+from src.context_detector import detect_context_signals, enrich_with_context
 from src.main import (
     load_faq,
     build_tfidf_index,
@@ -111,6 +112,13 @@ class SupportEngine:
 
     def handle_message(self, user):
         effective_user = user
+
+        # Context enrichment
+        context_result = enrich_with_context(user, self.state)
+        if context_result["context_applied"]:
+            effective_user = context_result["enriched_text"]
+        context_signals = context_result["context_signals"]
+
         skip_clarify_tail = False
         is_followup_clarification = should_treat_as_clarification_followup(user, self.state)
 
@@ -348,5 +356,7 @@ class SupportEngine:
             "retrieved_source": retrieved_source,
             "retrieved_score": retrieved_score,
             "retrieved_at": datetime.now().strftime("%H:%M:%S"),
+            "context_signals": context_signals,
+            "context_applied": context_result["context_applied"],
         }
     
