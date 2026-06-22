@@ -54,3 +54,51 @@ def preprocess_text(text):
     words = [w for w in words if w not in STOPWORDS]
 
     return " ".join(words)
+
+
+NEGATION_WORDS = ["not", "no", "never", "didn't", "don't", "wasn't", "isn't", "haven't", "can't", "cannot"]
+
+def contains_negation(text):
+    """
+    Detects if a negation word appears before a key term.
+    Example: 'I was NOT charged twice' → True
+    """
+    text_lower = text.lower()
+    words = text_lower.split()
+    
+    for i, word in enumerate(words):
+        clean_word = word.strip(".,!?")
+        if clean_word in NEGATION_WORDS:
+            return True
+    return False
+
+
+def remove_negated_terms(text, terms):
+    """
+    Removes terms from a list if they appear after a negation in the text.
+    Example: text='I was not charged twice', terms=['double_charge'] → []
+    """
+    if not contains_negation(text):
+        return terms
+    
+    text_lower = text.lower()
+    
+    NEGATION_MAP = {
+        "double_charge": ["charged twice", "double charge", "duplicate charge"],
+        "fraud_report": ["not fraud", "not a scam", "not stolen"],
+        "login_issue": ["can login", "i can log in", "not locked"],
+        "payment_failed": ["payment worked", "payment went through"],
+    }
+    
+    filtered = []
+    for term in terms:
+        negated = False
+        if term in NEGATION_MAP:
+            for phrase in NEGATION_MAP[term]:
+                if phrase in text_lower:
+                    negated = True
+                    break
+        if not negated:
+            filtered.append(term)
+    
+    return filtered

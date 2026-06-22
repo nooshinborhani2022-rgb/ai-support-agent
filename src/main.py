@@ -1,4 +1,4 @@
-from src.preprocessing import preprocess_text, expand_contractions
+from src.preprocessing import expand_contractions, contains_negation, remove_negated_terms
 from src.logger_utils import log_interaction
 from src.sentiment import detect_sentiment
 from src.confidence_utils import get_confidence, extract_confidence_details
@@ -378,7 +378,16 @@ def detect_intents(user_text, faq_data, vectorizer, matrix, mapping, sentiment_l
             )
 
     results.sort(key=lambda x: x["score"], reverse=True)
+
+    results.sort(key=lambda x: x["score"], reverse=True)
+
+    # Negation filtering
+    topics = [intent["topic"] for intent in results]
+    filtered_topics = remove_negated_terms(user_text, topics)
+    results = [intent for intent in results if intent["topic"] in filtered_topics]
+
     return apply_sentiment_score_boost(results, sentiment_label)
+
 
 
 def has_account_locked_cue(user_text):
